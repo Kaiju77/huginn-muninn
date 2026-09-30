@@ -1,0 +1,17 @@
+{
+  "name": "example",
+  "project": "C:\\Users\\kaiar\\Documents\\projects\\huginn-muninn",
+  "objective": "Describe one bounded change",
+  "allowed_paths": [
+    "path/to/file"
+  ],
+  "validation": [
+    [
+      "python",
+      "-m",
+      "pytest"
+    ]
+  ],
+  "provider": "local",
+  "allow_codex_escalation": false
+}
