@@ -1,9 +1,9 @@
-# Project state
+# Project State
 
 ## Status
 
-Repository initialized and connected to Kai's reusable AI development harness.
+The Huginn & Muninn project is in the planning phase, awaiting approval of the architecture and the first bounded offline phase.
 
-## Next step
+## Next Step
 
 Transfer the current product brief and decisions from the ChatGPT project **HUGIIN & MUNIN**, then define the first bounded implementation milestone.
