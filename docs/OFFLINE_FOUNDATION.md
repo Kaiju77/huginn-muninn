@@ -35,3 +35,7 @@ No percentage advice, optimization, tax engine certification, return assumptions
 ## Walkthrough
 
 `docs/HM01_WALKTHROUGH.md` shows a synthetic run of this same API. The demonstration does not change the valuation contract above.
+
+## HM-02 snapshot
+
+`docs/HM02_SNAPSHOT.md` describes a separate snapshot that qualifies synthetic holdings before they enter a known subtotal. The HM-01 contract above is unchanged. Independent review approved the snapshot on this branch.

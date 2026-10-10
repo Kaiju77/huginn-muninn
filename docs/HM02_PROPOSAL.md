@@ -1,5 +1,11 @@
 # HM-02 proposal — qualified synthetic snapshot holdings
 
+Kai authorized this proposal on 2026-10-10 with case-sensitive currency matching, exact as-of equality, required nonempty provenance, and a separate snapshot type.
+
+Implementation is in `src/huginn_muninn/snapshot.py`. Independent review on 2026-10-10 approved it for this isolated branch. Reviewer `ed959b8d-9104-4874-a4f1-e085511cdf02`. The parent sandbox discovered 26 tests, 26 passed, exit code 0. This acceptance is not a merge, and it does not start HM-03.
+
+## Historical proposal
+
 Status: proposed on 2026-10-10. Not authorized. Not implemented.
 
 ## Why this slice

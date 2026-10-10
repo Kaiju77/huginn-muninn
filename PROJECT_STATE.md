@@ -20,7 +20,19 @@ Fresh reviewer `0261868b-647f-4cf2-91bc-db9b8ea7e0e0` approved the walkthrough. 
 
 Accounts, transactions, cash flows, reconciliation, provenance, conversion, historical replay, and coverage are not implemented. Non-finite Decimals still count as known.
 
-See `docs/HM01_WALKTHROUGH.md` for how to run the demonstration and what each STEP line means. See `docs/HM02_PROPOSAL.md` for a proposed next slice that is not authorized and not implemented.
+See `docs/HM01_WALKTHROUGH.md` for how to run the demonstration and what each STEP line means. At the time of that walkthrough, `docs/HM02_PROPOSAL.md` was only a proposal. The HM-02 section below records the later authorization.
+
+## HM-02 qualified snapshot — 2026-10-10
+
+Kai authorized HM-02 on 2026-10-10 with case-sensitive currency matching, exact as-of equality, required nonempty provenance, and a separate snapshot type. The reviewed HM-01 walkthrough remains at commit `9a733369447c9e329a53e843de6e14526049acb5`.
+
+`src/huginn_muninn/snapshot.py` is a separate standard-library snapshot. A finite Decimal amount enters the known subtotal only when currency, as-of, and provenance all pass. Reason strings, in stable order, are missing_amount, non_decimal, non_finite, currency_mismatch, as_of_mismatch, and missing_provenance. Every other holding stays stored and is reported with those reasons. Non-finite values do not enter the known subtotal. `src/huginn_muninn/accounting.py` and the HM-01 tests are unchanged.
+
+Independent review approved this implementation. Reviewer `ed959b8d-9104-4874-a4f1-e085511cdf02` read the snapshot, its tests, the unchanged accounting module, the status documents, and the parent receipt. Verdict: approve. The parent sandbox rerun discovered 26 tests, 26 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/HM-02/unittest-parent.txt`. The reviewer did not rerun the suite. This acceptance is local to `cursor/hm-01`. It is not canonical integration, and it does not authorize HM-03.
+
+The implementer final run and the parent rerun both used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. An earlier implementer run discovered 25 tests and exited 1 because a precision test reloaded the snapshot module. That reload was removed before the passing 26-test run. Implementer `e14de7f7-3703-4a79-9395-c747b961f1bf` wrote the snapshot.
+
+The known subtotal uses ambient Decimal precision and does not change that precision. A caller who has already lowered precision can still round a large sum. A single space counts as nonempty provenance. `Portfolio` still treats non-finite Decimals as known. Conversion, transactions, coverage percentages, forecasts, and recommendations are not in this slice.
 
 ## Historical
 

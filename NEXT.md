@@ -1,8 +1,8 @@
 # Next Steps
 
-HM-02 is proposed in `docs/HM02_PROPOSAL.md` and is not authorized. Do not start that implementation from this walkthrough.
+HM-02 is a reviewed local implementation on this branch. It is not merged into the canonical repository. HM-03 is not authorized.
 
-HM-01 is accepted as a reviewed implementation and preserved on this isolated branch. The next product slice needs a new milestone authorization. Currency compatibility, as-of checks, per-holding provenance, conversion, valuation coverage, exposure coverage, and analytical coverage are still unfinished. This task did not solve them.
+The recommended next slice, when separately approved, is synthetic supplied-rate conversion. A foreign-currency holding stays excluded unless an explicit finite Decimal rate is supplied with its own currency pair, exact as-of, and nonempty provenance. No fetched rates, transactions, forecasts, or recommendations belong in that slice until it is proposed and approved.
 
 Do not treat this acceptance as canonical integration, deployment, or financial activation.
 
