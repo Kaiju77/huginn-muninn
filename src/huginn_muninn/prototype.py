@@ -7,11 +7,18 @@ reconciliation stay in the ledger.
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from html import escape
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import NamedTuple
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 import json
 
+from src.huginn_muninn.desk import (
+    answer,
+    build_payload,
+    render_conversation,
+    render_desk,
+    render_message,
+)
 from src.huginn_muninn.ledger import (
     Account,
     Buy,
@@ -335,6 +342,7 @@ class PrototypeState:
         self.price_postings = []
         self.rate_postings = []
         self.statement_results = []
+        self.turns = []
         self.load()
 
     def load(self):
@@ -378,6 +386,7 @@ class PrototypeState:
         if self.overlay_path.is_file():
             self.overlay_path.unlink()
         self.load()
+        self.turns = []
 
     def submit_event(self, row):
         self.document['events'].append(row)
@@ -562,13 +571,15 @@ def _nav(state):
         valuation = '/valuation?date=' + escape(latest)
     return (
         '<nav>'
-        '<a href="/">Books</a>'
+        '<a href="/">Desk</a>'
+        '<a href="/ledger">Ledger</a>'
         '<a href="/transactions">Transactions</a>'
         '<a href="/transactions/new">Record a transaction</a>'
         f'<a href="{history}">History</a>'
         f'<a href="{valuation}">Valuation</a>'
         '<a href="/reconcile">Reconciliation</a>'
         '<a href="/chart">Chart</a>'
+        '<a href="/conversation">Conversation</a>'
         '</nav>'
     )
 
@@ -1009,6 +1020,76 @@ def _post_reconcile(state, form):
     return _reconcile_page(state, banner=banner)
 
 
+def _selected_day(state, query):
+    day = _field(query, 'date')
+    if day == '':
+        return state.latest_date()
+    return day
+
+
+def _desk(state, query):
+    day = _selected_day(state, query)
+    if not day:
+        return Response(
+            200,
+            _CONTENT_TYPE,
+            render_message(state, 'There is no book date in the loaded inputs.'),
+        )
+    try:
+        body = render_desk(state, day)
+    except ValueError as exc:
+        return Response(400, _CONTENT_TYPE, render_message(state, str(exc)))
+    return Response(200, _CONTENT_TYPE, body)
+
+
+def _api_desk(state, query):
+    day = _field(query, 'date')
+    try:
+        payload = build_payload(state, day)
+    except ValueError as exc:
+        body = json.dumps({'error': str(exc)})
+        return Response(400, 'application/json; charset=utf-8', body)
+    return Response(200, 'application/json; charset=utf-8', json.dumps(payload))
+
+
+def _static_desk(state, route):
+    prefix = '/static/desk/'
+    plain = 'text/plain; charset=utf-8'
+    if not route.startswith(prefix):
+        return Response(404, plain, 'Missing file')
+    name = unquote(route[len(prefix):])
+    parts = PurePosixPath(name).parts
+    if (
+        name == ''
+        or '\\' in name
+        or name.startswith('/')
+        or not parts
+        or any(part in {'', '.', '..'} for part in parts)
+    ):
+        return Response(400, plain, 'That path is rejected.')
+    base = (state.fixture_path.parent.parent / 'static' / 'desk').resolve()
+    candidate = base.joinpath(*parts).resolve()
+    try:
+        candidate.relative_to(base)
+    except ValueError:
+        return Response(400, plain, 'That path is rejected.')
+    if not candidate.is_file():
+        return Response(404, plain, 'Missing file')
+    script = candidate.read_text(encoding='utf-8')
+    return Response(200, 'text/javascript; charset=utf-8', script)
+
+
+def _conversation(state):
+    return Response(200, _CONTENT_TYPE, render_conversation(state))
+
+
+def _post_conversation(state, form):
+    text = _field(form, 'text')
+    state.turns.append(('question', text))
+    state.turns.append(('reply', answer(state, text)))
+    return _conversation(state)
+
+
 def dispatch(state, method, path, form):
     verb = str(method or '').upper()
     parsed = urlsplit(path or '/')
@@ -1017,8 +1098,20 @@ def dispatch(state, method, path, form):
         route = route.rstrip('/') or '/'
     query = parse_qs(parsed.query, keep_blank_values=True)
     form = {} if form is None else form
+    if route.startswith('/static/desk'):
+        if verb != 'GET':
+            return Response(405, 'text/plain; charset=utf-8', 'That action is not available here.')
+        return _static_desk(state, route)
     if verb == 'GET' and route == '/':
+        return _desk(state, query)
+    if verb == 'GET' and route == '/ledger':
         return _home(state)
+    if verb == 'GET' and route == '/api/desk':
+        return _api_desk(state, query)
+    if verb == 'GET' and route == '/conversation':
+        return _conversation(state)
+    if verb == 'POST' and route == '/conversation':
+        return _post_conversation(state, form)
     if verb == 'GET' and route == '/transactions':
         return _transactions(state)
     if verb == 'GET' and route == '/transactions/new':
@@ -1037,9 +1130,12 @@ def dispatch(state, method, path, form):
         return _chart(state)
     if verb == 'POST' and route == '/reset':
         state.reset()
-        return _home(state)
+        return _desk(state, {})
     known = {
         '/',
+        '/ledger',
+        '/api/desk',
+        '/conversation',
         '/transactions',
         '/transactions/new',
         '/history',

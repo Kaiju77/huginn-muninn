@@ -1,5 +1,15 @@
 # Next Steps
 
+DESK-01 is a reviewed local night desk on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `0ada7b5904d76920128b98e89339eb92bcdda752`. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` approved it. A further phase is not authorized.
+
+The desk is described in `docs/DESK.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred. The recommended next phase, when separately approved, is still synthetic: load a real evidence set into the intelligence slots, and let the pages accept prices and FX rates. No fetched rates, recommendations, or forecasts follow from this desk.
+
+No merge, push, deployment, financial connection, or purchase follows from this implementation.
+
+## Historical
+
+The following pointer was current before DESK-01. It is not the current next step.
+
 PROTOTYPE-01 is a reviewed local paper ledger on branch `cursor/hm-01` at `afcd004c1a04f93711b4dac1163bf3d8a4c61996`. The baseline before the edits was `23c943ad50a88b4a0eb71fcd964798c9ddb321c4`. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c` approved it. A further phase is not authorized.
 
 The local pages and the synthetic fixture are described in `docs/LOCAL_PROTOTYPE.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred. The recommended next phase, when separately approved, is still synthetic: enter prices and FX rates through the same pages, then add cost basis without tax-lot advice. No fetched rates, recommendations, or forecasts.

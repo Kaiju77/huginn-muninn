@@ -8,7 +8,9 @@
 
 ## Current checkout
 
-This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The paper-ledger commit is `afcd004c1a04f93711b4dac1163bf3d8a4c61996`, described in `docs/LOCAL_PROTOTYPE.md` and `docs/DECIMAL_RULES.md`. The accounting ledger commit remains `66a3e7644a2d74ebc749667fa88f94b27b721280`. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. Independent review on 2026-10-10 approved the paper ledger. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
+This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. DESK-01 is described in `docs/DESK.md`. Independent review on 2026-10-11 approved it. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958`. The paper-ledger commit remains `afcd004c1a04f93711b4dac1163bf3d8a4c61996`.
+
+The paper-ledger commit is `afcd004c1a04f93711b4dac1163bf3d8a4c61996`, described in `docs/LOCAL_PROTOTYPE.md` and `docs/DECIMAL_RULES.md`. The accounting ledger commit remains `66a3e7644a2d74ebc749667fa88f94b27b721280`. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. Independent review on 2026-10-10 approved the paper ledger. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
 
 ## Historical checkout note
 

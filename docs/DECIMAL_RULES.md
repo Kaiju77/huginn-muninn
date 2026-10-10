@@ -10,8 +10,14 @@ These operations run inside that context:
 - a market amount times a directed FX rate
 - a foreign-cash amount times a directed FX rate
 - the known-subtotal sum
+- the sold fraction of average cost, cost times quantity sold divided by quantity held
+- realized gain, proceeds minus that removed cost, when the gain is known
+- unrealized gain, reporting amount minus cost, or minus cost times one directed rate
+- the accounting residual, known subtotal minus accepted deposits plus accepted withdrawals
+- an allocation weight, current amount divided by the known subtotal
+- an illustrative amount, target weight times the known subtotal minus the current amount
 
-Journal addition stays exact `Decimal` addition outside that context. A deposit, withdrawal, buy, sell, or dividend moves cash and quantity by addition, so those postings do not enter the local context.
+Journal addition stays exact `Decimal` addition outside that context. A deposit, withdrawal, buy, sell, or dividend moves cash and quantity by addition, so those postings do not enter the local context. Average-cost addition of `cash_amount + fee`, and subtraction of the removed fraction, run in the local 28-digit context so a caller who has lowered precision does not round the cost.
 
 The ledger does not call `getcontext`. It does not assign `prec` or `rounding` on the global context. It does not quantize journal amounts or valuation results to cents.
 

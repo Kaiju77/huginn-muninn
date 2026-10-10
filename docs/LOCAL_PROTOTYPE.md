@@ -24,15 +24,17 @@ A bare port argument or `--port` changes the port. `--bind` selects the loopback
 
 `var/synthetic-book.json` is the runtime overlay. `var/` and `__pycache__/` are gitignored. When the overlay file exists, the process starts from it. Otherwise it starts from the fixture. After a successful or rejected submission, the overlay is rewritten from the full input set: accounts, instruments, events including rejected events, prices, rates, and statements. A later start replays that file through `Ledger.record`, `add_price`, and `add_rate`.
 
-`POST /reset` deletes only that overlay file and reloads the fixture.
+`POST /reset` deletes only that overlay file, reloads the fixture, and returns the desk.
 
 Reporting currency is NOK. The account is `brokerage`. The instruments are fictional: Northline Equity Fund, listed in NOK, and Harbor Global Fund, listed in USD. The pages state that the figures are synthetic and that the page is not a recommendation.
 
 ## Pages
 
-Pages are server-rendered. Forms use `application/x-www-form-urlencoded`. No JavaScript is required.
+DESK-01 moved the night desk to `GET /`. The paper home below is now `GET /ledger`. The desk, its allocation arithmetic, and its conversation page are described in `docs/DESK.md`. This page list is the paper ledger that PROTOTYPE-01 shipped.
 
-- `GET /` shows the latest book date in the loaded inputs, cash, holdings, and whether the latest valuation is complete.
+Pages are server-rendered. Forms use `application/x-www-form-urlencoded`. No JavaScript is required for these paper pages.
+
+- `GET /ledger` shows the latest book date in the loaded inputs, cash, holdings, and whether the latest valuation is complete.
 - `GET /transactions` lists every retained event, accepted or rejected, with reasons.
 - `GET /transactions/new` shows the deposit, withdrawal, buy, sell, and dividend form.
 - `POST /transactions` parses amount fields with `Decimal(str)` and records the event through the ledger. The response redisplays the posting reasons. A rejected event leaves the books unchanged.
@@ -46,4 +48,4 @@ The visual is a paper ledger. Prose is left aligned. The right-hand column is a 
 
 ## Decimal and scope
 
-Valuation precision is in `docs/DECIMAL_RULES.md`. The application does not fetch market data, open a network connection, or add recommendations, forecasts, tax lots, or cost basis.
+Valuation precision is in `docs/DECIMAL_RULES.md`. The application does not fetch market data or open a network connection. PROTOTYPE-01 did not add recommendations, forecasts, tax lots, or cost basis. DESK-01 later adds average-cost performance and arithmetic gaps on the desk. It still does not recommend, forecast, or fetch a rate.

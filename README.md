@@ -18,4 +18,8 @@ From the checkout root, `python scripts/accounting_walkthrough.py` prints the sy
 
 ## Run the local prototype
 
-From the checkout root, `python scripts/serve_prototype.py` binds `127.0.0.1:8765` and prints `http://127.0.0.1:8765/`. The pages, the synthetic fixture, and the deferred FastAPI, React, and PostgreSQL target are described in `docs/LOCAL_PROTOTYPE.md`. Decimal precision for ledger valuation is in `docs/DECIMAL_RULES.md`. The figures are synthetic. The page is not a recommendation.
+From the checkout root, `python scripts/serve_prototype.py` binds `127.0.0.1:8765` and prints `http://127.0.0.1:8765/`. The paper pages and the synthetic fixture are described in `docs/LOCAL_PROTOTYPE.md`. Decimal precision is in `docs/DECIMAL_RULES.md`. The figures are synthetic. The page is not a recommendation.
+
+## Desk
+
+`GET /` is the night desk from DESK-01. Average-cost performance, arithmetic gaps, the conversation form, and the still waveform are described in `docs/DESK.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred because this milestone cannot install dependencies. The desk does not recommend a transaction, forecast a return, or recognize speech. Independent review on 2026-10-11 approved DESK-01. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958`.

@@ -1,5 +1,10 @@
 {
   "reporting_currency": "NOK",
+  "targets": {
+    "cash:NOK": "0.20",
+    "northline": "0.55",
+    "harbor": "0.25"
+  },
   "accounts": [
     {
       "identity": "brokerage"

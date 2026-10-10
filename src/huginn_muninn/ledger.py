@@ -1,12 +1,13 @@
 """Synthetic portfolio journal.
 
 Amounts stay Decimal values supplied by the caller. This module does not
-fetch prices, invert currency pairs, or recommend a transaction.
+fetch prices, invert currency pairs, recommend a transaction, or forecast
+a return.
 
-Valuation products and the known-subtotal sum run in a local Decimal
-context of 28 significant digits. Journal addition stays outside that
-context. HM-01 and HM-02 still use the caller's ambient precision.
-See docs/DECIMAL_RULES.md.
+Valuation products, average-cost fractions, and the known-subtotal sum run
+in a local Decimal context of 28 significant digits. Journal addition stays
+outside that context. HM-01 and HM-02 still use the caller's ambient
+precision. See docs/DECIMAL_RULES.md.
 """
 
 from datetime import date
@@ -207,6 +208,59 @@ class Reconciliation(NamedTuple):
     breaks: tuple
 
 
+class OpenCost(NamedTuple):
+    account: str
+    instrument: str
+    quantity: Decimal
+    cost: object
+    cost_currency: object
+    reasons: tuple
+
+
+class RealizedGain(NamedTuple):
+    event_id: str
+    account: str
+    instrument: str
+    quantity: Decimal
+    cash_currency: str
+    proceeds: Decimal
+    removed_cost: object
+    gain: object
+    reasons: tuple
+
+
+class UnrealizedGain(NamedTuple):
+    account: str
+    instrument: str
+    reporting_amount: object
+    cost: object
+    cost_currency: object
+    gain: object
+    reasons: tuple
+    rate_id: object
+
+
+class DividendIncome(NamedTuple):
+    event_id: str
+    account: str
+    instrument: str
+    currency: str
+    amount: Decimal
+    included: bool
+    reasons: tuple
+
+
+class Performance(NamedTuple):
+    on_date: str
+    positions: tuple
+    realized: tuple
+    unrealized: tuple
+    dividends: tuple
+    dividend_income: Decimal
+    residual: object
+    residual_reasons: tuple
+
+
 _EVENTS = (Deposit, Withdrawal, Buy, Sell, Dividend)
 _INSTRUMENT_EVENTS = (Buy, Sell, Dividend)
 
@@ -305,6 +359,100 @@ def _sum_amounts(amounts):
         for amount in amounts:
             total = total + amount
     return total
+
+
+def _portion(cost, sold, held):
+    """Remove the sold fraction of average cost at 28 significant digits."""
+    with localcontext(_valuation_context()):
+        return cost * sold / held
+
+
+def _mark_mixed(state):
+    state['cost'] = None
+    state['currency'] = None
+    if 'mixed_cost_currency' not in state['reasons']:
+        state['reasons'].append('mixed_cost_currency')
+
+
+def _buy_cost(costs, event):
+    key = (event.account, event.instrument)
+    with localcontext(_valuation_context()):
+        added = event.cash_amount + event.fee
+    state = costs.get(key)
+    if state is None:
+        costs[key] = {
+            'quantity': event.quantity,
+            'cost': added,
+            'currency': event.cash_currency,
+            'reasons': [],
+        }
+        return
+    state['quantity'] = state['quantity'] + event.quantity
+    if state['cost'] is None or state['reasons']:
+        _mark_mixed(state)
+        return
+    if state['currency'] != event.cash_currency:
+        _mark_mixed(state)
+        return
+    with localcontext(_valuation_context()):
+        state['cost'] = state['cost'] + added
+
+
+def _sell_cost(costs, event):
+    key = (event.account, event.instrument)
+    state = costs[key]
+    with localcontext(_valuation_context()):
+        proceeds = event.cash_amount - event.fee
+    removed = None
+    gain = None
+    reasons = []
+    known = state['cost'] is not None and not state['reasons']
+    if known:
+        removed = _portion(state['cost'], event.quantity, state['quantity'])
+        with localcontext(_valuation_context()):
+            state['cost'] = state['cost'] - removed
+            if state['currency'] == event.cash_currency:
+                gain = proceeds - removed
+        if state['currency'] != event.cash_currency:
+            reasons.append('currency_mismatch')
+    else:
+        reasons.extend(state['reasons'] or ['mixed_cost_currency'])
+    state['quantity'] = state['quantity'] - event.quantity
+    if state['quantity'] == _ZERO and known and not reasons:
+        del costs[key]
+    return RealizedGain(
+        event.event_id,
+        event.account,
+        event.instrument,
+        event.quantity,
+        event.cash_currency,
+        proceeds,
+        removed,
+        gain,
+        tuple(reasons),
+    )
+
+
+def _dividend_row(reporting_currency, event):
+    if event.currency == reporting_currency:
+        return DividendIncome(
+            event.event_id,
+            event.account,
+            event.instrument,
+            event.currency,
+            event.amount,
+            True,
+            (),
+        )
+    return DividendIncome(
+        event.event_id,
+        event.account,
+        event.instrument,
+        event.currency,
+        event.amount,
+        False,
+        ('currency_mismatch',),
+    )
 
 
 def _select(items, on_date, date_name, missing_reason, ambiguous_reason):
@@ -517,6 +665,144 @@ class Ledger:
             _sum_amounts(included),
             complete,
             tuple(lines),
+        )
+
+    def performance(self, on_date):
+        """Replay average cost through on_date without editing the journal.
+
+        Cost is the cash currency actually paid. A buy adds cash_amount +
+        fee. A sell removes the same fraction of cost. A dividend is income
+        and does not change cost. A later buy in another cash currency makes
+        that cost unknown. This does not convert currencies or invert a pair.
+        """
+        parsed = _as_date(on_date)
+        if parsed is None:
+            raise ValueError('invalid_date')
+        costs = {}
+        realized = []
+        dividends = []
+        deposits = []
+        withdrawals = []
+        foreign_flow = False
+        for event in self._accepted:
+            if _as_date(event.event_date) > parsed:
+                continue
+            if isinstance(event, Deposit):
+                if event.currency == self.reporting_currency:
+                    deposits.append(event.amount)
+                else:
+                    foreign_flow = True
+            elif isinstance(event, Withdrawal):
+                if event.currency == self.reporting_currency:
+                    withdrawals.append(event.amount)
+                else:
+                    foreign_flow = True
+            elif isinstance(event, Buy):
+                _buy_cost(costs, event)
+            elif isinstance(event, Sell):
+                realized.append(_sell_cost(costs, event))
+            elif isinstance(event, Dividend):
+                dividends.append(_dividend_row(self.reporting_currency, event))
+        valuation = self.value(on_date)
+        positions = []
+        unrealized = []
+        for (account, instrument), state in costs.items():
+            if state['quantity'] == _ZERO:
+                continue
+            positions.append(
+                OpenCost(
+                    account,
+                    instrument,
+                    state['quantity'],
+                    state['cost'],
+                    state['currency'],
+                    tuple(state['reasons']),
+                )
+            )
+            unrealized.append(
+                self._unrealized_row(
+                    account,
+                    instrument,
+                    state,
+                    valuation,
+                    parsed,
+                )
+            )
+        income = _sum_amounts(row.amount for row in dividends if row.included)
+        residual_reasons = []
+        if not valuation.complete:
+            residual_reasons.append('incomplete')
+        if foreign_flow:
+            residual_reasons.append('currency_mismatch')
+        if residual_reasons:
+            residual = None
+        else:
+            deposited = _sum_amounts(deposits)
+            withdrawn = _sum_amounts(withdrawals)
+            with localcontext(_valuation_context()):
+                residual = valuation.known_subtotal - deposited + withdrawn
+        return Performance(
+            on_date,
+            tuple(positions),
+            tuple(realized),
+            tuple(unrealized),
+            tuple(dividends),
+            income,
+            residual,
+            tuple(residual_reasons),
+        )
+
+    def _unrealized_row(self, account, instrument, state, valuation, on_date):
+        line = None
+        for candidate in valuation.lines:
+            if (
+                candidate.kind == 'position'
+                and candidate.account == account
+                and candidate.identity == instrument
+            ):
+                line = candidate
+                break
+        reporting = None if line is None else line.reporting_amount
+        line_reasons = () if line is None else line.reasons
+        gain = None
+        rate_id = None
+        reasons = []
+        cost = state['cost']
+        currency = state['currency']
+        included = line is not None and not line_reasons and reporting is not None
+        if not included:
+            if line_reasons:
+                reasons.extend(line_reasons)
+            else:
+                reasons.append('missing_price')
+        elif cost is None or state['reasons']:
+            reasons.extend(state['reasons'] or ['mixed_cost_currency'])
+        elif currency == self.reporting_currency:
+            with localcontext(_valuation_context()):
+                gain = reporting - cost
+        else:
+            rate, flagged = _select(
+                self._rates_for(currency, self.reporting_currency),
+                on_date,
+                'rate_date',
+                'missing_rate',
+                'ambiguous_rate',
+            )
+            if flagged or rate is None:
+                reasons.extend(_ordered(flagged))
+            else:
+                rate_id = rate.rate_id
+                with localcontext(_valuation_context()):
+                    gain = reporting - (cost * rate.rate)
+        return UnrealizedGain(
+            account,
+            instrument,
+            reporting,
+            cost,
+            currency,
+            gain,
+            tuple(reasons),
+            rate_id,
         )
 
     def reconcile(self, statement):

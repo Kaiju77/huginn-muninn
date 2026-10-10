@@ -50,8 +50,32 @@ Caller amounts count only when they are already finite `Decimal` values. `NaN`, 
 
 `reconcile(statement)` compares one account with `books(statement.on_date)`. It does not edit the ledger. Blank statement provenance, an invalid date, or an unknown account yields `reconciled` false and a statement break. Otherwise cash is compared by currency and positions by instrument. A zero on one side and an omission on the other matches. A finite decimal mismatch is `amount_mismatch` and reports both amounts. A non-decimal or non-finite statement amount does not match. A non-zero book row omitted from the statement is `missing_on_statement`. A non-zero statement row absent from the books is `missing_in_books`. Two or more well-typed rows that share a currency or instrument produce one `duplicate_statement_row` break. The book amount is included when the books have that identity, and the statement amount is `None` because the statement has no single amount. That identity does not also produce `amount_mismatch`, `missing_on_statement`, or `missing_in_books`. Identical duplicate amounts still break, `reconciled` is false, and `books` stays unchanged. A row of the wrong type still produces `non_decimal` and does not count as a typed duplicate. `reconciled` is true only when the break list is empty.
 
+## Average-cost performance
+
+`performance(on_date)` replays accepted events on or before that date and does not mutate the journal. Rejected events do not affect cost. An invalid date raises `ValueError`. Calling it leaves `books`, `value`, and `reconcile` unchanged.
+
+Cost basis is average cost in the cash currency actually paid. A buy adds `cash_amount + fee` to the position cost and adds quantity. That cost addition runs in the local 28-digit context. The journal's own cash posting stays outside it. A sell removes quantity and removes the same fraction of cost: cost times quantity sold, divided by quantity held, inside the local 28-digit context. A dividend does not change cost. It is income.
+
+If a later buy for the same position uses a different cash currency, that position's cost becomes unknown from that buy onward. The reason is `mixed_cost_currency`. The ledger does not convert the old cost and does not invert an FX pair.
+
+Realized gain on a sell is `(cash_amount - fee)` minus the removed cost, and only when the cost is known and the cost currency equals the sell cash currency. Otherwise realized gain is `None` with a reason. The cash and quantity books still move exactly as `books` already moves them.
+
+Unrealized gain for an open position is its reporting-currency market amount minus its cost, and only when `value` included that position and the cost is known in the reporting currency. If the cost currency is not the reporting currency, unrealized stays `None` unless one eligible directed `FxRate`, already accepted and selected by the existing rate rule, converts the cost currency to the reporting currency on `on_date`. A missing market amount makes unrealized `None`. It is not replaced with zero.
+
+Dividend income sums only dividends whose currency equals the reporting currency. A dividend in another currency is listed and left out of that sum, with `currency_mismatch`, rather than converted by guesswork.
+
+The accounting residual is `known_subtotal - accepted deposits + accepted withdrawals`. It is present only when `value` is complete and every accepted deposit and withdrawal on or before `on_date` is in the reporting currency. Otherwise the residual is `None`. This residual is an accounting identity. It is not a return, not an annualized figure, and not a forecast.
+
+On the synthetic fixture at 2026-03-31, Northline's remaining cost is 8012 NOK for 16 shares, the sale's realized gain is 287 NOK, and unrealized gain is 948 NOK. Harbor's cost is 805 NOK for 5 shares because the buy paid NOK, and unrealized gain is 117.50 NOK. Dividend income is 80 NOK. The residual is 1432.50 NOK. At 2026-03-10, `value` is incomplete, so the residual is `None` and Harbor's unrealized gain is `None`.
+
+Allocation arithmetic lives in `src/huginn_muninn/allocation.py` and is described in `docs/DESK.md`. It is not part of the journal.
+
 ## What this phase does not do
 
-Tax lots, cost basis, recommendations, forecasts, fetched market data, and broker connections are absent. The data are synthetic. Nothing here is investment advice, and the ledger does not suggest a trade.
+The following sentence described the ledger before DESK-01.
 
-The local pages in `docs/LOCAL_PROTOTYPE.md` call this ledger. They do not keep a second posting, valuation, or reconciliation implementation.
+> Tax lots, cost basis, recommendations, forecasts, fetched market data, and broker connections are absent. The data are synthetic. Nothing here is investment advice, and the ledger does not suggest a trade.
+
+DESK-01 adds the average-cost performance above. Tax lots, recommendations, forecasts, fetched market data, and broker connections remain absent. The data are synthetic. Nothing here is investment advice, and the ledger does not suggest a trade.
+
+The local pages in `docs/LOCAL_PROTOTYPE.md` and the desk in `docs/DESK.md` call this ledger. They do not keep a second posting, valuation, or reconciliation implementation.

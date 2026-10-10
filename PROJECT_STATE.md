@@ -2,6 +2,8 @@
 
 ## Status
 
+DESK-01 is a reviewed local night desk on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` approved it on 2026-10-11. This status is not canonical integration or production financial readiness.
+
 Kai accepted HM-01 as a reviewed implementation on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. Reviewer task 77d339bf-8bdf-4aaf-bfe9-2147630b425f approved the bounded slice. This local preservation is not canonical integration, deployment, or completion of the broader accounting milestone.
 
 The accounting module returns an explicit known Decimal subtotal, a completeness flag, and the identities of retained missing or non-Decimal holdings. It no longer mutates the global Decimal context. Discoverable `unittest` cases cover the synthetic known cases, an exact multi-holding subtotal, the incomplete-valuation regression, and context preservation.
@@ -61,6 +63,18 @@ Kai authorized PROTOTYPE-01, an offline synthetic prototype, on 2026-10-10. The 
 Independent review approved PROTOTYPE-01. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c` read the ledger changes, the prototype, the fixture, the tests, and the status documents. Verdict: approve. The reviewer did not rerun the suite. After that review, table cells stopped breaking mid-word and the page scrolls wide tables. That layout change does not alter posting, valuation, or reconciliation. A parent sandbox rerun after the layout change discovered 75 tests, 75 passed, exit code 0. A local browser session opened `http://127.0.0.1:8765/`, read the incomplete 2026-03-10 valuation, the 15050 versus 15051 reconciliation, and the chart, posted a synthetic 100 NOK deposit, and reloaded the fixture. The paper-ledger commit is `afcd004c1a04f93711b4dac1163bf3d8a4c61996`. This acceptance is local. It is not canonical integration, production financial readiness, or a further phase.
 
 The implementer sandbox used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. `python -m unittest discover -s tests -v` discovered 75 tests, 75 passed, exit code 0. A later parent rerun of the same dirty tree discovered 75 tests, 75 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/PROTOTYPE-01/unittest-parent.txt`. Implementer `b3fcf9be-096e-451e-820f-685f7b45ecc1` wrote the prototype. The parent rerun is not an independent review.
+
+## Desk — 2026-10-11
+
+Kai authorized DESK-01 on 2026-10-11. The isolated checkout is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on `cursor/hm-01`. HEAD before these edits was `0ada7b5904d76920128b98e89339eb92bcdda752`, and the worktree was clean. `accounting.py`, `snapshot.py`, their tests, `tests/test_hm01_walkthrough.py`, and `scripts/hm01_walkthrough.py` were not edited.
+
+`Ledger.performance` replays average cost in the cash currency paid. A mixed cash currency makes that cost unknown. Realized and unrealized gains stay unknown when the cost or the market amount cannot be stated in one currency without inventing a rate. The residual is an accounting identity, not a return. `src/huginn_muninn/allocation.py` compares a complete valuation with the fixture's target weights and labels listing-currency exposure. It does not recommend a transaction.
+
+`GET /` is a server-rendered night desk. The paper home remains `GET /ledger`. `GET /api/desk` returns the same known subtotal as `Ledger.value`. `GET /conversation` appends a deterministic text reply and shows a still waveform. Speech recognition, speech synthesis, and a live conversation model are not implemented. The hosted FastAPI, React, and PostgreSQL target remains deferred because this milestone cannot install dependencies.
+
+The rules are in `docs/DESK.md` and `docs/ACCOUNTING_LEDGER.md`. Independent review approved this desk. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` read the performance replay, the allocation module, the desk, the fixture targets, the waveform script, and the tests. Verdict: approve. The reviewer did not rerun the suite. The parent sandbox discovered 89 tests, 89 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/DESK-01/unittest-parent.txt`. A local browser session opened the desk, read the 24932.50 known subtotal, the 1432.50 residual, the price and rate citations, and the empty intelligence slots, then received a refusal for "Should I buy Harbor?". This acceptance is local.
+
+The implementer sandbox used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. `python -m unittest discover -s tests -v` discovered 89 tests, 89 passed, exit code 0. An earlier run in the same image discovered 89 tests and exited 1 because average-cost addition still followed the caller's lowered precision. That addition was moved into the local 28-digit context before the passing run.
 
 ## Historical
 
