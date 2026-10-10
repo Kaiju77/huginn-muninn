@@ -90,7 +90,7 @@ The recorded fixture has two synthetic observations and `live_retrieval` false. 
 
 `GET /evidence` server-renders the registry and the fixture. The desk stays in research mode. The intelligence block says the recorded fixture is not a competing interpretation, that confidence, risk, and a forecast are not assessed, and that the loaded evidence does not support a recommendation. After review, the earlier sentence "No competing evidence is loaded" was replaced so the page does not say the fixture is both absent and loaded. A later parent sandbox rerun after that wording change discovered 104 tests, exit code 0.
 
-Independent review approved this register. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` read the evidence module, both fixtures, the tests, the evidence page, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite. The parent sandbox discovered 104 tests, 104 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/EVIDENCE-01/unittest-parent.txt`. Implementer `426d66ce-5391-43cb-a69b-2683f76b84fc` wrote the register. This acceptance is local.
+Independent review approved this register. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` read the evidence module, both fixtures, the tests, the evidence page, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite. The parent sandbox discovered 104 tests, 104 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/EVIDENCE-01/unittest-parent.txt`. Implementer `426d66ce-5391-43cb-a69b-2683f76b84fc` wrote the register. This acceptance is local. The evidence-register commit is `1f6f26750c0b196aaea57d2f70c9edb2833628d7`.
 
 ## Historical
 

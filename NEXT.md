@@ -1,6 +1,6 @@
 # Next Steps
 
-EVIDENCE-01 is a reviewed local evidence register on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` approved it. A further phase is not authorized.
+EVIDENCE-01 is a reviewed local evidence register on branch `cursor/hm-01` at `1f6f26750c0b196aaea57d2f70c9edb2833628d7`. The baseline before the edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` approved it. A further phase is not authorized.
 
 Live fetch stays off. The evidence page reads `fixtures/source_registry.json` and `fixtures/evidence_observations.json`. No source is connected. The desk remains in research mode. See `docs/EVIDENCE.md`. The recommended next phase, when separately approved, is a reviewed egress profile for one public source, still read-only, with recorded responses in tests. No recommendations follow from connecting a source.
 
