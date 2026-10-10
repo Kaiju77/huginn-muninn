@@ -17,6 +17,7 @@ from src.huginn_muninn.desk import (
     build_payload,
     render_conversation,
     render_desk,
+    render_evidence,
     render_message,
 )
 from src.huginn_muninn.ledger import (
@@ -580,6 +581,7 @@ def _nav(state):
         '<a href="/reconcile">Reconciliation</a>'
         '<a href="/chart">Chart</a>'
         '<a href="/conversation">Conversation</a>'
+        '<a href="/evidence">Evidence</a>'
         '</nav>'
     )
 
@@ -1079,6 +1081,21 @@ def _static_desk(state, route):
     return Response(200, 'text/javascript; charset=utf-8', script)
 
 
+def _evidence(state, query):
+    day = _selected_day(state, query)
+    if not day:
+        return Response(
+            200,
+            _CONTENT_TYPE,
+            render_message(state, 'There is no book date in the loaded inputs.'),
+        )
+    try:
+        body = render_evidence(state, day)
+    except ValueError as exc:
+        return Response(400, _CONTENT_TYPE, render_message(state, str(exc)))
+    return Response(200, _CONTENT_TYPE, body)
+
+
 def _conversation(state):
     return Response(200, _CONTENT_TYPE, render_conversation(state))
 
@@ -1108,6 +1125,8 @@ def dispatch(state, method, path, form):
         return _home(state)
     if verb == 'GET' and route == '/api/desk':
         return _api_desk(state, query)
+    if verb == 'GET' and route == '/evidence':
+        return _evidence(state, query)
     if verb == 'GET' and route == '/conversation':
         return _conversation(state)
     if verb == 'POST' and route == '/conversation':
@@ -1142,6 +1161,7 @@ def dispatch(state, method, path, form):
         '/valuation',
         '/reconcile',
         '/chart',
+        '/evidence',
         '/reset',
     }
     if route in known:

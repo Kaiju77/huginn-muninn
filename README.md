@@ -23,3 +23,7 @@ From the checkout root, `python scripts/serve_prototype.py` binds `127.0.0.1:876
 ## Desk
 
 `GET /` is the night desk from DESK-01. Average-cost performance, arithmetic gaps, the conversation form, and the still waveform are described in `docs/DESK.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred because this milestone cannot install dependencies. The desk does not recommend a transaction, forecast a return, or recognize speech. Independent review on 2026-10-11 approved DESK-01. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958`.
+
+## Evidence
+
+`GET /evidence` is linked from the desk. It reads `fixtures/source_registry.json` and the recorded synthetic fixture in `fixtures/evidence_observations.json`. Live fetch is off. No source is connected. The page is not a recommendation. See `docs/EVIDENCE.md`. Independent review on 2026-10-11 approved EVIDENCE-01. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120`.

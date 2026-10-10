@@ -1,0 +1,68 @@
+{
+  "sources": [
+    {
+      "source_id": "norges-bank-open-data",
+      "publisher": "Norges Bank",
+      "category": "official_statistics",
+      "cadence": "periodic",
+      "description": "The open-data API offers exchange rates and interest rates, including the policy rate, NOWA, and Norwegian government securities. The query service says it can be used freely and requires no authentication. Daily exchange rates are middle rates, indicative rather than binding, published at about 16:00 CET. They are not equity prices and not executable quotes.",
+      "live_fetch": false,
+      "references": [
+        "https://www.norges-bank.no/en/topics/statistics/open-data/",
+        "https://www.norges-bank.no/en/topics/Statistics/exchange_rates/"
+      ]
+    },
+    {
+      "source_id": "ssb-statbank",
+      "publisher": "Statistics Norway",
+      "category": "official_statistics",
+      "cadence": "periodic",
+      "description": "The Statbank API is open, requires no registration, and uses CC BY 4.0. PxWebApi v2 limits an extract to 800000 data cells and 30 queries per minute per IP address. It publishes statistics, not security prices. Around the 08:00 publication, revised figures can appear as 0 or a dot between 05:00 and 08:00.",
+      "live_fetch": false,
+      "references": [
+        "https://www.ssb.no/en/api",
+        "https://www.ssb.no/en/api/pxwebapiv2"
+      ]
+    },
+    {
+      "source_id": "fred",
+      "publisher": "Federal Reserve Bank of St. Louis",
+      "category": "official_statistics",
+      "cadence": "periodic",
+      "description": "An API key is required. The service is economic observations, not a real-time trading feed. The 2024 terms restrict caching, archiving, and wholesale download, and they prohibit use for training machine-learning models.",
+      "live_fetch": false,
+      "blocked_reason": "api_key_and_terms",
+      "references": [
+        "https://fred.stlouisfed.org/docs/api/api_key.html"
+      ]
+    },
+    {
+      "source_id": "sec-edgar-public",
+      "publisher": "U.S. Securities and Exchange Commission",
+      "category": "filings",
+      "cadence": "periodic",
+      "description": "Public filings and XBRL JSON are available from data.sec.gov. Fair access currently states a maximum of 10 requests per second and requires a declared user agent. Filings are not live prices.",
+      "live_fetch": false,
+      "references": [
+        "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data"
+      ]
+    },
+    {
+      "source_id": "ecb-sdw",
+      "publisher": "European Central Bank",
+      "category": "official_statistics",
+      "cadence": "periodic",
+      "description": "This increment did not verify the license text. Coverage is official statistics, not equity quotes.",
+      "live_fetch": false,
+      "license_status": "not_verified_this_increment"
+    },
+    {
+      "source_id": "social-unverified",
+      "publisher": "none",
+      "category": "excluded",
+      "status": "excluded",
+      "reason": "unverified social-media sentiment is not market evidence",
+      "live_fetch": false
+    }
+  ]
+}

@@ -1,5 +1,15 @@
 # Next Steps
 
+EVIDENCE-01 is a reviewed local evidence register on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` approved it. A further phase is not authorized.
+
+Live fetch stays off. The evidence page reads `fixtures/source_registry.json` and `fixtures/evidence_observations.json`. No source is connected. The desk remains in research mode. See `docs/EVIDENCE.md`. The recommended next phase, when separately approved, is a reviewed egress profile for one public source, still read-only, with recorded responses in tests. No recommendations follow from connecting a source.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this implementation.
+
+## Historical
+
+The following pointer was current before EVIDENCE-01. It is not the current next step.
+
 DESK-01 is a reviewed local night desk on branch `cursor/hm-01` at `83750c9c6ec98a48fd24c864ee2cea184a37cf15`. The baseline before the edits was `0ada7b5904d76920128b98e89339eb92bcdda752`. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` approved it. A further phase is not authorized.
 
 The desk is described in `docs/DESK.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred. The recommended next phase, when separately approved, is still synthetic: load a real evidence set into the intelligence slots, and let the pages accept prices and FX rates. No fetched rates, recommendations, or forecasts follow from this desk.

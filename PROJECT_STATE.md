@@ -2,6 +2,10 @@
 
 ## Status
 
+EVIDENCE-01 is a reviewed local evidence register on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`, and the worktree was clean. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` approved it. This status is not canonical integration or production financial readiness.
+
+Live fetch stays off. `src/huginn_muninn/evidence.py` ingests `fixtures/evidence_observations.json` and reads `fixtures/source_registry.json`. No source is connected. The observations are not copied into the ledger, and the evidence page does not change `Ledger.value`. `accounting.py`, `snapshot.py`, their tests, `tests/test_hm01_walkthrough.py`, and `scripts/hm01_walkthrough.py` were not edited. The rules are in `docs/EVIDENCE.md`.
+
 DESK-01 is a reviewed local night desk on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` approved it on 2026-10-11. This status is not canonical integration or production financial readiness.
 
 Kai accepted HM-01 as a reviewed implementation on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. Reviewer task 77d339bf-8bdf-4aaf-bfe9-2147630b425f approved the bounded slice. This local preservation is not canonical integration, deployment, or completion of the broader accounting milestone.
@@ -75,6 +79,18 @@ Kai authorized DESK-01 on 2026-10-11. The isolated checkout is `C:/Users/kaiar/D
 The rules are in `docs/DESK.md` and `docs/ACCOUNTING_LEDGER.md`. Independent review approved this desk. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` read the performance replay, the allocation module, the desk, the fixture targets, the waveform script, and the tests. Verdict: approve. The reviewer did not rerun the suite. The parent sandbox discovered 89 tests, 89 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/DESK-01/unittest-parent.txt`. A local browser session opened the desk, read the 24932.50 known subtotal, the 1432.50 residual, the price and rate citations, and the empty intelligence slots, then received a refusal for "Should I buy Harbor?". This acceptance is local. The night-desk commit is `83750c9c6ec98a48fd24c864ee2cea184a37cf15`.
 
 The implementer sandbox used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. `python -m unittest discover -s tests -v` discovered 89 tests, 89 passed, exit code 0. An earlier run in the same image discovered 89 tests and exited 1 because average-cost addition still followed the caller's lowered precision. That addition was moved into the local 28-digit context before the passing run.
+
+## Evidence — 2026-10-11
+
+Kai authorized EVIDENCE-01 on 2026-10-11. The isolated checkout is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on `cursor/hm-01`. HEAD before these edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`, and the worktree was clean.
+
+The source registry records Norges Bank, Statistics Norway, FRED, SEC EDGAR, the ECB, and an excluded social source. Every source has `live_fetch` false. FRED stays blocked because an API key is required and the 2024 terms restrict caching, archiving, and wholesale download, and prohibit use for training machine-learning models. The ECB license text was not verified in this increment. Unverified social-media sentiment is not stored.
+
+The recorded fixture has two synthetic observations and `live_retrieval` false. At 2026-03-31 with a maximum age of 7 days, USD/NOK `10.25` is fresh and the policy rate `4.50` from 2026-01-02 is stale. The fresh number matches the ledger's supplied 10.25 rate. That match is not a live source confirmation. A repeated observation stays one row. A different value for the same id is a conflict, and both amounts stay visible. Neither value is written into the ledger.
+
+`GET /evidence` server-renders the registry and the fixture. The desk stays in research mode. The intelligence block says the recorded fixture is not a competing interpretation, that confidence, risk, and a forecast are not assessed, and that the loaded evidence does not support a recommendation. After review, the earlier sentence "No competing evidence is loaded" was replaced so the page does not say the fixture is both absent and loaded. A later parent sandbox rerun after that wording change discovered 104 tests, exit code 0.
+
+Independent review approved this register. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` read the evidence module, both fixtures, the tests, the evidence page, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite. The parent sandbox discovered 104 tests, 104 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/EVIDENCE-01/unittest-parent.txt`. Implementer `426d66ce-5391-43cb-a69b-2683f76b84fc` wrote the register. This acceptance is local.
 
 ## Historical
 

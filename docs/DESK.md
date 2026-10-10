@@ -36,6 +36,7 @@ The same result returns listing-currency exposure from qualified valuation lines
 - `GET /api/desk?date=YYYY-MM-DD` returns JSON from `json.dumps`. Decimal amounts are strings. The known subtotal equals `Ledger.value` for that date. A missing reporting amount is `null`, not `"0"`. An invalid date returns status 400.
 - `GET /conversation` shows a text form and a still waveform.
 - `POST /conversation` appends a deterministic reply. It does not call a model.
+- `GET /evidence` renders the source registry and the recorded synthetic fixture. Live fetch is off. See `docs/EVIDENCE.md`. The DESK-01 review does not cover that page.
 
 The desk links to the journal pages. The HTML for `GET /` contains the live cash and known subtotal because the server built them from the engine, along with the words synthetic and the phrase not a recommendation. A script may refresh those figures from `/api/desk`; this page does not need one, because the server already wrote them.
 
@@ -62,7 +63,7 @@ The waveform bars stay still. The page says "No audio input. Speech recognition 
 - performance components and the residual, or a statement that the residual is unknown when the valuation is incomplete
 - provenance for the prices and rates the valuation actually cites
 - an evidence panel listing those citations
-- empty intelligence slots: "No competing evidence is loaded. No interpretation is offered." "Confidence is not assessed." "Risk is not assessed. No risk model is loaded." "No forecast is computed."
+- intelligence sentences that confidence, risk, and a forecast are not assessed. The recorded fixture is not described as a competing interpretation: "The recorded fixture is not a competing interpretation. No interpretation is offered." "Confidence is not assessed." "Risk is not assessed. No risk model is loaded." "No forecast is computed." EVIDENCE-01 adds: "Loaded evidence is a recorded synthetic fixture. It does not support a recommendation."
 - the historical known-subtotal chart from stored dates only, with incomplete points in the break color and no interpolated dates
 
 ## Visual direction

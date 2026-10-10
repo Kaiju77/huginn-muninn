@@ -1,0 +1,27 @@
+{
+  "live_retrieval": false,
+  "observations": [
+    {
+      "observation_id": "obs-usd-nok-2026-03-31",
+      "source_id": "norges-bank-open-data",
+      "subject": "USD/NOK",
+      "unit": "NOK per 1 USD",
+      "value": "10.25",
+      "observation_time": "2026-03-31",
+      "retrieval_time": "2026-03-31",
+      "provenance": "synthetic-fixture-not-a-live-norges-bank-retrieval",
+      "quality": ["synthetic_fixture"]
+    },
+    {
+      "observation_id": "obs-stale-policy",
+      "source_id": "norges-bank-open-data",
+      "subject": "policy-rate",
+      "unit": "percent",
+      "value": "4.50",
+      "observation_time": "2026-01-02",
+      "retrieval_time": "2026-01-02",
+      "provenance": "synthetic-stale-policy-fixture",
+      "quality": ["synthetic_fixture"]
+    }
+  ]
+}

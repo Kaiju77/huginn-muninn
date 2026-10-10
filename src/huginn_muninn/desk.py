@@ -5,6 +5,7 @@ JavaScript on the conversation page may draw measured microphone levels.
 It does not recognize speech, synthesize speech, or call a model.
 """
 
+from datetime import date
 from decimal import ROUND_HALF_EVEN, Context, Decimal, InvalidOperation, localcontext
 from html import escape
 import re
@@ -13,13 +14,20 @@ from src.huginn_muninn.allocation import (
     ARITHMETIC_SENTENCE,
     compare,
 )
+from src.huginn_muninn.evidence import (
+    MAX_AGE_DAYS,
+    assess,
+    freshness_flags,
+    open_evidence,
+)
 
 
 INTELLIGENCE = (
-    'No competing evidence is loaded. No interpretation is offered.',
+    'The recorded fixture is not a competing interpretation. No interpretation is offered.',
     'Confidence is not assessed.',
     'Risk is not assessed. No risk model is loaded.',
     'No forecast is computed.',
+    'Loaded evidence is a recorded synthetic fixture. It does not support a recommendation.',
 )
 
 _SPEECH = 'No audio input. Speech recognition is not implemented.'
@@ -456,6 +464,7 @@ def _nav(state):
         ('/reconcile', 'Reconciliation'),
         ('/chart', 'Chart'),
         ('/conversation', 'Conversation'),
+        ('/evidence', 'Evidence'),
     )
     return '<nav>' + ''.join(
         f'<a href="{href}">{escape(label)}</a>' for href, label in links
@@ -879,6 +888,150 @@ def render_desk(state, on_date):
         + _intelligence(payload)
         + chart
         + controls
+    )
+    return _shell(state, inner)
+
+
+def _evidence_amount(value):
+    if value is None:
+        return 'missing'
+    return format(value, 'f')
+
+
+def _source_limitation(source):
+    parts = []
+    for key in ('description', 'reason', 'blocked_reason', 'license_status', 'status'):
+        value = source.get(key)
+        if isinstance(value, str) and value.strip() != '':
+            parts.append(value)
+    references = source.get('references') or ()
+    for reference in references:
+        if isinstance(reference, str) and reference.strip() != '':
+            parts.append(reference)
+    return ' '.join(parts)
+
+
+def _supplied_rate_match(state, observation):
+    if observation.value is None or observation.subject != 'USD/NOK':
+        return None
+    observed = observation.observation_time.isoformat()
+    for row, posting in state.rate_postings:
+        if not posting.accepted:
+            continue
+        if row.get('base') != 'USD' or row.get('quote') != 'NOK':
+            continue
+        if row.get('rate_date') != observed:
+            continue
+        rate_text = row.get('rate')
+        if not isinstance(rate_text, str):
+            continue
+        try:
+            rate = Decimal(rate_text)
+        except InvalidOperation:
+            continue
+        if rate == observation.value:
+            return rate
+    return None
+
+
+def render_evidence(state, on_date):
+    """Server-rendered registry and recorded fixture. Ledger.value is not called."""
+    parsed = date.fromisoformat(on_date)
+    store = open_evidence(state.fixture_path.parent.parent)
+    assessment = assess(store, parsed, MAX_AGE_DAYS)
+    source_rows = []
+    for source in store.sources():
+        fetch = 'live_fetch false' if source.get('live_fetch') is False else 'live_fetch true'
+        cadence = source.get('cadence') or ''
+        source_rows.append(
+            '<tr>'
+            f'<td>{escape(str(source.get("source_id", "")))}</td>'
+            f'<td>{escape(str(source.get("publisher", "")))}</td>'
+            f'<td>{escape(str(source.get("category", "")))}</td>'
+            f'<td>{escape(str(cadence))}</td>'
+            f'<td>{escape(fetch)}</td>'
+            f'<td>{escape(_source_limitation(source))}</td>'
+            '</tr>'
+        )
+    observation_rows = []
+    match_notes = []
+    for observation in store.observations():
+        flags = freshness_flags(observation, parsed, MAX_AGE_DAYS)
+        shown = ' '.join(flags)
+        observation_rows.append(
+            '<tr'
+            f' data-observation="{escape(observation.observation_id)}"'
+            f' data-freshness="{escape(shown)}"'
+            '>'
+            f'<td>{escape(observation.observation_id)}</td>'
+            f'<td>{escape(observation.source_id)}</td>'
+            f'<td>{escape(observation.subject)}</td>'
+            f'<td>{escape(observation.unit)}</td>'
+            f'<td class="figure">{escape(_evidence_amount(observation.value))}</td>'
+            f'<td>{escape(observation.observation_time.isoformat())}</td>'
+            f'<td>{escape(observation.retrieval_time.isoformat())}</td>'
+            f'<td>{escape(shown)}</td>'
+            f'<td>{escape(observation.provenance)}</td>'
+            f'<td>{escape(", ".join(observation.quality))}</td>'
+            '</tr>'
+        )
+        matched = _supplied_rate_match(state, observation)
+        if matched is not None:
+            shown_rate = format(matched, 'f')
+            match_notes.append(
+                f'<p>The number matches the ledger\'s supplied {escape(shown_rate)} rate. '
+                'The match is not a live source confirmation.</p>'
+            )
+    conflict_notes = []
+    for conflict in store.conflicts():
+        visible = ', '.join(
+            'missing' if value is None else format(value, 'f')
+            for value in conflict.values
+        )
+        conflict_notes.append(
+            f'<p>Conflict on {escape(conflict.observation_id)}. '
+            f'Both amounts stay visible: {escape(visible)}. '
+            'Neither amount was copied into the ledger.</p>'
+        )
+    if not conflict_notes:
+        conflict_notes.append('<p>No conflicting observation is stored.</p>')
+    limitations = ', '.join(assessment.limitations)
+    inner = (
+        '<section><h2>Evidence</h2>'
+        '<p>The desk is in research mode. No source is connected. '
+        'This page is not a recommendation.</p>'
+        f'<p>Freshness against {escape(on_date)}. '
+        f'The maximum age is {MAX_AGE_DAYS} days. '
+        'The page does not read the wall clock.</p>'
+        f'<p>Limitations: {escape(limitations)}.</p>'
+        '<p>Loaded evidence is a recorded synthetic fixture. '
+        'It does not support a recommendation.</p>'
+        '</section>'
+        '<section><h2>Sources</h2>'
+        '<div class="table-wrap"><table><thead><tr>'
+        '<th>Source</th><th>Publisher</th><th>Category</th><th>Cadence</th>'
+        '<th>Live fetch</th><th>Limitation</th>'
+        '</tr></thead><tbody>'
+        + ''.join(source_rows)
+        + '</tbody></table></div></section>'
+        '<section><h2>Recorded observations</h2>'
+        '<div class="table-wrap"><table><thead><tr>'
+        '<th>Observation</th><th>Source</th><th>Subject</th><th>Unit</th>'
+        '<th class="figure">Value</th><th>Observed</th><th>Retrieved</th>'
+        '<th>Freshness</th><th>Provenance</th><th>Quality</th>'
+        '</tr></thead><tbody>'
+        + ''.join(observation_rows)
+        + '</tbody></table></div>'
+        + ''.join(match_notes)
+        + ''.join(conflict_notes)
+        + '</section>'
+        '<section><h2>Date</h2>'
+        '<form method="get" action="/evidence">'
+        '<label for="date">Date'
+        f'<input id="date" name="date" value="{escape(on_date)}">'
+        '</label>'
+        '<button type="submit">Show this date</button>'
+        '</form></section>'
     )
     return _shell(state, inner)
 
