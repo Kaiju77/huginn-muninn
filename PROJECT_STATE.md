@@ -36,6 +36,20 @@ The implementer final run and the parent rerun both used image `sha256:1ec077c90
 
 The known subtotal uses ambient Decimal precision and does not change that precision. A caller who has already lowered precision can still round a large sum. A single space counts as nonempty provenance. `Portfolio` still treats non-finite Decimals as known. Conversion, transactions, coverage percentages, forecasts, and recommendations are not in this slice.
 
+## Accounting ledger — 2026-10-10
+
+Kai authorized an offline synthetic accounting phase, task ACCOUNTING-LEDGER, on this isolated checkout. HEAD before the ledger edits was `a804f40181d5d8a89dd7f60982c5b63b936d18a8`. The worktree was clean. HM-01 and HM-02 were not reimplemented. `accounting.py`, `snapshot.py`, and their tests are unchanged.
+
+`src/huginn_muninn/ledger.py` posts synthetic accounts, cash, holdings, trades, dividends, supplied prices, and directed FX rates. It replays historical books, values only qualified observations, and reconciles synthetic statements. A single space is blank provenance in the ledger. The HM-02 snapshot still treats a single space as nonempty.
+
+Independent review approved this ledger. Reviewer `6e908566-155a-4fbf-9755-3d40359c1995` read the ledger, its tests, the walkthrough, the unchanged HM-01 and HM-02 modules, and the parent receipt. Verdict: approve. The parent sandbox discovered 57 tests, 57 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/ACCOUNTING-LEDGER/unittest-parent.txt`. The reviewer did not rerun the suite. This acceptance is local. It is not canonical integration, and it does not authorize a further phase.
+
+Known limits from that review: a repeated currency or instrument on one statement keeps the first row and does not emit a break for the later row. One eligible price plus another same-date price in the wrong currency is reported as `ambiguous_price` before the currency check. A rejected event id cannot be reused. The ledger has no tax lots, cost basis, or staleness window. Sums use ambient Decimal precision and do not change it. `Decimal("10.5")` can print a trailing `.0` while remaining an exact Decimal.
+
+The rules are in `docs/ACCOUNTING_LEDGER.md`. The synthetic trace is `python scripts/accounting_walkthrough.py`.
+
+The implementer sandbox run and the parent rerun both used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. `python -m unittest discover -s tests -v` discovered 57 tests, 57 passed, exit code 0. An earlier implementer run discovered 57 tests and exited 1 because statement positions were read through a cash amount field. That comparison was corrected before the passing runs. Implementer `0fa10054-f14b-46c7-80ec-c2659e5fe82f` wrote the ledger.
+
 ## Historical
 
 The following text is the previous awaiting-approval status. It is not the current state.

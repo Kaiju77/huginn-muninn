@@ -8,7 +8,7 @@
 
 ## Current checkout
 
-This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. HEAD for the qualified snapshot is `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. The reviewed walkthrough is commit `9a733369447c9e329a53e843de6e14526049acb5`. HM-02 qualification is described in `docs/HM02_SNAPSHOT.md` and was independently reviewed on 2026-10-10. HM-03 is not started. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
+This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The accounting ledger is described in `docs/ACCOUNTING_LEDGER.md` and was independently reviewed on 2026-10-10. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
 
 ## Historical checkout note
 

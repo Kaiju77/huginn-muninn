@@ -14,6 +14,8 @@ HM-01-WALKTHROUGH was independently reviewed on 2026-10-10. Reviewer `0261868b-6
 
 HM-02 is implemented in this checkout at `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. Independent review on 2026-10-10 approved it. Reviewer `ed959b8d-9104-4874-a4f1-e085511cdf02` read the snapshot, its tests, the unchanged accounting module, the status documents, and the parent receipt. Verdict: approve. The parent sandbox rerun discovered 26 tests, 26 passed, exit code 0. A later clean-tree rerun of that same commit also discovered 26 tests, 26 passed, exit code 0. The reviewer did not rerun the suite. This verdict covers the qualified snapshot only. It does not authorize conversion, transactions, forecasts, recommendations, or HM-03.
 
+The accounting ledger in `src/huginn_muninn/ledger.py` was independently reviewed on 2026-10-10. Reviewer `6e908566-155a-4fbf-9755-3d40359c1995` read the ledger, its tests, the walkthrough, the unchanged HM-01 and HM-02 modules, and the parent receipt. Verdict: approve. The parent sandbox discovered 57 tests, 57 passed, exit code 0. The reviewer did not rerun the suite. This verdict covers the synthetic ledger only. It does not authorize tax lots, recommendations, forecasts, or a further phase. A repeated statement row currently keeps the first amount and does not break on the duplicate.
+
 ## Historical
 
 The following sentence is the earlier review note. It is not the current HM-01 verdict.
