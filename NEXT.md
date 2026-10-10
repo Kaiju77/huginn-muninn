@@ -1,6 +1,6 @@
 # Next Steps
 
-DESK-01 is a reviewed local night desk on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `0ada7b5904d76920128b98e89339eb92bcdda752`. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` approved it. A further phase is not authorized.
+DESK-01 is a reviewed local night desk on branch `cursor/hm-01` at `83750c9c6ec98a48fd24c864ee2cea184a37cf15`. The baseline before the edits was `0ada7b5904d76920128b98e89339eb92bcdda752`. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958` approved it. A further phase is not authorized.
 
 The desk is described in `docs/DESK.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred. The recommended next phase, when separately approved, is still synthetic: load a real evidence set into the intelligence slots, and let the pages accept prices and FX rates. No fetched rates, recommendations, or forecasts follow from this desk.
 
