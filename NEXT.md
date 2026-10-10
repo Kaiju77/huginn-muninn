@@ -1,6 +1,6 @@
 # Next Steps
 
-HM-02 is a reviewed local implementation on this branch. It is not merged into the canonical repository. HM-03 is not authorized.
+HM-02 is a reviewed local implementation on this branch at `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. The walkthrough commit is `9a733369447c9e329a53e843de6e14526049acb5`. Neither commit is merged into the canonical repository. HM-03 is not authorized.
 
 The recommended next slice, when separately approved, is synthetic supplied-rate conversion. A foreign-currency holding stays excluded unless an explicit finite Decimal rate is supplied with its own currency pair, exact as-of, and nonempty provenance. No fetched rates, transactions, forecasts, or recommendations belong in that slice until it is proposed and approved.
 

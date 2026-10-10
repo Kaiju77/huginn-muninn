@@ -12,7 +12,7 @@ The HM-01 walkthrough demonstrates that accepted slice. It does not extend the 2
 
 HM-01-WALKTHROUGH was independently reviewed on 2026-10-10. Reviewer `0261868b-647f-4cf2-91bc-db9b8ea7e0e0` read the walkthrough, its tests, the accounting module, the status documents, the HM-02 proposal, the canonical handoff, and the baseline and parent receipts. Verdict: approve. The parent sandbox rerun discovered 13 tests, 13 passed, exit code 0. The reviewer did not rerun the suite. This verdict covers the demonstration only. It does not implement or approve HM-02.
 
-HM-02 is implemented in this checkout. Independent review on 2026-10-10 approved it. Reviewer `ed959b8d-9104-4874-a4f1-e085511cdf02` read the snapshot, its tests, the unchanged accounting module, the status documents, and the parent receipt. Verdict: approve. The parent sandbox rerun discovered 26 tests, 26 passed, exit code 0. The reviewer did not rerun the suite. This verdict covers the qualified snapshot only. It does not authorize conversion, transactions, forecasts, recommendations, or HM-03.
+HM-02 is implemented in this checkout at `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. Independent review on 2026-10-10 approved it. Reviewer `ed959b8d-9104-4874-a4f1-e085511cdf02` read the snapshot, its tests, the unchanged accounting module, the status documents, and the parent receipt. Verdict: approve. The parent sandbox rerun discovered 26 tests, 26 passed, exit code 0. A later clean-tree rerun of that same commit also discovered 26 tests, 26 passed, exit code 0. The reviewer did not rerun the suite. This verdict covers the qualified snapshot only. It does not authorize conversion, transactions, forecasts, recommendations, or HM-03.
 
 ## Historical
 
