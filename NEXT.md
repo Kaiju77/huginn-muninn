@@ -1,6 +1,6 @@
 # Next Steps
 
-ACCOUNTING-LEDGER is a reviewed local ledger on branch `cursor/hm-01`. The baseline before it was `a804f40181d5d8a89dd7f60982c5b63b936d18a8`. It is not merged. A further phase is not authorized.
+ACCOUNTING-LEDGER is a reviewed local ledger on branch `cursor/hm-01` at `66a3e7644a2d74ebc749667fa88f94b27b721280`. The baseline before it was `a804f40181d5d8a89dd7f60982c5b63b936d18a8`. It is not merged. A further phase is not authorized.
 
 The recommended next phase, when separately approved, is still synthetic: treat repeated statement rows as explicit breaks, then add cost basis without tax-lot advice. No fetched rates, recommendations, or forecasts.
 

@@ -8,7 +8,7 @@
 
 ## Current checkout
 
-This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The accounting ledger is described in `docs/ACCOUNTING_LEDGER.md` and was independently reviewed on 2026-10-10. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
+This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The accounting ledger commit is `66a3e7644a2d74ebc749667fa88f94b27b721280`, described in `docs/ACCOUNTING_LEDGER.md`. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
 
 ## Historical checkout note
 
