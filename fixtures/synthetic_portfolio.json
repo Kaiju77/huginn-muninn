@@ -1,0 +1,243 @@
+{
+  "reporting_currency": "NOK",
+  "accounts": [
+    {
+      "identity": "brokerage"
+    }
+  ],
+  "instruments": [
+    {
+      "identity": "northline",
+      "listing_currency": "NOK",
+      "display_name": "Northline Equity Fund"
+    },
+    {
+      "identity": "harbor",
+      "listing_currency": "USD",
+      "display_name": "Harbor Global Fund"
+    }
+  ],
+  "events": [
+    {
+      "type": "deposit",
+      "event_id": "dep-open",
+      "account": "brokerage",
+      "currency": "NOK",
+      "amount": "25000",
+      "event_date": "2026-01-15",
+      "provenance": "synthetic-opening-deposit"
+    },
+    {
+      "type": "buy",
+      "event_id": "buy-northline",
+      "account": "brokerage",
+      "instrument": "northline",
+      "quantity": "20",
+      "cash_currency": "NOK",
+      "cash_amount": "10000",
+      "fee": "15",
+      "event_date": "2026-01-16",
+      "provenance": "synthetic-buy-northline"
+    },
+    {
+      "type": "dividend",
+      "event_id": "div-northline",
+      "account": "brokerage",
+      "instrument": "northline",
+      "currency": "NOK",
+      "amount": "80",
+      "event_date": "2026-02-02",
+      "provenance": "synthetic-dividend"
+    },
+    {
+      "type": "buy",
+      "event_id": "buy-harbor",
+      "account": "brokerage",
+      "instrument": "harbor",
+      "quantity": "5",
+      "cash_currency": "NOK",
+      "cash_amount": "800",
+      "fee": "5",
+      "event_date": "2026-02-18",
+      "provenance": "synthetic-buy-harbor"
+    },
+    {
+      "type": "sell",
+      "event_id": "sell-northline",
+      "account": "brokerage",
+      "instrument": "northline",
+      "quantity": "4",
+      "cash_currency": "NOK",
+      "cash_amount": "2300",
+      "fee": "10",
+      "event_date": "2026-03-10",
+      "provenance": "synthetic-sell-northline"
+    },
+    {
+      "type": "withdrawal",
+      "event_id": "wd-cash",
+      "account": "brokerage",
+      "currency": "NOK",
+      "amount": "1500",
+      "event_date": "2026-03-20",
+      "provenance": "synthetic-withdrawal"
+    }
+  ],
+  "prices": [
+    {
+      "observation_id": "px-northline-0116",
+      "instrument": "northline",
+      "price": "500",
+      "price_currency": "NOK",
+      "valuation_date": "2026-01-16",
+      "evidence_date": "2026-01-16",
+      "provenance": "synthetic-price-northline-0116"
+    },
+    {
+      "observation_id": "px-northline-0218",
+      "instrument": "northline",
+      "price": "510",
+      "price_currency": "NOK",
+      "valuation_date": "2026-02-18",
+      "evidence_date": "2026-02-18",
+      "provenance": "synthetic-price-northline-0218"
+    },
+    {
+      "observation_id": "px-harbor-0218",
+      "instrument": "harbor",
+      "price": "17.5",
+      "price_currency": "USD",
+      "valuation_date": "2026-02-18",
+      "evidence_date": "2026-02-18",
+      "provenance": "synthetic-price-harbor-0218"
+    },
+    {
+      "observation_id": "px-northline-0310",
+      "instrument": "northline",
+      "price": "575",
+      "price_currency": "NOK",
+      "valuation_date": "2026-03-10",
+      "evidence_date": "2026-03-10",
+      "provenance": "synthetic-price-northline-0310"
+    },
+    {
+      "observation_id": "px-harbor-0310",
+      "instrument": "harbor",
+      "price": "18",
+      "price_currency": "USD",
+      "valuation_date": "2026-03-10",
+      "evidence_date": "2026-03-10",
+      "provenance": "synthetic-price-harbor-0310"
+    },
+    {
+      "observation_id": "px-northline-0331",
+      "instrument": "northline",
+      "price": "560",
+      "price_currency": "NOK",
+      "valuation_date": "2026-03-31",
+      "evidence_date": "2026-03-31",
+      "provenance": "synthetic-price-northline-0331"
+    },
+    {
+      "observation_id": "px-harbor-0331",
+      "instrument": "harbor",
+      "price": "18",
+      "price_currency": "USD",
+      "valuation_date": "2026-03-31",
+      "evidence_date": "2026-03-31",
+      "provenance": "synthetic-price-harbor-0331"
+    }
+  ],
+  "rates": [
+    {
+      "rate_id": "fx-0218",
+      "base": "USD",
+      "quote": "NOK",
+      "rate": "10",
+      "rate_date": "2026-02-18",
+      "evidence_date": "2026-02-17",
+      "provenance": "synthetic-fx-usd-nok-0218"
+    },
+    {
+      "rate_id": "fx-0331",
+      "base": "USD",
+      "quote": "NOK",
+      "rate": "10.25",
+      "rate_date": "2026-03-31",
+      "evidence_date": "2026-03-30",
+      "provenance": "synthetic-fx-usd-nok-0331"
+    }
+  ],
+  "statements": [
+    {
+      "statement_id": "stmt-match",
+      "account": "brokerage",
+      "on_date": "2026-03-20",
+      "provenance": "synthetic-statement-match",
+      "cash": [
+        {
+          "currency": "NOK",
+          "amount": "15050"
+        }
+      ],
+      "positions": [
+        {
+          "instrument": "northline",
+          "quantity": "16"
+        },
+        {
+          "instrument": "harbor",
+          "quantity": "5"
+        }
+      ]
+    },
+    {
+      "statement_id": "stmt-mismatch",
+      "account": "brokerage",
+      "on_date": "2026-03-20",
+      "provenance": "synthetic-statement-mismatch",
+      "cash": [
+        {
+          "currency": "NOK",
+          "amount": "15051"
+        }
+      ],
+      "positions": [
+        {
+          "instrument": "northline",
+          "quantity": "16"
+        },
+        {
+          "instrument": "harbor",
+          "quantity": "5"
+        }
+      ]
+    },
+    {
+      "statement_id": "stmt-duplicate",
+      "account": "brokerage",
+      "on_date": "2026-03-20",
+      "provenance": "synthetic-statement-duplicate",
+      "cash": [
+        {
+          "currency": "NOK",
+          "amount": "15050"
+        },
+        {
+          "currency": "NOK",
+          "amount": "15050"
+        }
+      ],
+      "positions": [
+        {
+          "instrument": "northline",
+          "quantity": "16"
+        },
+        {
+          "instrument": "harbor",
+          "quantity": "5"
+        }
+      ]
+    }
+  ]
+}

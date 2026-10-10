@@ -44,11 +44,23 @@ Kai authorized an offline synthetic accounting phase, task ACCOUNTING-LEDGER, on
 
 Independent review approved this ledger. Reviewer `6e908566-155a-4fbf-9755-3d40359c1995` read the ledger, its tests, the walkthrough, the unchanged HM-01 and HM-02 modules, and the parent receipt. Verdict: approve. The parent sandbox discovered 57 tests, 57 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/ACCOUNTING-LEDGER/unittest-parent.txt`. The reviewer did not rerun the suite. The ledger commit is `66a3e7644a2d74ebc749667fa88f94b27b721280`. This acceptance is local. It is not canonical integration, and it does not authorize a further phase.
 
-Known limits from that review: a repeated currency or instrument on one statement keeps the first row and does not emit a break for the later row. One eligible price plus another same-date price in the wrong currency is reported as `ambiguous_price` before the currency check. A rejected event id cannot be reused. The ledger has no tax lots, cost basis, or staleness window. Sums use ambient Decimal precision and do not change it. `Decimal("10.5")` can print a trailing `.0` while remaining an exact Decimal.
+Known limits recorded at that review, before PROTOTYPE-01: a repeated statement row kept the first amount, a wrong-currency price could be reported as `ambiguous_price`, and valuation followed ambient Decimal precision. A rejected event id cannot be reused. The ledger has no tax lots, cost basis, or staleness window. `Decimal("10.5")` can print a trailing `.0` while remaining an exact Decimal. The prototype section records the later changes.
 
 The rules are in `docs/ACCOUNTING_LEDGER.md`. The synthetic trace is `python scripts/accounting_walkthrough.py`.
 
 The implementer sandbox run and the parent rerun both used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. `python -m unittest discover -s tests -v` discovered 57 tests, 57 passed, exit code 0. An earlier implementer run discovered 57 tests and exited 1 because statement positions were read through a cash amount field. That comparison was corrected before the passing runs. Implementer `0fa10054-f14b-46c7-80ec-c2659e5fe82f` wrote the ledger.
+
+## Local prototype — 2026-10-10
+
+Kai authorized PROTOTYPE-01, an offline synthetic prototype, on 2026-10-10. The isolated checkout is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on `cursor/hm-01`. HEAD before these edits was `23c943ad50a88b4a0eb71fcd964798c9ddb321c4`, and the worktree was clean. HM-01 and HM-02 source files were not edited.
+
+`src/huginn_muninn/ledger.py` now emits `duplicate_statement_row` when a statement repeats a currency or instrument, selects one listing-currency price before treating other currencies as ambiguity, and computes valuation products and the known subtotal inside a local 28-digit Decimal context. Journal addition stays outside that context. `docs/DECIMAL_RULES.md` records that HM-01 and HM-02 still use ambient precision.
+
+`src/huginn_muninn/prototype.py` and `scripts/serve_prototype.py` are a standard-library local interface. The committed fixture is `fixtures/synthetic_portfolio.json`. The runtime overlay is `var/synthetic-book.json`. The hosted FastAPI, React, and PostgreSQL target stays deferred because this milestone cannot install dependencies. See `docs/LOCAL_PROTOTYPE.md`.
+
+Independent review approved PROTOTYPE-01. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c` read the ledger changes, the prototype, the fixture, the tests, and the status documents. Verdict: approve. The reviewer did not rerun the suite. After that review, table cells stopped breaking mid-word and the page scrolls wide tables. That layout change does not alter posting, valuation, or reconciliation. A parent sandbox rerun after the layout change discovered 75 tests, 75 passed, exit code 0. A local browser session opened `http://127.0.0.1:8765/`, read the incomplete 2026-03-10 valuation, the 15050 versus 15051 reconciliation, and the chart, posted a synthetic 100 NOK deposit, and reloaded the fixture. This acceptance is local. It is not canonical integration, production financial readiness, or a further phase.
+
+The implementer sandbox used image `sha256:1ec077c900d954b540018818f0dea239d7c3ffcf7638f49e090cbf14832d061f`, with the network disabled and the checkout copied into container scratch. `python -m unittest discover -s tests -v` discovered 75 tests, 75 passed, exit code 0. A later parent rerun of the same dirty tree discovered 75 tests, 75 passed, exit code 0. Receipt: `C:/Users/kaiar/Documents/projects/cursor-portfolio/evidence/PROTOTYPE-01/unittest-parent.txt`. Implementer `b3fcf9be-096e-451e-820f-685f7b45ecc1` wrote the prototype. The parent rerun is not an independent review.
 
 ## Historical
 

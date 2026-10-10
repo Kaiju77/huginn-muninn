@@ -15,3 +15,7 @@ From the checkout root, `python scripts/hm01_walkthrough.py` prints the syntheti
 ## Run the accounting walkthrough
 
 From the checkout root, `python scripts/accounting_walkthrough.py` prints the synthetic ledger trace. The journal rules are in `docs/ACCOUNTING_LEDGER.md`.
+
+## Run the local prototype
+
+From the checkout root, `python scripts/serve_prototype.py` binds `127.0.0.1:8765` and prints `http://127.0.0.1:8765/`. The pages, the synthetic fixture, and the deferred FastAPI, React, and PostgreSQL target are described in `docs/LOCAL_PROTOTYPE.md`. Decimal precision for ledger valuation is in `docs/DECIMAL_RULES.md`. The figures are synthetic. The page is not a recommendation.

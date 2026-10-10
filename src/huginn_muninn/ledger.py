@@ -2,10 +2,15 @@
 
 Amounts stay Decimal values supplied by the caller. This module does not
 fetch prices, invert currency pairs, or recommend a transaction.
+
+Valuation products and the known-subtotal sum run in a local Decimal
+context of 28 significant digits. Journal addition stays outside that
+context. HM-01 and HM-02 still use the caller's ambient precision.
+See docs/DECIMAL_RULES.md.
 """
 
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_EVEN, Context, Decimal, localcontext
 from typing import NamedTuple
 
 
@@ -34,6 +39,7 @@ _REASON_ORDER = (
     'amount_mismatch',
     'missing_on_statement',
     'missing_in_books',
+    'duplicate_statement_row',
     'invalid_pair',
 )
 
@@ -283,6 +289,24 @@ def _available(balances, key):
     return _ZERO
 
 
+def _valuation_context():
+    """28 significant digits. Rounding applies only past that precision."""
+    return Context(prec=28, rounding=ROUND_HALF_EVEN)
+
+
+def _multiply(left, right):
+    with localcontext(_valuation_context()):
+        return left * right
+
+
+def _sum_amounts(amounts):
+    total = _ZERO
+    with localcontext(_valuation_context()):
+        for amount in amounts:
+            total = total + amount
+    return total
+
+
 def _select(items, on_date, date_name, missing_reason, ambiguous_reason):
     eligible = []
     future = []
@@ -304,6 +328,43 @@ def _select(items, on_date, date_name, missing_reason, ambiguous_reason):
     if future:
         return None, {'future_evidence'}
     return None, {missing_reason}
+
+
+def _select_price(items, on_date, listing_currency):
+    """Pick a listing-currency price before calling a set of prices ambiguous.
+
+    Eligible observations match the valuation date, carry evidence on or
+    before that date, and have meaningful provenance. Listing currency is
+    compared exactly, including case. A different currency does not make
+    one matching price ambiguous.
+    """
+    eligible = []
+    future = []
+    for item in items:
+        observed = _as_date(item.valuation_date)
+        evidence = _as_date(item.evidence_date)
+        if observed != on_date or not _meaningful_provenance(item.provenance):
+            continue
+        if evidence is None:
+            continue
+        if evidence <= on_date:
+            eligible.append(item)
+        else:
+            future.append(item)
+    if not eligible:
+        if future:
+            return None, {'future_evidence'}
+        return None, {'missing_price'}
+    qualifying = [
+        item
+        for item in eligible
+        if item.price_currency == listing_currency
+    ]
+    if len(qualifying) == 1:
+        return qualifying[0], set()
+    if len(qualifying) > 1:
+        return None, {'ambiguous_price'}
+    return eligible[0], {'currency_mismatch'}
 
 
 def _nonzero_rows(mapping, row_type):
@@ -444,14 +505,19 @@ class Ledger:
             lines.append(self._value_cash(row, on))
         for row in snapshot.positions:
             lines.append(self._value_position(row, on))
-        total = _ZERO
+        included = []
         complete = True
         for line in lines:
             if line.reasons:
                 complete = False
             else:
-                total = total + line.reporting_amount
-        return PortfolioValuation(on_date, total, complete, tuple(lines))
+                included.append(line.reporting_amount)
+        return PortfolioValuation(
+            on_date,
+            _sum_amounts(included),
+            complete,
+            tuple(lines),
+        )
 
     def reconcile(self, statement):
         if not isinstance(statement, Statement):
@@ -644,7 +710,7 @@ class Ledger:
             row.account,
             row.currency,
             row.amount,
-            row.amount * rate.rate,
+            _multiply(row.amount, rate.rate),
             None,
             rate.rate_id,
             (),
@@ -657,13 +723,22 @@ class Ledger:
             for price in self._prices
             if price.instrument == row.instrument
         ]
-        price, flagged = _select(
+        price, flagged = _select_price(
             prices,
             on_date,
-            'valuation_date',
-            'missing_price',
-            'ambiguous_price',
+            instrument.listing_currency,
         )
+        if flagged == {'currency_mismatch'}:
+            return ValuedLine(
+                'position',
+                row.account,
+                row.instrument,
+                row.quantity,
+                None,
+                price.observation_id,
+                None,
+                ('currency_mismatch',),
+            )
         if flagged:
             return ValuedLine(
                 'position',
@@ -675,18 +750,7 @@ class Ledger:
                 None,
                 _ordered(flagged),
             )
-        if price.price_currency != instrument.listing_currency:
-            return ValuedLine(
-                'position',
-                row.account,
-                row.instrument,
-                row.quantity,
-                None,
-                price.observation_id,
-                None,
-                ('currency_mismatch',),
-            )
-        market = row.quantity * price.price
+        market = _multiply(row.quantity, price.price)
         if instrument.listing_currency == self.reporting_currency:
             return ValuedLine(
                 'position',
@@ -724,7 +788,7 @@ class Ledger:
             row.account,
             row.instrument,
             row.quantity,
-            market * rate.rate,
+            _multiply(market, rate.rate),
             price.observation_id,
             rate.rate_id,
             (),
@@ -740,7 +804,7 @@ def _compare_side(
     value_name,
 ):
     breaks = []
-    first = {}
+    grouped = {}
     order = []
     if statement_rows is None:
         statement_rows = ()
@@ -749,11 +813,15 @@ def _compare_side(
             breaks.append(Break(kind, '', None, row, ('non_decimal',)))
             continue
         identity = getattr(row, identity_name)
-        if identity not in first:
-            first[identity] = getattr(row, value_name)
+        if identity not in grouped:
+            grouped[identity] = []
             order.append(identity)
+        grouped[identity].append(getattr(row, value_name))
+    compared = set()
     for identity, book_amount in book_amounts.items():
-        if identity not in first:
+        compared.add(identity)
+        amounts = grouped.get(identity)
+        if amounts is None:
             breaks.append(
                 Break(
                     kind,
@@ -764,14 +832,34 @@ def _compare_side(
                 )
             )
             continue
-        breaks.extend(
-            _amount_break(kind, identity, book_amount, first[identity])
-        )
-    for identity in order:
-        if identity not in book_amounts:
-            breaks.extend(
-                _amount_break(kind, identity, None, first[identity])
+        if len(amounts) > 1:
+            breaks.append(
+                Break(
+                    kind,
+                    identity,
+                    book_amount,
+                    None,
+                    ('duplicate_statement_row',),
+                )
             )
+            continue
+        breaks.extend(_amount_break(kind, identity, book_amount, amounts[0]))
+    for identity in order:
+        if identity in compared:
+            continue
+        amounts = grouped[identity]
+        if len(amounts) > 1:
+            breaks.append(
+                Break(
+                    kind,
+                    identity,
+                    None,
+                    None,
+                    ('duplicate_statement_row',),
+                )
+            )
+            continue
+        breaks.extend(_amount_break(kind, identity, None, amounts[0]))
     return breaks
 
 

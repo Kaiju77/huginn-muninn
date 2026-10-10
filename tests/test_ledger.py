@@ -824,6 +824,153 @@ class LedgerValuationTest(unittest.TestCase):
         self.assertTrue(valuation.complete)
         self.assertEqual(valuation.known_subtotal, Decimal('5'))
 
+    def test_listing_currency_price_ignores_same_date_wrong_currency(self):
+        ledger = _story()
+        wrong = ledger.add_price(
+            PriceObservation(
+                'px-wrong',
+                'fund-nok',
+                Decimal('999'),
+                'USD',
+                '2026-01-05',
+                '2026-01-05',
+                'synthetic-wrong-currency',
+            )
+        )
+        right = ledger.add_price(
+            PriceObservation(
+                'px-right',
+                'fund-nok',
+                Decimal('520'),
+                'NOK',
+                '2026-01-05',
+                '2026-01-05',
+                'synthetic-listing-currency',
+            )
+        )
+        self.assertTrue(wrong.accepted)
+        self.assertTrue(right.accepted)
+        line = _line(ledger.value('2026-01-05'), 'fund-nok')
+        self.assertEqual(line.reasons, ())
+        self.assertEqual(line.price_id, 'px-right')
+        self.assertEqual(line.reporting_amount, Decimal('3120'))
+        self.assertNotIn('ambiguous_price', line.reasons)
+
+    def test_two_listing_currency_prices_are_ambiguous(self):
+        ledger = _story()
+        ledger.add_price(
+            PriceObservation(
+                'px-a',
+                'fund-nok',
+                Decimal('520'),
+                'NOK',
+                '2026-01-05',
+                '2026-01-05',
+                'synthetic-price-a',
+            )
+        )
+        ledger.add_price(
+            PriceObservation(
+                'px-b',
+                'fund-nok',
+                Decimal('530'),
+                'NOK',
+                '2026-01-05',
+                '2026-01-05',
+                'synthetic-price-b',
+            )
+        )
+        line = _line(ledger.value('2026-01-05'), 'fund-nok')
+        self.assertEqual(line.reasons, ('ambiguous_price',))
+        self.assertIsNone(line.reporting_amount)
+        self.assertIsNone(line.price_id)
+        self.assertNotEqual(line.reporting_amount, Decimal('3120'))
+        self.assertNotEqual(line.reporting_amount, Decimal('3180'))
+
+    def test_two_wrong_currency_prices_are_currency_mismatch(self):
+        ledger = _story()
+        ledger.add_price(
+            PriceObservation(
+                'px-early',
+                'fund-nok',
+                Decimal('10'),
+                'USD',
+                '2026-01-05',
+                '2026-01-05',
+                'synthetic-early',
+            )
+        )
+        ledger.add_price(
+            PriceObservation(
+                'px-late',
+                'fund-nok',
+                Decimal('11'),
+                'EUR',
+                '2026-01-05',
+                '2026-01-05',
+                'synthetic-late',
+            )
+        )
+        line = _line(ledger.value('2026-01-05'), 'fund-nok')
+        self.assertEqual(line.reasons, ('currency_mismatch',))
+        self.assertIsNone(line.reporting_amount)
+        self.assertEqual(line.price_id, 'px-early')
+        self.assertNotIn('ambiguous_price', line.reasons)
+
+    def test_lowered_caller_precision_does_not_round_the_valuation_product(self):
+        ledger = _base()
+        ledger.record(
+            Deposit(
+                'dep',
+                'brokerage',
+                'NOK',
+                Decimal('1'),
+                '2026-01-01',
+                'synthetic',
+            )
+        )
+        ledger.record(
+            Buy(
+                'buy',
+                'brokerage',
+                'fund-nok',
+                Decimal('1000000'),
+                'NOK',
+                Decimal('0'),
+                Decimal('0'),
+                '2026-01-02',
+                'synthetic',
+            )
+        )
+        ledger.add_price(
+            PriceObservation(
+                'px-wide',
+                'fund-nok',
+                Decimal('1.23456789'),
+                'NOK',
+                '2026-01-02',
+                '2026-01-02',
+                'synthetic-wide',
+            )
+        )
+        expected = Decimal('1000000') * Decimal('1.23456789')
+        self.assertGreater(len(expected.as_tuple().digits), 6)
+        original = getcontext().prec
+        getcontext().prec = 6
+        try:
+            valuation = ledger.value('2026-01-02')
+            self.assertEqual(
+                _line(valuation, 'fund-nok').reporting_amount,
+                expected,
+            )
+            self.assertEqual(getcontext().prec, 6)
+        finally:
+            getcontext().prec = original
+        self.assertEqual(getcontext().prec, original)
+        before = getcontext().prec
+        ledger.value('2026-01-02')
+        self.assertEqual(getcontext().prec, before)
+
 
 class LedgerReconciliationTest(unittest.TestCase):
     def test_matching_statement_reconciles(self):
@@ -935,6 +1082,57 @@ class LedgerReconciliationTest(unittest.TestCase):
         self.assertEqual(result.breaks[0].book_amount, Decimal('6910'))
         integer = ledger.reconcile(_statement(6910, 'stmt-int'))
         self.assertEqual(integer.breaks[0].reasons, ('non_decimal',))
+
+    def test_duplicate_cash_rows_break_even_when_amounts_match(self):
+        ledger = _story()
+        before = ledger.books('2026-01-05')
+        result = ledger.reconcile(
+            Statement(
+                'stmt-dup',
+                'brokerage',
+                '2026-01-05',
+                'synthetic-statement',
+                (
+                    StatementCash('NOK', Decimal('6910')),
+                    StatementCash('NOK', Decimal('6910')),
+                ),
+                (
+                    StatementPosition('fund-nok', Decimal('6')),
+                    StatementPosition('fund-usd', Decimal('2')),
+                ),
+            )
+        )
+        self.assertFalse(result.reconciled)
+        self.assertEqual(len(result.breaks), 1)
+        cash_break = result.breaks[0]
+        self.assertEqual(cash_break.kind, 'cash')
+        self.assertEqual(cash_break.identity, 'NOK')
+        self.assertEqual(cash_break.reasons, ('duplicate_statement_row',))
+        self.assertEqual(cash_break.book_amount, Decimal('6910'))
+        self.assertIsNone(cash_break.statement_amount)
+        self.assertEqual(ledger.books('2026-01-05'), before)
+
+    def test_wrong_type_row_is_not_a_typed_duplicate(self):
+        ledger = _story()
+        result = ledger.reconcile(
+            Statement(
+                'stmt-type',
+                'brokerage',
+                '2026-01-05',
+                'synthetic-statement',
+                (
+                    StatementCash('NOK', Decimal('6910')),
+                    StatementPosition('NOK', Decimal('6910')),
+                ),
+                (
+                    StatementPosition('fund-nok', Decimal('6')),
+                    StatementPosition('fund-usd', Decimal('2')),
+                ),
+            )
+        )
+        self.assertFalse(result.reconciled)
+        self.assertEqual(result.breaks[0].reasons, ('non_decimal',))
+        self.assertEqual(len(result.breaks), 1)
 
 
 class LedgerContractTest(unittest.TestCase):

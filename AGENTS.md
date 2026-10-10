@@ -8,7 +8,7 @@
 
 ## Current checkout
 
-This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The accounting ledger commit is `66a3e7644a2d74ebc749667fa88f94b27b721280`, described in `docs/ACCOUNTING_LEDGER.md`. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
+This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The accounting ledger commit is `66a3e7644a2d74ebc749667fa88f94b27b721280`, described in `docs/ACCOUNTING_LEDGER.md`. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. PROTOTYPE-01 adds the local synthetic paper ledger on this worktree, described in `docs/LOCAL_PROTOTYPE.md` and `docs/DECIMAL_RULES.md`. Independent review on 2026-10-10 approved it. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
 
 ## Historical checkout note
 
