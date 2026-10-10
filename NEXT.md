@@ -1,5 +1,7 @@
 # Next Steps
 
+HM-02 is proposed in `docs/HM02_PROPOSAL.md` and is not authorized. Do not start that implementation from this walkthrough.
+
 HM-01 is accepted as a reviewed implementation and preserved on this isolated branch. The next product slice needs a new milestone authorization. Currency compatibility, as-of checks, per-holding provenance, conversion, valuation coverage, exposure coverage, and analytical coverage are still unfinished. This task did not solve them.
 
 Do not treat this acceptance as canonical integration, deployment, or financial activation.

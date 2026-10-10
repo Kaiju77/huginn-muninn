@@ -8,6 +8,10 @@ The parent sandbox rerun used image `sha256:1ec077c900d954b540018818f0dea239d7c3
 
 This verdict covers that bounded slice only. It does not complete the broader accounting foundation. Currency compatibility, as-of checks, per-holding provenance, conversion, and valuation, exposure, and analytical coverage remain unfinished. `complete=true` means every stored holding is a Decimal. Non-finite Decimal values still count as known. The branch is not integrated into the canonical repository, deployed, or financially activated.
 
+The HM-01 walkthrough demonstrates that accepted slice. It does not extend the 2026-10-10 HM-01 approval to currency, as-of, provenance, conversion, or coverage.
+
+HM-01-WALKTHROUGH was independently reviewed on 2026-10-10. Reviewer `0261868b-647f-4cf2-91bc-db9b8ea7e0e0` read the walkthrough, its tests, the accounting module, the status documents, the HM-02 proposal, the canonical handoff, and the baseline and parent receipts. Verdict: approve. The parent sandbox rerun discovered 13 tests, 13 passed, exit code 0. The reviewer did not rerun the suite. This verdict covers the demonstration only. It does not implement or approve HM-02.
+
 ## Historical
 
 The following sentence is the earlier review note. It is not the current HM-01 verdict.

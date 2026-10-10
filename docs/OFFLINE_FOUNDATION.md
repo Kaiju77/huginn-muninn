@@ -31,3 +31,7 @@ HM-01 did not implement:
 `complete=true` means every stored holding was a Decimal. It does not mean currency, as-of, provenance, conversion, or coverage qualification passed. Non-finite Decimal values, such as NaN and infinity, still count as known; that limit is recorded and was not part of the accepted repair.
 
 No percentage advice, optimization, tax engine certification, return assumptions, forecast skill claims, personalized policy defaults, or tactical activation. No FastAPI/PostgreSQL/React runtime provisioning, data vendor/broker/API connections, purchases, private financial imports, services, deployment, or merge/push.
+
+## Walkthrough
+
+`docs/HM01_WALKTHROUGH.md` shows a synthetic run of this same API. The demonstration does not change the valuation contract above.
