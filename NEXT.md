@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-07 is reviewed in this commit. Reviewer `93b4999a-71c0-4cca-9ca6-522a66b33861` approved the separate policy-rate and NOWA note and the allowlist hosts. The next executable task is item 2.
+1. INGEST-07 is reviewed at `a29e6ad0d562739f3823d7fde537c8f376b13db3`. Reviewer `93b4999a-71c0-4cca-9ca6-522a66b33861` approved the separate policy-rate and NOWA note and the allowlist hosts. The next executable task is item 2.
 2. After it: for the newest stored USD/NOK observation, show stored value minus Decimal('10.25') as a labeled difference. Exact zero renders as 0. Include this exact sentence: "The USD/NOK gap is not a recommendation and is not copied into the ledger." Do not call add_rate. If no USD/NOK row is visible, omit the difference and keep the existing empty-state sentence.
 3. After that: on each stored-series inventory line, state the freshness flag of the latest row against the selected page date, using the existing freshness_flags function. Do not change that function. A line with two rows on the latest date states both flags.
 
