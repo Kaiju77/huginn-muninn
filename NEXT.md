@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-09 is reviewed in this commit. Reviewer `1b77f2bb-714f-4adf-9e95-67699efad7cf` approved the due or current label beside each refresh series and the calendar-day sentence. The next executable task is item 2.
+1. INGEST-09 is reviewed at `177b1dbf5d651da11b7debdb5c5aebbad589b588`. Reviewer `1b77f2bb-714f-4adf-9e95-67699efad7cf` approved the due or current label beside each refresh series and the calendar-day sentence. The next executable task is item 2.
 2. After it: on the evidence page, show the count of stored cache observations and the existing 500 cap. Say the cap drops the oldest observation dates that are absent from a new batch. Do not change the cap. Do not fetch.
 3. After that: leave the human decisions in `HUMAN_TASKS.md` as the remaining gate. Do not implement EDGAR, FRED, another SSB table, a ledger write, or a scheduler. The ready code task that stays inside the evidence page is: name the quality flag of the newest stored row for each of the six series when that series has a stored row, and say the flag is a label. If a series has no stored row, say it is not stored.
 
