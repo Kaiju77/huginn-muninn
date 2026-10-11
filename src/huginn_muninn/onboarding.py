@@ -1,13 +1,14 @@
 """Entered portfolio store.
 
-People record accounts, instruments, activities, and manual balances.
+People record accounts, instruments, activities, manual balances, and prices.
 This module does not fetch and does not load the synthetic fixture.
-Prices and currency rates are not recorded here. HTTP stays in the prototype.
+Currency rates are not recorded here. Valuation reads this book only.
+HTTP stays in the prototype.
 """
 
 from copy import deepcopy
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Context, Decimal, InvalidOperation, localcontext
 import json
 from pathlib import Path
 from typing import NamedTuple
@@ -43,6 +44,20 @@ ENTERED_SENTENCE = (
 SNAPSHOT_SENTENCE = (
     'Manual balances are snapshots. They are not a full performance record.'
 )
+VALUATION_SENTENCE = 'This valuation is not a recommendation.'
+MISSING_PRICE_SENTENCE = 'A missing price stays unknown.'
+SNAPSHOT_VALUE_SENTENCE = (
+    'A manual balance is a snapshot on its date. It is not a price and '
+    'it is not a full performance record.'
+)
+ALLOCATION_INCOMPLETE = 'Allocation is incomplete.'
+CASH_SNAPSHOT_NOT_ADDED = 'A cash snapshot is not added to ledger cash.'
+NO_SNAPSHOT = 'No snapshot on this date'
+PRICE_CURRENCY_MISMATCH = (
+    'The price currency does not match the listing currency.'
+)
+AMBIGUOUS_PRICE = 'The price is ambiguous.'
+FRESH_PRICE_DAYS = 7
 INCOMPLETE_IDENTIFICATION = 'identification is incomplete'
 QUANTITY_CONFLICT = (
     'This holding already has a quantity. A manual balance is not a '
@@ -84,6 +99,35 @@ class EntryResult(NamedTuple):
     message: str
     reasons: tuple
     identity: str
+
+
+class ValueLine(NamedTuple):
+    kind: str
+    account: str
+    identity: str
+    currency: str
+    amount: object
+    known: bool
+    freshness: str
+    detail: str
+
+
+class HistoryPoint(NamedTuple):
+    on_date: str
+    known_nok_subtotal: Decimal
+    unknown_count: int
+
+
+class ValueReport(NamedTuple):
+    on_date: str
+    lines: tuple
+    known_nok_subtotal: Decimal
+    unknown_count: int
+    allocation_complete: bool
+    shares: tuple
+    history: tuple
+    error: str
+    note: str = ''
 
 
 def default_book_path(checkout):
@@ -156,6 +200,68 @@ def _empty_document():
         'activities': [],
         'manual_balances': [],
     }
+
+
+def _valuation_context():
+    """28 significant digits. Rounding applies only past that precision."""
+    return Context(prec=28, rounding=ROUND_HALF_EVEN)
+
+
+def _multiply(left, right):
+    with localcontext(_valuation_context()):
+        return left * right
+
+
+def _divide(left, right):
+    with localcontext(_valuation_context()):
+        return left / right
+
+
+def _sum_decimals(amounts):
+    total = Decimal(0)
+    with localcontext(_valuation_context()):
+        for amount in amounts:
+            total = total + amount
+    return total
+
+
+def _blank_report(message):
+    return ValueReport('', (), Decimal(0), 0, False, (), (), message)
+
+
+def _cash_snapshot_overlaps(line, ledger_cash):
+    """A known cash snapshot for an account that also has ledger cash."""
+    return (
+        line.kind == 'snapshot'
+        and line.identity == 'cash'
+        and line.known
+        and line.amount is not None
+        and (line.account, line.currency) in ledger_cash
+    )
+
+
+def price_freshness(valuation_date, evidence_date, selected_date):
+    """Label one stored price against the selected date.
+
+    The selected date is the only clock. A price is fresh when both of
+    its dates are on or before that date and the gap from the valuation
+    date is at most 7 days. A later valuation date, a later evidence
+    date, and an older valuation date are future_valuation,
+    future_evidence, and stale. Those labels do not remove the price.
+    """
+    selected = date.fromisoformat(selected_date)
+    valuation = date.fromisoformat(valuation_date)
+    evidence = date.fromisoformat(evidence_date)
+    flags = []
+    if valuation > selected:
+        flags.append('future_valuation')
+    if evidence > selected:
+        flags.append('future_evidence')
+    if (selected - valuation).days > FRESH_PRICE_DAYS:
+        flags.append('stale')
+    if not flags:
+        flags.append('fresh')
+    return tuple(flags)
 
 
 def _sentence(code):
@@ -370,6 +476,31 @@ def _validate_document(raw):
             raise ValueError('instrument')
         if holding == 'instrument' and instrument.strip() == '':
             raise ValueError('instrument')
+    listings = {
+        instrument['identity']: instrument['listing_currency']
+        for instrument in raw['instruments']
+    }
+    stored_prices = raw.get('prices', [])
+    if not isinstance(stored_prices, list):
+        raise ValueError('prices')
+    for price in stored_prices:
+        if not isinstance(price, dict) or price.get('origin') != ORIGIN:
+            raise ValueError('price')
+        instrument = _string_field(price, 'instrument')
+        if instrument not in listings:
+            raise ValueError('price instrument')
+        amount, code = _finite_decimal(price.get('amount'))
+        if code is not None or amount < 0:
+            raise ValueError('price amount')
+        currency = _string_field(price, 'currency')
+        if currency != listings[instrument]:
+            raise ValueError('price currency')
+        for field in ('valuation_date', 'evidence_date'):
+            text, problem = _clean_date(price.get(field))
+            if text is None or problem is not None:
+                raise ValueError(field)
+        if _clean_provenance(price.get('provenance')) is None:
+            raise ValueError('price provenance')
     ledger, postings = replay(raw)
     if any(not posting.accepted for posting in postings):
         raise ValueError('rejected activity')
@@ -419,6 +550,10 @@ class EnteredPortfolio:
     @property
     def manual_balances(self):
         return tuple(self.document['manual_balances'])
+
+    @property
+    def prices(self):
+        return tuple(self.document.get('prices', ()))
 
     def account_label(self, identity):
         for account in self.accounts:
@@ -707,6 +842,300 @@ class EnteredPortfolio:
         self._commit(staged)
         return _ok('')
 
+    def record_price(
+        self,
+        instrument,
+        amount,
+        currency,
+        valuation_date,
+        evidence_date,
+        provenance,
+    ):
+        """Store one entered price. A second price on the same date stays."""
+        refused = self._refused()
+        if refused is not None:
+            return refused
+        problems = []
+        reasons = []
+        found = self._find_instrument(instrument)
+        if found is None:
+            problems.append('Choose an instrument that you have entered.')
+        values = {}
+        self._take_amount(
+            problems,
+            reasons,
+            values,
+            'amount',
+            amount,
+            'Enter the amount.',
+        )
+        if 'amount' in values and values['amount'] < 0:
+            problems.append(_sentence('negative_amount'))
+            reasons.append('negative_amount')
+            del values['amount']
+        elif 'amount' in values and values['amount'] == 0:
+            values['amount'] = Decimal(0)
+        price_currency = _currency_text(currency)
+        if price_currency is None:
+            problems.append('Enter the currency.')
+        elif found is not None and price_currency != found['listing_currency']:
+            problems.append(PRICE_CURRENCY_MISMATCH)
+            reasons.append('currency_mismatch')
+        valuation_day, valuation_message = _clean_date(valuation_date)
+        if valuation_message == 'Enter the date.':
+            problems.append('Enter the valuation date.')
+        elif valuation_message is not None:
+            problems.append(valuation_message)
+            reasons.append('invalid_date')
+        evidence_day, evidence_message = _clean_date(evidence_date)
+        if evidence_message == 'Enter the date.':
+            problems.append('Enter the evidence date.')
+        elif evidence_message is not None:
+            problems.append(evidence_message)
+            reasons.append('invalid_date')
+        source = _clean_provenance(provenance)
+        if source is None:
+            problems.append(_sentence('blank_provenance'))
+            reasons.append('blank_provenance')
+        if problems:
+            return _fail(' '.join(problems), reasons)
+        staged = deepcopy(self.document)
+        stored = list(staged.get('prices', []))
+        stored.append({
+            'origin': ORIGIN,
+            'instrument': found['identity'],
+            'amount': _stored_amount(values['amount']),
+            'currency': price_currency,
+            'valuation_date': valuation_day,
+            'evidence_date': evidence_day,
+            'provenance': source,
+        })
+        staged['prices'] = stored
+        try:
+            self._commit(staged)
+        except (ValueError, TypeError, InvalidOperation, OSError):
+            return _fail('The entry was not recorded.')
+        return _ok('')
+
+    def value_on(self, on_date):
+        """Value this entered book on one selected date.
+
+        Cash stays at face in its own currency. A quantity uses one price
+        whose valuation date is that date and whose currency is the listing
+        currency. A manual balance is used only on its as-of date. A cash
+        snapshot on that date stays on its own line. When that account and
+        currency also have ledger cash, the snapshot is not added to the
+        known NOK subtotal and the report is incomplete. A snapshot whose
+        ledger cash is zero can be a known amount. Nothing here converts
+        currencies or fills in a missing price.
+        """
+        if self.load_error:
+            return _blank_report(self.load_error)
+        day, message = _clean_date(on_date)
+        if message is not None:
+            if message == 'Enter the date.':
+                return _blank_report('Enter the date.')
+            return _blank_report(message)
+        ledger = self.ledger()
+        if ledger is None:
+            return _blank_report(UNREADABLE)
+        (
+            lines,
+            subtotal,
+            unknown,
+            complete,
+            shares,
+            cash_overlap,
+        ) = self._valuate(ledger, day)
+        history = []
+        for historic in self._history_dates(day):
+            if historic == day:
+                history.append(HistoryPoint(historic, subtotal, unknown))
+                continue
+            (
+                _lines,
+                other_total,
+                other_unknown,
+                _complete,
+                _shares,
+                _overlap,
+            ) = self._valuate(
+                ledger,
+                historic,
+            )
+            history.append(HistoryPoint(historic, other_total, other_unknown))
+        note = CASH_SNAPSHOT_NOT_ADDED if cash_overlap else ''
+        return ValueReport(
+            day,
+            lines,
+            subtotal,
+            unknown,
+            complete,
+            shares,
+            tuple(history),
+            '',
+            note,
+        )
+
+    def _history_dates(self, selected):
+        found = {selected}
+        for row in self.activities:
+            found.add(row['event_date'])
+        return tuple(sorted(found))
+
+    def _valuate(self, ledger, day):
+        books = ledger.books(day)
+        manual_instruments = {
+            row['instrument']
+            for row in self.manual_balances
+            if row['holding'] == 'instrument'
+        }
+        lines = []
+        ledger_cash = set()
+        for cash in books.cash:
+            lines.append(ValueLine(
+                'cash',
+                cash.account,
+                cash.currency,
+                cash.currency,
+                cash.amount,
+                True,
+                '',
+                '',
+            ))
+            if cash.amount != 0:
+                ledger_cash.add((cash.account, cash.currency))
+        for position in books.positions:
+            if position.instrument in manual_instruments:
+                continue
+            lines.append(self._quantity_line(position, day))
+        lines.extend(self._snapshot_lines(day))
+        cash_overlap = False
+        nok_amounts = []
+        for line in lines:
+            if _cash_snapshot_overlaps(line, ledger_cash):
+                cash_overlap = True
+                continue
+            if (
+                line.known
+                and line.currency == REPORTING_CURRENCY
+                and line.amount is not None
+            ):
+                nok_amounts.append(line.amount)
+        subtotal = _sum_decimals(nok_amounts)
+        unknown = sum(1 for line in lines if not line.known)
+        complete = not cash_overlap and all(
+            line.known and line.currency == REPORTING_CURRENCY
+            for line in lines
+        )
+        shares = ()
+        if complete and subtotal != 0:
+            shares = tuple(_divide(line.amount, subtotal) for line in lines)
+        return lines, subtotal, unknown, complete, shares, cash_overlap
+
+    def _quantity_line(self, position, day):
+        instrument = self._find_instrument(position.instrument)
+        listing = '' if instrument is None else instrument['listing_currency']
+        matches = [
+            row for row in self.prices
+            if row['instrument'] == position.instrument
+            and row['valuation_date'] == day
+            and row['currency'] == listing
+        ]
+        if len(matches) == 1:
+            price = matches[0]
+            flags = price_freshness(
+                price['valuation_date'],
+                price['evidence_date'],
+                day,
+            )
+            return ValueLine(
+                'quantity',
+                position.account,
+                position.instrument,
+                listing,
+                _multiply(position.quantity, Decimal(price['amount'])),
+                True,
+                ' '.join(flags),
+                '',
+            )
+        if len(matches) > 1:
+            return ValueLine(
+                'quantity',
+                position.account,
+                position.instrument,
+                listing,
+                None,
+                False,
+                '',
+                AMBIGUOUS_PRICE,
+            )
+        return ValueLine(
+            'quantity',
+            position.account,
+            position.instrument,
+            listing,
+            None,
+            False,
+            '',
+            'unknown',
+        )
+
+    def _snapshot_lines(self, day):
+        groups = []
+        rows_for = {}
+        for row in self.manual_balances:
+            if row['holding'] == 'cash':
+                key = ('cash', row['account'], 'cash', row['currency'])
+            else:
+                key = ('instrument', row['account'], row['instrument'], '')
+            if key not in rows_for:
+                rows_for[key] = []
+                groups.append(key)
+            rows_for[key].append(row)
+        lines = []
+        for key in groups:
+            kind, account, identity, currency = key
+            matched = [
+                row for row in rows_for[key]
+                if row['as_of'] == day
+            ]
+            if len(matched) == 1:
+                row = matched[0]
+                lines.append(ValueLine(
+                    'snapshot',
+                    account,
+                    identity,
+                    row['currency'],
+                    Decimal(row['amount']),
+                    True,
+                    '',
+                    'snapshot',
+                ))
+            elif len(matched) == 0:
+                lines.append(ValueLine(
+                    'snapshot',
+                    account,
+                    identity,
+                    currency,
+                    None,
+                    False,
+                    '',
+                    NO_SNAPSHOT,
+                ))
+            else:
+                lines.append(ValueLine(
+                    'snapshot',
+                    account,
+                    identity,
+                    currency,
+                    None,
+                    False,
+                    '',
+                    'The snapshot is ambiguous.',
+                ))
+        return lines
+
     def _refused(self):
         if self.load_error:
             return _fail(self.load_error)
@@ -773,6 +1202,8 @@ class EnteredPortfolio:
     def _commit(self, document):
         if self.load_error:
             raise RuntimeError('refusing to overwrite an unreadable book')
+        if not document.get('prices'):
+            document.pop('prices', None)
         _validate_document(document)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         text = json.dumps(document, indent=2, ensure_ascii=False) + '\n'

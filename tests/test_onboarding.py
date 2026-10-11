@@ -2,14 +2,18 @@ import json
 import re
 import tempfile
 import unittest
-from decimal import Decimal
+from decimal import Context, Decimal, localcontext
 from pathlib import Path
 
 from src.huginn_muninn.ledger import CashBalance, Deposit, Position, Withdrawal
 from src.huginn_muninn.onboarding import (
+    CASH_SNAPSHOT_NOT_ADDED,
+    NO_SNAPSHOT,
+    PRICE_CURRENCY_MISMATCH,
     EnteredPortfolio,
     default_book_path,
     isin_is_valid,
+    price_freshness,
 )
 from src.huginn_muninn.prototype import dispatch, open_state
 
@@ -522,3 +526,655 @@ class OnboardingTest(unittest.TestCase):
         self.assertIn('15050', ledger.body)
         self.assertIn('These figures are synthetic', ledger.body)
         self.assertIn('synthetic', ledger.body.lower())
+
+
+VALUATION_SENTENCE = 'This valuation is not a recommendation.'
+MISSING_PRICE_SENTENCE = 'A missing price stays unknown.'
+SNAPSHOT_VALUE_SENTENCE = (
+    'A manual balance is a snapshot on its date. It is not a price and '
+    'it is not a full performance record.'
+)
+
+
+def _value_row(html, kind, identity):
+    section = html.split('<h2>Historical value</h2>', 1)[0]
+    for part in section.split('<tr')[1:]:
+        row = part.split('</tr>', 1)[0]
+        if f'data-kind="{kind}"' not in row:
+            continue
+        if 'data-known="' not in row:
+            continue
+        if f'data-identity="{identity}"' not in row:
+            continue
+        return row
+    return ''
+
+
+class EnteredValuationTest(unittest.TestCase):
+    def setUp(self):
+        self._before_fixture = FIXTURE.read_bytes()
+        self._tmp = tempfile.TemporaryDirectory()
+        root = Path(self._tmp.name)
+        self.overlay = root / 'synthetic-book.json'
+        self.entered_path = root / 'book.json'
+        self.state = open_state(ROOT, self.overlay, self.entered_path)
+        self.book = self.state.entered
+        self._price_postings = list(self.state.price_postings)
+        self._rate_postings = list(self.state.rate_postings)
+
+    def tearDown(self):
+        self.assertEqual(FIXTURE.read_bytes(), self._before_fixture)
+        self._tmp.cleanup()
+
+    def _account(self):
+        return self.book.add_account('Bank', 'Main').identity
+
+    def _fund(self, currency='NOK'):
+        saved = self.book.add_instrument('Local fund', 'fund', currency)
+        self.assertTrue(saved.accepted)
+        return saved.identity
+
+    def _contribute(self, account, day, amount, currency='NOK'):
+        saved = self.book.add_activity(
+            'contribution',
+            account,
+            day,
+            'transfer',
+            currency=currency,
+            amount=amount,
+        )
+        self.assertTrue(saved.accepted)
+
+    def _buy(self, account, instrument, day, quantity, cash):
+        saved = self.book.add_activity(
+            'purchase',
+            account,
+            day,
+            'ticket',
+            instrument=instrument,
+            quantity=quantity,
+            cash_currency='NOK',
+            cash_amount=cash,
+            fee='0',
+        )
+        self.assertTrue(saved.accepted)
+
+    def _price(self, instrument, amount, currency, valuation, evidence='same'):
+        if evidence == 'same':
+            evidence = valuation
+        saved = self.book.record_price(
+            instrument,
+            amount,
+            currency,
+            valuation,
+            evidence,
+            'statement',
+        )
+        self.assertTrue(saved.accepted, saved.message)
+        return saved
+
+    def test_price_requires_every_field_and_matching_currency(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '100')
+        instrument = self._fund('NOK')
+        self._buy(account, instrument, '2026-01-02', '2', '40')
+        before = self.book.books()
+        blank = self.book.record_price('', '', '', '', '', '')
+        self.assertFalse(blank.accepted)
+        self.assertIn('Choose an instrument that you have entered.', blank.message)
+        self.assertIn('Enter the amount.', blank.message)
+        self.assertIn('Enter the currency.', blank.message)
+        self.assertIn('Enter the valuation date.', blank.message)
+        self.assertIn('Enter the evidence date.', blank.message)
+        self.assertIn('Say where this came from.', blank.message)
+        self.assertEqual(self.book.prices, ())
+        mismatch = self.book.record_price(
+            instrument,
+            '4',
+            'EUR',
+            '2026-01-02',
+            '2026-01-02',
+            'statement',
+        )
+        self.assertFalse(mismatch.accepted)
+        self.assertEqual(mismatch.message, PRICE_CURRENCY_MISMATCH)
+        self.assertIn('currency_mismatch', mismatch.reasons)
+        self.assertNotIn('currency_mismatch', mismatch.message)
+        self.assertEqual(self.book.prices, ())
+        case = self.book.record_price(
+            instrument,
+            '4',
+            'nok',
+            '2026-01-02',
+            '2026-01-02',
+            'statement',
+        )
+        self.assertFalse(case.accepted)
+        self.assertEqual(case.message, PRICE_CURRENCY_MISMATCH)
+        negative = self.book.record_price(
+            instrument,
+            '-1',
+            'NOK',
+            '2026-01-02',
+            '2026-01-02',
+            'statement',
+        )
+        self.assertFalse(negative.accepted)
+        self.assertIn('The amount cannot be negative.', negative.message)
+        self.assertEqual(before.positions, self.book.books().positions)
+        self.assertEqual(before.cash, self.book.books().cash)
+        self.assertEqual(self.book.manual_balances, ())
+        self.assertEqual(len(self.book.activities), 2)
+
+    def test_zero_price_is_known_and_a_missing_price_is_not_zero(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '100')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-01-02', '2', '40')
+        missing = self.book.value_on('2026-01-02')
+        row = [
+            line for line in missing.lines
+            if line.kind == 'quantity'
+        ][0]
+        self.assertFalse(row.known)
+        self.assertIsNone(row.amount)
+        self.assertNotEqual(row.amount, Decimal(0))
+        posted = dispatch(
+            self.state,
+            'POST',
+            '/portfolio/valuation',
+            {
+                'action': 'price',
+                'instrument': instrument,
+                'amount': '0',
+                'currency': 'NOK',
+                'valuation_date': '2026-01-02',
+                'evidence_date': '2026-01-02',
+                'provenance': 'statement',
+                'date': '2026-01-02',
+            },
+        )
+        self.assertEqual(posted.status, 200)
+        self.assertEqual(self.book.prices[0]['amount'], '0')
+        self.assertEqual(self.book.prices[0]['origin'], 'entered')
+        valued = self.book.value_on('2026-01-02')
+        quantity = [
+            line for line in valued.lines
+            if line.kind == 'quantity'
+        ][0]
+        self.assertTrue(quantity.known)
+        self.assertEqual(quantity.amount, Decimal(0))
+        self.assertIsInstance(quantity.amount, Decimal)
+        self.assertEqual(quantity.freshness, 'fresh')
+        page_row = _value_row(posted.body, 'quantity', instrument)
+        self.assertIn('data-amount="0"', page_row)
+        self.assertIn('data-known="true"', page_row)
+        reloaded = EnteredPortfolio(self.entered_path)
+        self.assertEqual(reloaded.prices[0]['currency'], 'NOK')
+        self.assertEqual(self.book.books().positions[0].quantity, Decimal('2'))
+        self.assertEqual(self.book.ledger()._prices, [])
+        self.assertEqual(self.book.ledger()._rates, [])
+
+    def test_two_prices_on_one_date_are_ambiguous_and_another_date_is_unused(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '100')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-01-02', '2', '40')
+        self._price(instrument, '3', 'NOK', '2026-01-02')
+        self._price(instrument, '5', 'NOK', '2026-01-02')
+        self._price(instrument, '9', 'NOK', '2026-01-08')
+        self.assertEqual(len(self.book.prices), 3)
+        report = self.book.value_on('2026-01-02')
+        quantity = [
+            line for line in report.lines
+            if line.kind == 'quantity'
+        ][0]
+        self.assertFalse(quantity.known)
+        self.assertIsNone(quantity.amount)
+        self.assertEqual(quantity.detail, 'The price is ambiguous.')
+        self.assertNotEqual(quantity.amount, Decimal('6'))
+        self.assertNotEqual(quantity.amount, Decimal('10'))
+        later = self.book.value_on('2026-01-05')
+        later_quantity = [
+            line for line in later.lines
+            if line.kind == 'quantity'
+        ][0]
+        self.assertFalse(later_quantity.known)
+        self.assertIsNone(later_quantity.amount)
+        self.assertEqual(
+            price_freshness('2026-01-01', '2026-01-01', '2026-01-08'),
+            ('fresh',),
+        )
+        self.assertEqual(
+            price_freshness('2026-01-01', '2026-01-01', '2026-01-09'),
+            ('stale',),
+        )
+
+    def test_a_stale_price_stays_the_price_for_its_date(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '100')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-01-02', '2', '40')
+        self._price(instrument, '4', 'NOK', '2026-01-02')
+        on_date = self.book.value_on('2026-01-02')
+        quantity = [line for line in on_date.lines if line.kind == 'quantity'][0]
+        self.assertEqual(quantity.amount, Decimal('8'))
+        self.assertEqual(quantity.freshness, 'fresh')
+        later = self.book.value_on('2026-01-12')
+        missed = [line for line in later.lines if line.kind == 'quantity'][0]
+        self.assertIsNone(missed.amount)
+        self.assertEqual(len(self.book.prices), 1)
+        page = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-01-12',
+            None,
+        )
+        self.assertIn('data-freshness="stale"', page.body)
+        self._price(instrument, '9', 'NOK', '2026-01-12')
+        self.assertEqual(len(self.book.prices), 2)
+        still = self.book.value_on('2026-01-02')
+        kept = [line for line in still.lines if line.kind == 'quantity'][0]
+        self.assertEqual(kept.amount, Decimal('8'))
+        self.assertEqual(kept.freshness, 'fresh')
+        moved = self.book.value_on('2026-01-12')
+        used = [line for line in moved.lines if line.kind == 'quantity'][0]
+        self.assertEqual(used.amount, Decimal('18'))
+        self.assertEqual(used.freshness, 'fresh')
+
+    def test_labels_and_historical_value_do_not_invent_a_price(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '100')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-01-03', '2', '40')
+        self._price(instrument, '4', 'NOK', '2026-01-02', '2026-01-05')
+        self._price(instrument, '7', 'NOK', '2026-01-20', '2026-01-01')
+        used = self.book.value_on('2026-01-02')
+        quantity = [line for line in used.lines if line.kind == 'quantity']
+        self.assertEqual(quantity, [])
+        later = self.book.value_on('2026-01-12')
+        holding = [line for line in later.lines if line.kind == 'quantity'][0]
+        self.assertFalse(holding.known)
+        self.assertIsNone(holding.amount)
+        self.assertNotEqual(holding.amount, Decimal('8'))
+        page = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-01-12',
+            None,
+        )
+        self.assertEqual(page.status, 200)
+        price_rows = [
+            part.split('</tr>', 1)[0]
+            for part in page.body.split('<tr')[1:]
+            if 'data-valuation-date=' in part
+        ]
+        freshness = {
+            row.split('data-valuation-date="', 1)[1].split('"', 1)[0]: row
+            for row in price_rows
+        }
+        self.assertIn('data-freshness="stale"', freshness['2026-01-02'])
+        self.assertIn(
+            'data-freshness="future_valuation"',
+            freshness['2026-01-20'],
+        )
+        self.assertEqual(len(self.book.prices), 2)
+        on_its_date = self.book.value_on('2026-01-02')
+        self.assertEqual(on_its_date.lines[-1].kind, 'cash')
+        evidence = self.book.value_on('2026-01-03')
+        self.assertTrue(
+            any(line.kind == 'quantity' and not line.known for line in evidence.lines)
+        )
+        carried = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-01-03',
+            None,
+        )
+        value_row = _value_row(carried.body, 'quantity', instrument)
+        self.assertIn('data-known="false"', value_row)
+        self.assertNotIn('data-amount', value_row)
+        self.assertNotIn('>8<', value_row)
+        future = dispatch(
+            self.state,
+            'POST',
+            '/portfolio/valuation?date=2026-01-03',
+            {
+                'action': 'price',
+                'instrument': instrument,
+                'amount': '4',
+                'currency': 'NOK',
+                'valuation_date': '2026-01-03',
+                'evidence_date': '2026-01-09',
+                'provenance': 'later note',
+                'date': '2026-01-03',
+            },
+        )
+        self.assertEqual(future.status, 200)
+        valued = self.book.value_on('2026-01-03')
+        quantity = [line for line in valued.lines if line.kind == 'quantity'][0]
+        self.assertTrue(quantity.known)
+        self.assertEqual(quantity.amount, Decimal('8'))
+        self.assertEqual(quantity.freshness, 'future_evidence')
+        self.assertNotIn('fresh', quantity.freshness)
+        row = _value_row(future.body, 'quantity', instrument)
+        self.assertIn('data-freshness="future_evidence"', row)
+        self.assertIn('data-amount="8"', row)
+        history = self.book.value_on('2026-01-05')
+        self.assertEqual(
+            [point.on_date for point in history.history],
+            ['2026-01-01', '2026-01-03', '2026-01-05'],
+        )
+        by_date = {point.on_date: point for point in history.history}
+        self.assertEqual(by_date['2026-01-01'].known_nok_subtotal, Decimal('100'))
+        self.assertEqual(by_date['2026-01-01'].unknown_count, 0)
+        self.assertEqual(by_date['2026-01-03'].known_nok_subtotal, Decimal('68'))
+        self.assertEqual(by_date['2026-01-03'].unknown_count, 0)
+        self.assertEqual(by_date['2026-01-05'].known_nok_subtotal, Decimal('60'))
+        self.assertEqual(by_date['2026-01-05'].unknown_count, 1)
+        self.assertNotEqual(by_date['2026-01-05'].known_nok_subtotal, Decimal('68'))
+
+    def test_same_day_cash_snapshot_is_not_added_to_ledger_cash(self):
+        account = self._account()
+        self._contribute(account, '2026-01-02', '100')
+        ledger_only = self.book.value_on('2026-01-02')
+        self.assertEqual(
+            [line.kind for line in ledger_only.lines],
+            ['cash'],
+        )
+        self.assertTrue(ledger_only.lines[0].known)
+        self.assertEqual(ledger_only.lines[0].amount, Decimal('100'))
+        self.assertEqual(ledger_only.known_nok_subtotal, Decimal('100'))
+        self.assertTrue(ledger_only.allocation_complete)
+        self.assertEqual(ledger_only.note, '')
+
+        saved = self.book.add_manual_balance(
+            account,
+            'cash',
+            '100',
+            'NOK',
+            '2026-01-02',
+            'statement',
+        )
+        self.assertTrue(saved.accepted)
+        report = self.book.value_on('2026-01-02')
+        self.assertEqual(
+            [line.kind for line in report.lines],
+            ['cash', 'snapshot'],
+        )
+        cash = report.lines[0]
+        snapshot = report.lines[1]
+        self.assertTrue(cash.known)
+        self.assertEqual(cash.amount, Decimal('100'))
+        self.assertEqual(cash.currency, 'NOK')
+        self.assertTrue(snapshot.known)
+        self.assertEqual(snapshot.amount, Decimal('100'))
+        self.assertEqual(snapshot.currency, 'NOK')
+        self.assertEqual(snapshot.detail, 'snapshot')
+        self.assertNotEqual(report.known_nok_subtotal, Decimal('200'))
+        self.assertEqual(report.known_nok_subtotal, Decimal('100'))
+        self.assertFalse(report.allocation_complete)
+        self.assertEqual(report.shares, ())
+        self.assertEqual(report.note, CASH_SNAPSHOT_NOT_ADDED)
+        self.assertEqual(report.error, '')
+        page = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-01-02',
+            None,
+        )
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.body.count(CASH_SNAPSHOT_NOT_ADDED), 1)
+        self.assertIn('Allocation is incomplete.', page.body)
+        self.assertIn('data-amount="100"', _value_row(page.body, 'cash', 'NOK'))
+        self.assertIn(
+            'data-amount="100"',
+            _value_row(page.body, 'snapshot', 'cash'),
+        )
+        self.assertNotIn('data-nok-subtotal="200"', page.body)
+        self.assertNotIn('data-share', page.body)
+
+        solo = EnteredPortfolio(Path(self._tmp.name) / 'solo.json')
+        solo_account = solo.add_account('Bank', 'Solo').identity
+        withdrawn = solo.add_activity(
+            'contribution',
+            solo_account,
+            '2026-03-01',
+            'transfer',
+            currency='NOK',
+            amount='100',
+        )
+        self.assertTrue(withdrawn.accepted)
+        cleared = solo.add_activity(
+            'withdrawal',
+            solo_account,
+            '2026-03-02',
+            'transfer',
+            currency='NOK',
+            amount='100',
+        )
+        self.assertTrue(cleared.accepted)
+        self.assertEqual(solo.books().cash, ())
+        only_snapshot = solo.add_manual_balance(
+            solo_account,
+            'cash',
+            '100',
+            'NOK',
+            '2026-03-02',
+            'statement',
+        )
+        self.assertTrue(only_snapshot.accepted)
+        zero_cash = solo.value_on('2026-03-02')
+        self.assertEqual(
+            [line.kind for line in zero_cash.lines],
+            ['snapshot'],
+        )
+        self.assertTrue(zero_cash.lines[0].known)
+        self.assertEqual(zero_cash.lines[0].amount, Decimal('100'))
+        self.assertEqual(zero_cash.known_nok_subtotal, Decimal('100'))
+        self.assertTrue(zero_cash.allocation_complete)
+        self.assertEqual(zero_cash.note, '')
+
+    def test_manual_balance_is_a_snapshot_and_not_a_price(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '100')
+        instrument = self._fund('USD')
+        saved = self.book.add_manual_balance(
+            account,
+            instrument,
+            '10',
+            'USD',
+            '2026-01-02',
+            'statement',
+        )
+        self.assertTrue(saved.accepted)
+        self._price(instrument, '99', 'USD', '2026-01-02')
+        on_date = self.book.value_on('2026-01-02')
+        self.assertEqual(
+            [line.kind for line in on_date.lines],
+            ['cash', 'snapshot'],
+        )
+        snapshot = on_date.lines[1]
+        self.assertTrue(snapshot.known)
+        self.assertEqual(snapshot.amount, Decimal('10'))
+        self.assertEqual(snapshot.currency, 'USD')
+        self.assertEqual(snapshot.detail, 'snapshot')
+        self.assertNotEqual(snapshot.amount, Decimal('99'))
+        self.assertEqual(on_date.known_nok_subtotal, Decimal('100'))
+        self.assertEqual(self.book.books().positions, ())
+        other = self.book.value_on('2026-01-04')
+        missed = [line for line in other.lines if line.kind == 'snapshot'][0]
+        self.assertFalse(missed.known)
+        self.assertIsNone(missed.amount)
+        self.assertEqual(missed.detail, NO_SNAPSHOT)
+        self.assertNotEqual(missed.amount, Decimal(0))
+        self.assertNotEqual(missed.amount, Decimal('10'))
+        page = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-01-04',
+            None,
+        )
+        row = _value_row(page.body, 'snapshot', instrument)
+        self.assertIn(NO_SNAPSHOT, row)
+        self.assertIn('unknown', row)
+        self.assertNotIn('data-amount', row)
+        self.assertNotIn('>10<', row)
+        self.assertNotIn('>99<', row)
+
+    def test_allocation_shares_only_when_every_line_is_known_nok(self):
+        account = self._account()
+        self._contribute(account, '2026-01-01', '200')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-01-02', '2', '100')
+        self._price(instrument, '50', 'NOK', '2026-01-02')
+        report = self.book.value_on('2026-01-02')
+        self.assertTrue(report.allocation_complete)
+        self.assertEqual(report.known_nok_subtotal, Decimal('200'))
+        self.assertEqual(report.shares, (Decimal('0.5'), Decimal('0.5')))
+        self.assertEqual(sum(report.shares, Decimal(0)), Decimal(1))
+        page = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-01-02',
+            None,
+        )
+        self.assertNotIn('Allocation is incomplete.', page.body)
+        self.assertIn('data-share="0.5"', page.body)
+        self.assertIn('known NOK subtotal', page.body)
+        usd = self._account_usd_line()
+        mixed = usd.value_on('2026-02-01')
+        self.assertFalse(mixed.allocation_complete)
+        self.assertEqual(mixed.known_nok_subtotal, Decimal('100'))
+        self.assertEqual(mixed.shares, ())
+        carried = [line for line in mixed.lines if line.kind == 'quantity'][0]
+        self.assertIsNone(carried.amount)
+        dollar = [
+            line for line in mixed.lines
+            if line.kind == 'cash' and line.currency == 'USD'
+        ][0]
+        self.assertEqual(dollar.amount, Decimal('40'))
+        foreign = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-02-01',
+            None,
+        )
+        self.assertIn('Allocation is incomplete.', foreign.body)
+        self.assertNotIn('data-share', foreign.body)
+        self.assertIn('known NOK subtotal', foreign.body)
+        self.assertIn('>40<', _value_row(foreign.body, 'cash', 'USD'))
+        self.assertNotIn('10.25', foreign.body)
+        self.assertNotIn('410', foreign.body)
+
+    def test_known_nok_subtotal_of_zero_says_allocation_is_incomplete(self):
+        account = self._account()
+        self._contribute(account, '2026-04-01', '100')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-04-02', '1', '100')
+        self._price(instrument, '0', 'NOK', '2026-04-02')
+        report = self.book.value_on('2026-04-02')
+        self.assertEqual(report.error, '')
+        self.assertTrue(report.lines)
+        self.assertTrue(all(
+            line.known and line.currency == 'NOK' for line in report.lines
+        ))
+        self.assertEqual(report.known_nok_subtotal, Decimal(0))
+        self.assertEqual(report.shares, ())
+        self.assertEqual(report.note, '')
+        page = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-04-02',
+            None,
+        )
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.body.count('Allocation is incomplete.'), 1)
+        self.assertNotIn('data-share', page.body)
+        self.assertNotIn('<h2>Allocation</h2>', page.body)
+        self.assertIn(
+            'data-nok-subtotal="0">known NOK subtotal '
+            '<span class="figure">0</span>',
+            page.body,
+        )
+        self.assertEqual(self.book.ledger()._prices, [])
+        self.assertEqual(self.book.ledger()._rates, [])
+        empty = dispatch(self.state, 'GET', '/portfolio/valuation', None)
+        self.assertEqual(empty.status, 200)
+        self.assertIn('Enter the date.', empty.body)
+        self.assertEqual(empty.body.count('Allocation is incomplete.'), 1)
+        self.assertNotIn('data-share', empty.body)
+        self.assertNotIn('<h2>Allocation</h2>', empty.body)
+
+    def _account_usd_line(self):
+        account = self.book.add_account('Bank', 'Dollar').identity
+        self._contribute(account, '2026-02-01', '40', 'USD')
+        return self.book
+
+    def test_decimal_product_ignores_a_lowered_context(self):
+        account = self._account()
+        self._contribute(account, '2026-03-01', '10')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-03-02', '1.25', '1')
+        self._price(instrument, '1.25', 'NOK', '2026-03-02')
+        with localcontext(Context(prec=2)):
+            report = self.book.value_on('2026-03-02')
+        quantity = [line for line in report.lines if line.kind == 'quantity'][0]
+        self.assertEqual(quantity.amount, Decimal('1.5625'))
+        self.assertIsInstance(quantity.amount, Decimal)
+
+    def test_page_is_reached_from_the_entered_portfolio_without_a_new_process(self):
+        import socket
+        import urllib.request
+
+        account = self._account()
+        self._contribute(account, '2026-01-01', '15')
+        portfolio = dispatch(self.state, 'GET', '/portfolio', None)
+        self.assertIn('href="/portfolio/valuation?date=2026-01-01"', portfolio.body)
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            page = dispatch(
+                self.state,
+                'GET',
+                '/portfolio/valuation?date=2026-01-01',
+                None,
+            )
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.body.count(VALUATION_SENTENCE), 1)
+        self.assertEqual(page.body.count(MISSING_PRICE_SENTENCE), 1)
+        self.assertEqual(page.body.count(SNAPSHOT_VALUE_SENTENCE), 1)
+        self.assertIn('known NOK subtotal', page.body)
+        self.assertIn('data-history="2026-01-01"', page.body)
+        self.assertNotIn('These figures are synthetic', page.body)
+        self.assertNotIn('10.25', page.body)
+        ledger = dispatch(self.state, 'GET', '/ledger', None)
+        self.assertIn('15050', ledger.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+        self.assertEqual(list(self.state.price_postings), self._price_postings)
+        self.assertEqual(list(self.state.rate_postings), self._rate_postings)
+        source = (
+            ROOT / 'src' / 'huginn_muninn' / 'onboarding.py'
+        ).read_text(encoding='utf-8')
+        self.assertNotIn('add_price', source)
+        self.assertNotIn('add_rate', source)
+        self.assertNotIn('evidence_observations', source)
+        empty = dispatch(self.state, 'GET', '/portfolio/valuation', None)
+        self.assertEqual(empty.status, 200)
+        self.assertIn('Enter the date.', empty.body)
+        self.assertEqual(empty.body.count(VALUATION_SENTENCE), 1)

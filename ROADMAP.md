@@ -10,6 +10,8 @@ A person enters their own accounts, instruments, contributions, withdrawals, pur
 
 Value a holding from a supplied price times quantity, or from a dated manual balance. A missing price stays unknown. A manual snapshot does not claim full attribution.
 
+ONBOARD-02 records a price on an entered instrument and values that book on a selected date. Cash stays at face in its own currency. One matching price on that date sets a quantity's value. Two prices on that date are ambiguous. A missing price stays unknown. A manual balance is a snapshot on its as-of date and is not priced. Allocation shares are shown only when every line on that date is known, every line is in NOK, and the known NOK subtotal is not zero. Otherwise, including a known NOK subtotal of zero and an empty date, the page says "Allocation is incomplete." and shows no shares. Independent review on 2026-10-11 approved ONBOARD-02. Reviewer `7f37206a-eb44-4416-b904-0ac8267e14b3`.
+
 ## 3. Market intelligence
 
 Practical adapters for filings, macro releases, permitted prices, and verified news. No unlicensed scrape.

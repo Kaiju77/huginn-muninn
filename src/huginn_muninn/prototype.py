@@ -37,13 +37,19 @@ from src.huginn_muninn.ledger import (
 )
 from src.huginn_muninn.onboarding import (
     ACTIVITY_WORDS,
+    ALLOCATION_INCOMPLETE,
+    CASH_SNAPSHOT_NOT_ADDED,
     ENTERED_SENTENCE,
     INCOMPLETE_IDENTIFICATION,
     KINDS,
+    MISSING_PRICE_SENTENCE,
     SNAPSHOT_SENTENCE,
+    SNAPSHOT_VALUE_SENTENCE,
+    VALUATION_SENTENCE,
     EnteredPortfolio,
     default_book_path,
     display_activity,
+    price_freshness,
 )
 
 
@@ -1227,6 +1233,7 @@ def _portfolio(state, result=None, status=200):
     parts = [
         f'<p>{escape(ENTERED_SENTENCE)}</p>',
         '<p>Reporting currency is NOK. Foreign currency stays in its own currency.</p>',
+        f'<p><a href="{_entered_valuation_href(book)}">Value this portfolio</a></p>',
     ]
     if book.load_error:
         parts.append(f'<p class="break">{escape(book.load_error)}</p>')
@@ -1482,6 +1489,262 @@ def _post_portfolio(state, form):
     return _portfolio(state, result, status)
 
 
+def _entered_valuation_href(book):
+    day = book.latest_activity_date()
+    if not day:
+        return '/portfolio/valuation'
+    return '/portfolio/valuation?date=' + escape(day)
+
+
+def _entered_line_amount(line):
+    if not line.known or line.amount is None:
+        return 'unknown'
+    return _figure(line.amount)
+
+
+def _allocation_incomplete_paragraph():
+    return f'<p>{escape(ALLOCATION_INCOMPLETE)}</p>'
+
+
+def _entered_shares_shown(report):
+    """Shares need known NOK lines and a non-zero known NOK subtotal."""
+    return bool(
+        report.allocation_complete
+        and report.known_nok_subtotal != 0
+        and report.shares
+    )
+
+
+def _entered_valuation(state, source, result=None, status=200):
+    book = state.entered
+    day = _field(source, 'date')
+    parts = [
+        f'<p>{escape(VALUATION_SENTENCE)}</p>',
+        f'<p>{escape(MISSING_PRICE_SENTENCE)}</p>',
+        f'<p>{escape(SNAPSHOT_VALUE_SENTENCE)}</p>',
+        '<p><a href="/portfolio">Entered portfolio</a></p>',
+        _result_banner(result),
+    ]
+    if book.load_error:
+        parts.append(f'<p class="break">{escape(book.load_error)}</p>')
+        parts.append(_allocation_incomplete_paragraph())
+        parts.append(_date_form('/portfolio/valuation', day))
+        return _page(state, 'Entered valuation', ''.join(parts), status, footer='')
+    report = None
+    if day == '':
+        parts.append('<p>Enter the date.</p>')
+        parts.append(_allocation_incomplete_paragraph())
+    else:
+        report = book.value_on(day)
+        if report.error:
+            status = 400
+            parts.append(f'<p class="break">{escape(report.error)}</p>')
+            parts.append(_allocation_incomplete_paragraph())
+        else:
+            parts.append(f'<p>Valuation on {escape(report.on_date)}.</p>')
+            parts.append(_entered_value_table(book, report))
+            parts.append(
+                '<p data-nok-subtotal="'
+                + _figure(report.known_nok_subtotal)
+                + '">known NOK subtotal <span class="figure">'
+                + _figure(report.known_nok_subtotal)
+                + '</span></p>'
+            )
+            if report.note == CASH_SNAPSHOT_NOT_ADDED:
+                parts.append(f'<p>{escape(CASH_SNAPSHOT_NOT_ADDED)}</p>')
+            if _entered_shares_shown(report):
+                parts.append(_entered_shares(book, report))
+            else:
+                parts.append(_allocation_incomplete_paragraph())
+            parts.append('<h2>Historical value</h2>')
+            parts.append(_entered_history(report))
+    parts.append(_date_form('/portfolio/valuation', day if report is None or report.error else report.on_date))
+    if not book.load_error:
+        parts.append('<h2>Entered prices</h2>')
+        parts.append(_entered_price_table(book, day if report is None or report.error else report.on_date))
+        parts.append(_entered_price_form(book, day if report is None or report.error else report.on_date))
+    return _page(state, 'Entered valuation', ''.join(parts), status, footer='')
+
+
+def _entered_value_table(book, report):
+    if not report.lines:
+        return '<p>Nothing is recorded for this date.</p>'
+    rows = []
+    for line in report.lines:
+        amount = _entered_line_amount(line)
+        amount_attribute = ''
+        if line.known and line.amount is not None:
+            amount_attribute = f' data-amount="{_figure(line.amount)}"'
+        freshness = ''
+        freshness_attribute = ''
+        if line.freshness:
+            freshness = line.freshness
+            freshness_attribute = f' data-freshness="{escape(line.freshness)}"'
+        label = line.detail
+        rows.append(
+            '<tr'
+            f' data-kind="{escape(line.kind)}"'
+            f' data-known="{"true" if line.known else "false"}"'
+            f' data-identity="{escape(line.identity)}"'
+            f' data-currency="{escape(line.currency)}"'
+            f'{amount_attribute}'
+            f'{freshness_attribute}'
+            '>'
+            f'<td>{escape(book.account_label(line.account))}</td>'
+            f'<td>{escape(_entered_holding_label(book, line))}</td>'
+            f'<td>{escape(line.kind)}</td>'
+            f'<td>{escape(line.currency)}</td>'
+            f'<td class="figure">{amount}</td>'
+            f'<td>{escape(freshness)}</td>'
+            f'<td>{escape(label)}</td>'
+            '</tr>'
+        )
+    return (
+        '<table><thead><tr><th>Account</th><th>Holding</th><th>Kind</th>'
+        '<th>Currency</th><th class="figure">Value</th><th>Freshness</th>'
+        '<th>Note</th></tr></thead><tbody>'
+        + ''.join(rows)
+        + '</tbody></table>'
+    )
+
+
+def _entered_holding_label(book, line):
+    if line.kind == 'cash' or line.identity == 'cash':
+        return 'cash'
+    return book.instrument_label(line.identity)
+
+
+def _entered_shares(book, report):
+    rows = []
+    for line, share in zip(report.lines, report.shares):
+        shown = _figure(share)
+        rows.append(
+            '<tr'
+            f' data-kind="{escape(line.kind)}"'
+            f' data-identity="{escape(line.identity)}"'
+            f' data-share="{shown}"'
+            '>'
+            f'<td>{escape(_entered_holding_label(book, line))}</td>'
+            f'<td>{escape(line.currency)}</td>'
+            f'<td class="figure">{shown}</td>'
+            '</tr>'
+        )
+    return (
+        '<h2>Allocation</h2>'
+        '<table><thead><tr><th>Holding</th><th>Currency</th>'
+        '<th class="figure">Share</th></tr></thead><tbody>'
+        + ''.join(rows)
+        + '</tbody></table>'
+    )
+
+
+def _entered_history(report):
+    rows = []
+    for point in report.history:
+        shown = _figure(point.known_nok_subtotal)
+        rows.append(
+            '<p'
+            f' data-history="{escape(point.on_date)}"'
+            f' data-nok-subtotal="{shown}"'
+            f' data-unknown="{point.unknown_count}"'
+            '>'
+            f'{escape(point.on_date)} known NOK subtotal {shown}. '
+            f'Unknown lines {point.unknown_count}.'
+            '</p>'
+        )
+    return ''.join(rows)
+
+
+def _entered_price_table(book, selected):
+    if not book.prices:
+        return '<p>No prices yet.</p>'
+    rows = []
+    for price in book.prices:
+        freshness = ''
+        if selected:
+            try:
+                freshness = ' '.join(price_freshness(
+                    price['valuation_date'],
+                    price['evidence_date'],
+                    selected,
+                ))
+            except ValueError:
+                freshness = ''
+        rows.append(
+            '<tr'
+            f' data-valuation-date="{escape(price["valuation_date"])}"'
+            f' data-instrument="{escape(price["instrument"])}"'
+            + (f' data-freshness="{escape(freshness)}"' if freshness else '')
+            + '>'
+            f'<td>{escape(book.instrument_label(price["instrument"]))}</td>'
+            f'<td class="figure">{escape(price["amount"])}</td>'
+            f'<td>{escape(price["currency"])}</td>'
+            f'<td>{escape(price["valuation_date"])}</td>'
+            f'<td>{escape(price["evidence_date"])}</td>'
+            f'<td>{escape(price["provenance"])}</td>'
+            f'<td>{escape(freshness)}</td>'
+            '</tr>'
+        )
+    return (
+        '<table><thead><tr><th>Instrument</th><th class="figure">Amount</th>'
+        '<th>Currency</th><th>Valuation date</th><th>Evidence date</th>'
+        '<th>Where this came from</th><th>Freshness</th></tr></thead><tbody>'
+        + ''.join(rows)
+        + '</tbody></table>'
+    )
+
+
+def _entered_price_form(book, selected):
+    hidden_date = ''
+    if selected:
+        hidden_date = (
+            '<input type="hidden" name="date" value="'
+            + escape(selected)
+            + '">'
+        )
+    return (
+        '<h2>Record a price</h2>'
+        '<form method="post" action="/portfolio/valuation" '
+        'enctype="application/x-www-form-urlencoded">'
+        '<input type="hidden" name="action" value="price">'
+        + hidden_date
+        + _portfolio_select(
+            'price',
+            'instrument',
+            'Instrument',
+            _instrument_choices(book),
+        )
+        + _portfolio_input('price', 'amount', 'Amount')
+        + _portfolio_input('price', 'currency', 'Currency')
+        + _portfolio_input('price', 'valuation_date', 'Valuation date')
+        + _portfolio_input('price', 'evidence_date', 'Evidence date')
+        + _portfolio_input('price', 'provenance', 'Where this came from')
+        + '<button type="submit">Save price</button></form>'
+    )
+
+
+def _post_entered_valuation(state, form):
+    book = state.entered
+    action = _field(form, 'action')
+    if action != 'price':
+        result = book.record_price('', '', '', '', '', '')
+        return _entered_valuation(state, form, result, 400)
+    result = book.record_price(
+        _field(form, 'instrument'),
+        _field(form, 'amount'),
+        _field(form, 'currency'),
+        _field(form, 'valuation_date'),
+        _field(form, 'evidence_date'),
+        _field(form, 'provenance'),
+    )
+    status = 200 if result.accepted else 400
+    source = dict(form)
+    if result.accepted and _field(form, 'date') == '':
+        source = dict(form)
+        source['date'] = _field(form, 'valuation_date')
+    return _entered_valuation(state, source, result, status)
+
+
 def dispatch(state, method, path, form):
     verb = str(method or '').upper()
     parsed = urlsplit(path or '/')
@@ -1502,6 +1765,10 @@ def dispatch(state, method, path, form):
         return _portfolio(state)
     if verb == 'POST' and route == '/portfolio':
         return _post_portfolio(state, form)
+    if verb == 'GET' and route == '/portfolio/valuation':
+        return _entered_valuation(state, query)
+    if verb == 'POST' and route == '/portfolio/valuation':
+        return _post_entered_valuation(state, form)
     if verb == 'GET' and route == '/api/desk':
         return _api_desk(state, query)
     if verb == 'GET' and route == '/evidence':
@@ -1535,6 +1802,7 @@ def dispatch(state, method, path, form):
         '/',
         '/ledger',
         '/portfolio',
+        '/portfolio/valuation',
         '/api/desk',
         '/conversation',
         '/transactions',
