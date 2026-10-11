@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. NOTE-01 is reviewed. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208` approved notes that restate a stored observation and keep a hypothesis labeled. The commit id is recorded in the following note. The next executable task is item 2.
+1. NOTE-01 is reviewed at `2052cf59a9636558732ef71410e31b0802277a28`. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208` approved notes that restate a stored observation and keep a hypothesis labeled. The next executable task is item 2.
 2. Leave EDGAR, FRED, news feeds, market-data vendors, and brokerage connections in `HUMAN_TASKS.md`. Do not scrape. Do not fetch EDGAR without a real contact string. Do not fetch FRED.
 3. A later slice can match a holding to a filing only after that contact string exists. Do not invent a filing.
 

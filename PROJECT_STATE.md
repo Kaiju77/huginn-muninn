@@ -2,7 +2,7 @@
 
 ## Status
 
-NOTE-01 separates observed notes from hypotheses on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `1baa7e906b26772fc1b62707ccf95abcc3d1dc82`, and the worktree was clean. Independent review on 2026-10-11 approved NOTE-01. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208`.
+NOTE-01 is a reviewed notes slice on branch `cursor/hm-01` at `2052cf59a9636558732ef71410e31b0802277a28` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `1baa7e906b26772fc1b62707ccf95abcc3d1dc82`, and the worktree was clean. Independent review on 2026-10-11 approved NOTE-01. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208`.
 
 `GET /portfolio/notes` and `POST /portfolio/notes` are linked from the entered portfolio. An observed note restates one visible stored observation: its id, subject, unit, value, observation date, and retrieval date. The person does not type that text. A hypothesis is typed text that cites one or more visible stored observations. The page says "This note restates a stored observation.", "This is a hypothesis. It is not a recommendation.", and "These notes are not a recommendation." A hypothesis is not shown as an observed note. Notes stay on the entered book and are not ledger events. GET does not store a note. The parent sandbox discovered 195 tests, 195 passed, exit code 0, in 12.346s. It did not call the network. This status is not canonical integration, deployment, or production financial readiness.
 
