@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-03 is reviewed. Reviewer `b30fc8b7-9c31-4500-837a-3243f3be9cc5` approved the NOWA chart, the two-source EUR/NOK difference, and the one CPI cell. The next executable task is item 2.
+1. INGEST-03 is reviewed at `fd11a8b358ed67fcd142620b9bdb5a71fa251821`. Reviewer `b30fc8b7-9c31-4500-837a-3243f3be9cc5` approved the NOWA chart, the two-source EUR/NOK difference, and the one CPI cell. The next executable task is item 2.
 2. After it: state on the evidence page that the CPI observation date is the first day of 2026M07, so a 7-day freshness window marks July stale in October. That staleness is the monthly publication, not a failed daily refresh.
 3. After that: a stored-series inventory listing the latest observation date for each subject, still without a scheduler.
 4. Leave EDGAR, FRED, vendors, and ledger acceptance in `HUMAN_TASKS.md`.
