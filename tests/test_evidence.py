@@ -14,9 +14,11 @@ from src.huginn_muninn.evidence import (
     freshness_flags,
     load_registry,
     open_evidence,
+    series_inventory,
     source_posture,
     visible_observations,
 )
+from src.huginn_muninn.ingest.cache import write_refresh
 from src.huginn_muninn.prototype import dispatch, open_state
 
 
@@ -364,6 +366,93 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertEqual(reloaded.conflicts()[0].values, (Decimal('10.25'), Decimal('10.26')))
         self.assertIn('conflict', assess(reloaded, AS_OF).limitations)
 
+    def test_series_inventory_lists_each_visible_subject_once(self):
+        store = open_evidence(ROOT)
+        lines = {
+            line.subject: line
+            for line in series_inventory(visible_observations(store))
+        }
+        self.assertEqual(set(lines), {'USD/NOK', 'policy-rate'})
+        self.assertEqual(lines['USD/NOK'].source_ids, ('norges-bank-open-data',))
+        self.assertEqual(lines['USD/NOK'].latest_date, date(2026, 3, 31))
+        self.assertEqual(lines['USD/NOK'].values, (Decimal('10.25'),))
+        self.assertEqual(lines['policy-rate'].latest_date, date(2026, 1, 2))
+        self.assertEqual(lines['policy-rate'].values, (Decimal('4.50'),))
+        self.assertEqual(series_inventory(()), ())
+        conflict = _first()
+        conflict['value'] = '10.26'
+        self.assertTrue(store.ingest(conflict).conflict)
+        lines = {
+            line.subject: line
+            for line in series_inventory(visible_observations(store))
+        }
+        self.assertEqual(
+            lines['USD/NOK'].values,
+            (Decimal('10.25'), Decimal('10.26')),
+        )
+        self.assertEqual(lines['USD/NOK'].latest_date, date(2026, 3, 31))
+        later = _first()
+        later['observation_id'] = 'nb-exr-USD-NOK-2026-10-09'
+        later['observation_time'] = '2026-10-09'
+        later['retrieval_time'] = '2026-10-11'
+        later['value'] = '9.5623'
+        later['quality'] = ['recorded_fixture']
+        later['provenance'] = 'Norges Bank open data.'
+        self.assertTrue(store.ingest(later).stored)
+        lines = {
+            line.subject: line
+            for line in series_inventory(visible_observations(store))
+        }
+        self.assertEqual(lines['USD/NOK'].latest_date, date(2026, 10, 9))
+        self.assertEqual(lines['USD/NOK'].values, (Decimal('9.5623'),))
+        self.assertEqual(len(lines), 2)
+
+    def test_shared_latest_date_keeps_both_values_for_one_subject(self):
+        store = _store()
+        rows = (
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-09', '10.7155', '2026-10-09'),
+            ('ecb-sdw', 'ecb-exr-NOK-EUR-2026-10-09', '10.717', '2026-10-09'),
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-08', '10.700', '2026-10-08'),
+        )
+        for source_id, observation_id, value, observed in rows:
+            row = _first()
+            row['observation_id'] = observation_id
+            row['source_id'] = source_id
+            row['subject'] = 'EUR/NOK'
+            row['unit'] = 'NOK per 1 EUR'
+            row['value'] = value
+            row['observation_time'] = observed
+            row['retrieval_time'] = '2026-10-11'
+            row['provenance'] = 'recorded'
+            row['quality'] = ['recorded_fixture']
+            self.assertTrue(store.ingest(row).stored)
+        found = series_inventory(visible_observations(store))
+        self.assertEqual(len(found), 1)
+        line = found[0]
+        self.assertEqual(line.subject, 'EUR/NOK')
+        self.assertEqual(line.source_ids, ('ecb-sdw', 'norges-bank-open-data'))
+        self.assertEqual(line.latest_date, date(2026, 10, 9))
+        self.assertEqual(line.values, (Decimal('10.717'), Decimal('10.7155')))
+        self.assertNotIn(Decimal('10.700'), line.values)
+
+    def test_cpi_observation_stays_stale_on_2026_10_11(self):
+        store = _store()
+        row = _first()
+        row['observation_id'] = 'ssb-cpi-total-2026M07'
+        row['source_id'] = 'ssb-statbank'
+        row['subject'] = 'cpi-total'
+        row['unit'] = 'index 2025=100'
+        row['value'] = '103.8'
+        row['observation_time'] = '2026-07-01'
+        row['retrieval_time'] = '2026-10-11'
+        row['provenance'] = 'Statistics Norway. Table 14700.'
+        row['quality'] = ['recorded_fixture']
+        self.assertTrue(store.ingest(row).stored)
+        flags = freshness_flags(store.observations()[0], date(2026, 10, 11), MAX_AGE_DAYS)
+        self.assertEqual(flags, ('stale',))
+        self.assertNotIn('fresh', flags)
+        self.assertEqual(MAX_AGE_DAYS, 7)
+
     def test_evidence_module_does_not_mention_network_libraries(self):
         source = (ROOT / 'src' / 'huginn_muninn' / 'evidence.py').read_text(encoding='utf-8')
         self.assertNotIn('urllib', source)
@@ -422,6 +511,25 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('training machine-learning models', body)
         self.assertIn('data-observation="obs-usd-nok-2026-03-31" data-freshness="fresh"', body)
         self.assertIn('data-observation="obs-stale-policy" data-freshness="stale"', body)
+        usd_series = body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-source-id="norges-bank-open-data"', usd_series)
+        self.assertIn('data-latest="2026-03-31"', usd_series)
+        self.assertIn('data-values="10.25"', usd_series)
+        self.assertIn('Latest observation date 2026-03-31.', usd_series)
+        self.assertIn('Value 10.25.', usd_series)
+        self.assertNotIn('The date has more than one row.', usd_series)
+        policy_series = body.split('data-series-subject="policy-rate"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-latest="2026-01-02"', policy_series)
+        self.assertIn('data-values="4.50"', policy_series)
+        self.assertNotIn('The date has more than one row.', policy_series)
+        self.assertEqual(body.count('data-series-subject='), 2)
+        self.assertIn('Computed from stored rows.', body)
+        self.assertNotIn(
+            'The CPI date is the first day of 2026M07. '
+            'Stale in October means the monthly index is older than 7 days. '
+            'It is not a failed daily refresh.',
+            body,
+        )
         self.assertIn('synthetic-fixture-not-a-live-norges-bank-retrieval', body)
         self.assertIn(
             'The synthetic 10.25 fixture is labeled synthetic and is not drawn as a Norges Bank point.',
@@ -473,6 +581,8 @@ class EvidencePageTest(unittest.TestCase):
         selected = dispatch(self.state, 'GET', '/evidence?date=2026-01-02', None)
         self.assertEqual(selected.status, 200)
         self.assertIn('Freshness against 2026-01-02.', selected.body)
+        selected_usd = selected.body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-latest="2026-03-31"', selected_usd)
         self.assertIn(
             'data-observation="obs-stale-policy" data-freshness="fresh"',
             selected.body,
@@ -504,3 +614,107 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('Risk is not assessed. No risk model is loaded.', response.body)
         self.assertIn('The recorded fixture is not a competing interpretation. No interpretation is offered.', response.body)
         self.assertIn('No forecast is computed.', response.body)
+
+    def test_cpi_sentence_is_shown_and_the_october_row_stays_stale(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T09:21:00+00:00',
+            ({
+                'observation_id': 'ssb-cpi-total-2026M07',
+                'source_id': 'ssb-statbank',
+                'subject': 'cpi-total',
+                'unit': 'index 2025=100',
+                'value': '103.8',
+                'observation_time': '2026-07-01',
+                'retrieval_time': '2026-10-11',
+                'provenance': (
+                    'Statistics Norway. CC BY 4.0. Table 14700. '
+                    'This is a price index, not a security price.'
+                ),
+                'quality': ['recorded_fixture'],
+            },),
+            (),
+        )
+        before = self.state.ledger.value('2026-03-31')
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(response.status, 200)
+        sentence = (
+            'The CPI date is the first day of 2026M07. '
+            'Stale in October means the monthly index is older than 7 days. '
+            'It is not a failed daily refresh.'
+        )
+        self.assertEqual(response.body.count(sentence), 1)
+        self.assertIn(
+            'data-observation="ssb-cpi-total-2026M07" data-freshness="stale"',
+            response.body,
+        )
+        self.assertNotIn(
+            'data-observation="ssb-cpi-total-2026M07" data-freshness="fresh"',
+            response.body,
+        )
+        cpi = response.body.split('data-series-subject="cpi-total"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-source-id="ssb-statbank"', cpi)
+        self.assertIn('data-latest="2026-07-01"', cpi)
+        self.assertIn('data-values="103.8"', cpi)
+        self.assertIn('Value 103.8.', cpi)
+        self.assertNotIn('data-multiple', cpi)
+        self.assertNotIn('The date has more than one row.', cpi)
+        self.assertIn(
+            'data-source="ssb-statbank" data-posture="connected" data-due="due"',
+            response.body,
+        )
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before)
+        self.assertEqual(before.known_subtotal, Decimal('24932.50'))
+        rates = [row['rate'] for row, _posting in self.state.rate_postings]
+        self.assertEqual(rates, ['10', '10.25'])
+
+    def test_inventory_shows_both_values_when_the_latest_date_has_two_rows(self):
+        rows = []
+        samples = (
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-09', '10.7155', '2026-10-09'),
+            ('ecb-sdw', 'ecb-exr-NOK-EUR-2026-10-09', '10.717', '2026-10-09'),
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-08', '10.700', '2026-10-08'),
+        )
+        for source_id, observation_id, value, observed in samples:
+            rows.append({
+                'observation_id': observation_id,
+                'source_id': source_id,
+                'subject': 'EUR/NOK',
+                'unit': 'NOK per 1 EUR',
+                'value': value,
+                'observation_time': observed,
+                'retrieval_time': '2026-10-11',
+                'provenance': 'recorded',
+                'quality': ['recorded_fixture'],
+            })
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T09:21:00+00:00',
+            tuple(rows),
+            (),
+        )
+        before = self.state.ledger.value('2026-03-31')
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(response.status, 200)
+        line = response.body.split('data-series-subject="EUR/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-source-id="ecb-sdw norges-bank-open-data"', line)
+        self.assertIn('data-latest="2026-10-09"', line)
+        self.assertIn('data-values="10.717 10.7155"', line)
+        self.assertIn('data-multiple="true"', line)
+        self.assertIn('Source ecb-sdw.', line)
+        self.assertIn('Source norges-bank-open-data.', line)
+        self.assertIn('Value 10.717.', line)
+        self.assertIn('Value 10.7155.', line)
+        self.assertIn('The date has more than one row.', line)
+        self.assertNotIn('10.700', line)
+        usd = response.body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertNotIn('The date has more than one row.', usd)
+        self.assertNotIn(
+            'The CPI date is the first day of 2026M07.',
+            response.body,
+        )
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )

@@ -718,6 +718,12 @@ class RefreshDeskTest(unittest.TestCase):
         self.assertIn('index 2025=100', body)
         self.assertIn('2026-07-01', body)
         self.assertIn('price index, not a security price', body)
+        cpi_sentence = (
+            'The CPI date is the first day of 2026M07. '
+            'Stale in October means the monthly index is older than 7 days. '
+            'It is not a failed daily refresh.'
+        )
+        self.assertIn(cpi_sentence, body)
         self.assertIn('data-due="due"', body)
         self.assertNotIn('data-due="current"', body)
         self.assertIn('No revision is stored.', body)
@@ -731,6 +737,32 @@ class RefreshDeskTest(unittest.TestCase):
             'data-source="ecb-sdw" data-posture="connected" data-due="current"',
             current.body,
         )
+        self.assertIn(cpi_sentence, current.body)
+        self.assertIn(
+            'data-observation="ssb-cpi-total-2026M07" data-freshness="stale"',
+            current.body,
+        )
+        self.assertNotIn(
+            'data-observation="ssb-cpi-total-2026M07" data-freshness="fresh"',
+            current.body,
+        )
+        self.assertIn(
+            'data-source="ssb-statbank" data-posture="connected" data-due="due"',
+            current.body,
+        )
+        cpi_line = current.body.split('data-series-subject="cpi-total"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-source-id="ssb-statbank"', cpi_line)
+        self.assertIn('data-latest="2026-07-01"', cpi_line)
+        self.assertIn('data-values="103.8"', cpi_line)
+        eur_line = current.body.split('data-series-subject="EUR/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-latest="2026-10-09"', eur_line)
+        self.assertIn('data-values="10.7155 10.7155"', eur_line)
+        self.assertIn('data-multiple="true"', eur_line)
+        self.assertIn('The date has more than one row.', eur_line)
+        usd_line = current.body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-latest="2026-10-09"', usd_line)
+        self.assertIn('data-values="9.5623"', usd_line)
+        self.assertNotIn('data-multiple', usd_line)
         self.assertIn(CITATION, body)
         self.assertIn('Norges Bank open data', body)
         self.assertIn('Last refresh ' + STAMP + '.', body)

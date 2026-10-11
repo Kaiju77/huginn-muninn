@@ -20,6 +20,7 @@ from src.huginn_muninn.evidence import (
     due_status,
     freshness_flags,
     open_evidence,
+    series_inventory,
     source_posture,
     visible_observations,
 )
@@ -1071,6 +1072,12 @@ _ECB_NOK_EUR = 'ecb-exr-NOK-EUR-'
 _DIFFERENCE_SENTENCE = (
     'This difference is not a recommendation and is not copied into the ledger.'
 )
+_CPI_OBSERVATION_ID = 'ssb-cpi-total-2026M07'
+_CPI_MONTHLY_SENTENCE = (
+    'The CPI date is the first day of 2026M07. '
+    'Stale in October means the monthly index is older than 7 days. '
+    'It is not a failed daily refresh.'
+)
 
 
 def _pair_day(observation_id, prefix):
@@ -1157,6 +1164,62 @@ def _revision_section(revisions):
             f'Retrieval times {escape(shown_times)}.</p>'
         )
     return '<section><h2>Revisions</h2>' + ''.join(notes) + '</section>'
+
+
+def _cpi_monthly_note(observations):
+    """The monthly index date, shown only when that stored row is visible."""
+    if not any(item.observation_id == _CPI_OBSERVATION_ID for item in observations):
+        return ''
+    return (
+        f'<p data-cpi-note="{_CPI_OBSERVATION_ID}">'
+        f'{_CPI_MONTHLY_SENTENCE}</p>'
+    )
+
+
+def _series_inventory_section(observations):
+    """Stored subjects only. A shared latest date keeps every value on that date."""
+    lines = series_inventory(observations)
+    if not lines:
+        return (
+            '<section id="series-inventory"><h2>Stored series</h2>'
+            '<p>No stored series is visible.</p></section>'
+        )
+    notes = []
+    for line in lines:
+        shown_values = [
+            'missing' if value is None else format(value, 'f')
+            for value in line.values
+        ]
+        source_text = '. '.join(
+            f'Source {escape(source_id)}' for source_id in line.source_ids
+        )
+        value_text = '. '.join(
+            f'Value {escape(shown)}' for shown in shown_values
+        )
+        multiple = ''
+        trailing = ''
+        if len(line.values) > 1:
+            multiple = ' data-multiple="true"'
+            trailing = ' The date has more than one row.'
+        notes.append(
+            '<p'
+            f' data-series-subject="{escape(line.subject)}"'
+            f' data-source-id="{escape(" ".join(line.source_ids))}"'
+            f' data-latest="{escape(line.latest_date.isoformat())}"'
+            f' data-values="{escape(" ".join(shown_values))}"'
+            f'{multiple}'
+            '>'
+            f'{escape(line.subject)}. '
+            f'{source_text}. '
+            f'Latest observation date {escape(line.latest_date.isoformat())}. '
+            f'{value_text}.{trailing}</p>'
+        )
+    return (
+        '<section id="series-inventory"><h2>Stored series</h2>'
+        '<p>Computed from stored rows.</p>'
+        + ''.join(notes)
+        + '</section>'
+    )
 
 
 def render_evidence(state, on_date):
@@ -1339,7 +1402,9 @@ def render_evidence(state, on_date):
         + '</tbody></table></div>'
         + ''.join(match_notes)
         + ''.join(conflict_notes)
+        + _cpi_monthly_note(shown_observations)
         + '</section>'
+        + _series_inventory_section(shown_observations)
         + _revision_section(cached.revisions)
         + '<section><h2>Date</h2>'
         '<form method="get" action="/evidence">'

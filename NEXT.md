@@ -2,6 +2,22 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
+1. INGEST-04 is reviewed in this commit. Reviewer `20fd508e-2a5f-49a3-a4fb-f8c2d0ce9594` approved the monthly CPI sentence and the stored-series inventory. Stored revisions were already rendered before that diff. The next executable task is item 2.
+2. On the evidence page, place the newest stored USD/NOK observation beside the synthetic ledger rate 10.25. State the stored value, its observation date, its quality flag, and whether the two numbers are equal. Say that a match and a gap are both not a ledger update. Do not call `add_rate`.
+3. After that: when a visible row is `future_observation` or `future_retrieval` against the selected date, say that the row is later than the selected date and was not dropped. Do not change the freshness rule.
+
+Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`.
+
+The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
+
+## Historical
+
+The following pointer was current before INGEST-04. It is not the current next step.
+
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
+
 1. INGEST-03 is reviewed at `fd11a8b358ed67fcd142620b9bdb5a71fa251821`. Reviewer `b30fc8b7-9c31-4500-837a-3243f3be9cc5` approved the NOWA chart, the two-source EUR/NOK difference, and the one CPI cell. The next executable task is item 2.
 2. After it: state on the evidence page that the CPI observation date is the first day of 2026M07, so a 7-day freshness window marks July stale in October. That staleness is the monthly publication, not a failed daily refresh.
 3. After that: a stored-series inventory listing the latest observation date for each subject, still without a scheduler.

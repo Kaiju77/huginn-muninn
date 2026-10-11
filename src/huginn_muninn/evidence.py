@@ -61,6 +61,13 @@ class Assessment(NamedTuple):
     limitations: tuple
 
 
+class SeriesLine(NamedTuple):
+    subject: str
+    source_ids: tuple
+    latest_date: date
+    values: tuple
+
+
 def _ordered(reasons):
     found = set(reasons)
     return tuple(reason for reason in _REASON_ORDER if reason in found)
@@ -230,6 +237,37 @@ def visible_observations(store):
             rows.append(item)
             seen.append(item)
     return tuple(rows)
+
+
+def series_inventory(observations):
+    """One line per stored subject from visible rows.
+
+    The latest date is the newest observation date among those rows.
+    Values are the amounts on that date. This does not fetch and does
+    not write the ledger.
+    """
+    grouped = {}
+    for observation in observations:
+        grouped.setdefault(observation.subject, []).append(observation)
+    lines = []
+    for subject in sorted(grouped):
+        items = grouped[subject]
+        latest = max(item.observation_time for item in items)
+        on_latest = [
+            item for item in items
+            if item.observation_time == latest
+        ]
+        on_latest.sort(key=lambda item: (
+            item.source_id,
+            item.observation_id,
+            item.retrieval_time.isoformat(),
+            '' if item.value is None else format(item.value, 'f'),
+            item.provenance,
+        ))
+        source_ids = tuple(dict.fromkeys(item.source_id for item in on_latest))
+        values = tuple(item.value for item in on_latest)
+        lines.append(SeriesLine(subject, source_ids, latest, values))
+    return tuple(lines)
 
 
 class EvidenceStore:

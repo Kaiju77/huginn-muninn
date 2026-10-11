@@ -1,5 +1,7 @@
 # Review
 
+Independent review on 2026-10-11 approved INGEST-04. Reviewer `20fd508e-2a5f-49a3-a4fb-f8c2d0ce9594` read the CPI sentence, the series inventory, the freshness rule, the evidence page, the tests, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite and did not fetch. The parent sandbox discovered 137 tests, 137 passed, exit code 0. This verdict covers the monthly CPI sentence and the stored-series inventory. It is not a live-refresh acceptance or a ledger change. The synthetic 10.25 rate remains the ledger rate. Rendering of stored revisions already existed before this diff.
+
 Independent review on 2026-10-11 approved INGEST-03. Reviewer `b30fc8b7-9c31-4500-837a-3243f3be9cc5`. This checkout adds the NOWA chart, the two-source EUR/NOK difference, and the one Statistics Norway CPI cell. That work is not approved by this note.
 
 INGEST-02 was independently reviewed on 2026-10-11. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff` read the refresh, the rate parsers, the revision merge, the due status, the policy chart, the fixtures, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite and did not fetch. The parent sandbox discovered 130 tests, 130 passed, exit code 0. This verdict covers the five-series manual refresh. It is not a live-refresh acceptance or a ledger change. The synthetic 10.25 rate remains the ledger rate.
