@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. ONBOARD-02 is reviewed. Reviewer `7f37206a-eb44-4416-b904-0ac8267e14b3` approved entered prices and valuation on a selected date. A known NOK subtotal of zero says "Allocation is incomplete." The commit id is recorded in the following note. The next executable task is item 2.
+1. ONBOARD-02 is reviewed at `ee3c0598dc97a0f0a4740c3b47aef07080beb752`. Reviewer `7f37206a-eb44-4416-b904-0ac8267e14b3` approved entered prices and valuation on a selected date. A known NOK subtotal of zero says "Allocation is incomplete." The next executable task is item 2.
 2. Between two dates, separate contributions, withdrawals, and fees from the change in value. Do this only when every holding on both dates is a known quantity times one same-currency price and the book has no manual balance. If any manual balance exists, say attribution is unavailable. A fee is cash leaving, not a market gain. Do not convert currencies.
 3. After that: let a person record one explicit accept of a stored public observation as an entered price. The accept stores provenance that names the observation id. It does not run by itself and it does not call add_rate on the synthetic ledger.
 
