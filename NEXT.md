@@ -2,6 +2,22 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
+1. ONBOARD-01 is reviewed in this commit. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3` approved the entered accounts, instruments, activities, and manual balances. The next executable task is item 2.
+2. After it: value an entered holding as quantity times one supplied price on the valuation date, or show the manual balance on its as-of date. A missing price stays unknown. Do not invent a price. Do not convert currency in this task.
+3. After that: separate contributions and withdrawals from the change in value between two dates when every required price and the holding path are known. If a manual balance is the only figure, say attribution is unavailable.
+
+Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`. The product path is `ROADMAP.md`.
+
+The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
+
+## Historical
+
+The following pointer was current before ONBOARD-01. It is not the current next step.
+
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
+
 1. INGEST-11 is reviewed at `c4e57ffc790a2321dea2c28d2d5c15028dba293d`. Reviewer `03aa61c5-c3d3-44ef-9f33-332065d20934` approved the missing-series count and the sentence that the synthetic fixture is not part of the cache count. The next executable task is item 2.
 2. When the cache count is greater than the cap, say the stored count is above the cap because the first batch can stay above 500. Use the existing trim rule. Do not change the cap. If the count is not above the cap, omit that sentence.
 3. After that: keep three ready notes on the evidence page that do not fetch. State the number of stored conflicts. State the number of stored revisions. State whether the last refresh recorded an error. Each line is omitted when the count is zero or no error is stored.

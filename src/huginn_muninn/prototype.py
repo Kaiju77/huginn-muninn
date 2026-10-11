@@ -35,6 +35,16 @@ from src.huginn_muninn.ledger import (
     StatementPosition,
     Withdrawal,
 )
+from src.huginn_muninn.onboarding import (
+    ACTIVITY_WORDS,
+    ENTERED_SENTENCE,
+    INCOMPLETE_IDENTIFICATION,
+    KINDS,
+    SNAPSHOT_SENTENCE,
+    EnteredPortfolio,
+    default_book_path,
+    display_activity,
+)
 
 
 class Response(NamedTuple):
@@ -386,6 +396,7 @@ class PrototypeState:
         self.overlay_path.write_text(text, encoding='utf-8')
 
     def reset(self):
+        """Delete the synthetic overlay only. The entered book is a different file."""
         if self.overlay_path.is_file():
             self.overlay_path.unlink()
         self.load()
@@ -439,12 +450,16 @@ class PrototypeState:
         return dates[-1]
 
 
-def open_state(checkout, overlay_path=None):
+def open_state(checkout, overlay_path=None, entered_path=None):
     root = Path(checkout)
     fixture = root / 'fixtures' / 'synthetic_portfolio.json'
     if overlay_path is None:
         overlay_path = root / 'var' / 'synthetic-book.json'
-    return PrototypeState(fixture, overlay_path)
+    if entered_path is None:
+        entered_path = default_book_path(root)
+    state = PrototypeState(fixture, overlay_path)
+    state.entered = EnteredPortfolio(entered_path)
+    return state
 
 
 def _field(form, name):
@@ -576,6 +591,7 @@ def _nav(state):
         '<nav>'
         '<a href="/">Desk</a>'
         '<a href="/ledger">Ledger</a>'
+        '<a href="/portfolio">Portfolio</a>'
         '<a href="/transactions">Transactions</a>'
         '<a href="/transactions/new">Record a transaction</a>'
         f'<a href="{history}">History</a>'
@@ -588,7 +604,12 @@ def _nav(state):
     )
 
 
-def _page(state, title, body, status=200):
+def _page(state, title, body, status=200, footer=None):
+    if footer is None:
+        footer = (
+            '<p class="note">These figures are synthetic. '
+            'This page is not a recommendation.</p>\n'
+        )
     document = (
         '<!DOCTYPE html>\n'
         '<html lang="en">\n'
@@ -604,8 +625,8 @@ def _page(state, title, body, status=200):
         + _nav(state)
         + f'<h1>{escape(title)}</h1>\n'
         + body
-        + '<p class="note">These figures are synthetic. This page is not a recommendation.</p>\n'
-        '</main>\n</body>\n</html>\n'
+        + footer
+        + '</main>\n</body>\n</html>\n'
     )
     return Response(status, _CONTENT_TYPE, document)
 
@@ -1131,6 +1152,336 @@ def _post_conversation(state, form):
     return _conversation(state)
 
 
+def _portfolio_input(form_name, name, label):
+    field_id = f'portfolio-{form_name}-{name}'
+    return (
+        f'<label for="{field_id}">{escape(label)}'
+        f'<input id="{field_id}" name="{escape(name)}" value="">'
+        '</label>'
+    )
+
+
+def _portfolio_select(form_name, name, label, options):
+    field_id = f'portfolio-{form_name}-{name}'
+    rows = []
+    for value, text in options:
+        rows.append(
+            f'<option value="{escape(value)}">{escape(text)}</option>'
+        )
+    return (
+        f'<label for="{field_id}">{escape(label)}'
+        f'<select id="{field_id}" name="{escape(name)}">'
+        + ''.join(rows)
+        + '</select></label>'
+    )
+
+
+def _account_choices(book):
+    choices = [('', 'Choose an account')]
+    for account in book.accounts:
+        label = f"{account['institution']} {account['name']}"
+        choices.append((account['identity'], label))
+    return choices
+
+
+def _instrument_choices(book):
+    choices = [('', 'Choose an instrument')]
+    for instrument in book.instruments:
+        label = f"{instrument['display_name']}, {instrument['kind']}"
+        choices.append((instrument['identity'], label))
+    return choices
+
+
+def _balance_choices(book):
+    choices = [('', 'Choose cash or one instrument'), ('cash', 'Cash')]
+    for instrument in book.instruments:
+        label = f"{instrument['display_name']}, {instrument['kind']}"
+        choices.append((instrument['identity'], label))
+    return choices
+
+
+def _activity_detail(row):
+    activity = row['activity']
+    if activity in {'contribution', 'withdrawal', 'fee', 'dividend'}:
+        return f"{row['amount']} {row['currency']}"
+    return (
+        f"quantity {row['quantity']}, "
+        f"cash {row['cash_amount']} {row['cash_currency']}, "
+        f"fee {row['fee']}"
+    )
+
+
+def _result_banner(result):
+    if result is None:
+        return ''
+    if result.accepted:
+        return '<p class="qualified">Saved.</p>'
+    attribute = ''
+    if result.reasons:
+        attribute = f' data-reason="{escape(" ".join(result.reasons))}"'
+    return f'<p class="break"{attribute}>{escape(result.message)}</p>'
+
+
+def _portfolio(state, result=None, status=200):
+    book = state.entered
+    parts = [
+        f'<p>{escape(ENTERED_SENTENCE)}</p>',
+        '<p>Reporting currency is NOK. Foreign currency stays in its own currency.</p>',
+    ]
+    if book.load_error:
+        parts.append(f'<p class="break">{escape(book.load_error)}</p>')
+    parts.append(_result_banner(result))
+    if not book.load_error:
+        parts.append('<h2>Accounts</h2>')
+        if book.accounts:
+            rows = []
+            for account in book.accounts:
+                rows.append(
+                    '<tr>'
+                    f'<td>{escape(account["institution"])}</td>'
+                    f'<td>{escape(account["name"])}</td>'
+                    '</tr>'
+                )
+            parts.append(
+                '<table><thead><tr><th>Institution</th><th>Account</th>'
+                '</tr></thead><tbody>'
+                + ''.join(rows)
+                + '</tbody></table>'
+            )
+        else:
+            parts.append('<p>No accounts yet.</p>')
+        parts.append('<h2>Instruments</h2>')
+        if book.instruments:
+            rows = []
+            for instrument in book.instruments:
+                identification = instrument['isin'] or INCOMPLETE_IDENTIFICATION
+                rows.append(
+                    '<tr>'
+                    f'<td>{escape(instrument["display_name"])}</td>'
+                    f'<td>{escape(instrument["kind"])}</td>'
+                    f'<td>{escape(instrument["listing_currency"])}</td>'
+                    f'<td>{escape(identification)}</td>'
+                    '</tr>'
+                )
+            parts.append(
+                '<table><thead><tr><th>Name</th><th>Kind</th>'
+                '<th>Listing currency</th><th>Identification</th>'
+                '</tr></thead><tbody>'
+                + ''.join(rows)
+                + '</tbody></table>'
+            )
+        else:
+            parts.append('<p>No instruments yet.</p>')
+        parts.append('<h2>Activities</h2>')
+        if book.activities:
+            rows = []
+            for row in book.activities:
+                label = display_activity(row['activity'])
+                rows.append(
+                    f'<tr data-activity="{escape(row["activity"])}">'
+                    f'<td>{escape(label)}</td>'
+                    f'<td>{escape(row["event_date"])}</td>'
+                    f'<td>{escape(_activity_detail(row))}</td>'
+                    '</tr>'
+                )
+            parts.append(
+                '<table><thead><tr><th>Activity</th><th>Date</th>'
+                '<th>Detail</th></tr></thead><tbody>'
+                + ''.join(rows)
+                + '</tbody></table>'
+            )
+        else:
+            parts.append('<p>No activities yet.</p>')
+        parts.append('<h2>Cash and quantities</h2>')
+        snapshot = book.books()
+        if snapshot is None:
+            parts.append(
+                '<p>No activity has been recorded, so there is no cash '
+                'or quantity to show.</p>'
+            )
+        else:
+            parts.append(
+                f'<p>Cash and quantities on {escape(snapshot.on_date)}.</p>'
+            )
+            cash_rows = []
+            for cash in snapshot.cash:
+                cash_rows.append(
+                    f'<tr data-currency="{escape(cash.currency)}">'
+                    f'<td>{escape(book.account_label(cash.account))}</td>'
+                    f'<td>{escape(cash.currency)}</td>'
+                    f'<td class="figure">{_figure(cash.amount)}</td>'
+                    '</tr>'
+                )
+            if cash_rows:
+                parts.append(
+                    '<table><thead><tr><th>Account</th><th>Currency</th>'
+                    '<th class="figure">Amount</th></tr></thead><tbody>'
+                    + ''.join(cash_rows)
+                    + '</tbody></table>'
+                )
+            else:
+                parts.append('<p>No cash remains on this date.</p>')
+            position_rows = []
+            for position in snapshot.positions:
+                position_rows.append(
+                    '<tr>'
+                    f'<td>{escape(book.account_label(position.account))}</td>'
+                    f'<td>{escape(book.instrument_label(position.instrument))}</td>'
+                    f'<td class="figure">{_figure(position.quantity)}</td>'
+                    '</tr>'
+                )
+            if position_rows:
+                parts.append(
+                    '<table><thead><tr><th>Account</th><th>Instrument</th>'
+                    '<th class="figure">Quantity</th></tr></thead><tbody>'
+                    + ''.join(position_rows)
+                    + '</tbody></table>'
+                )
+            else:
+                parts.append('<p>No quantity remains on this date.</p>')
+        parts.append('<h2>Manual balances</h2>')
+        parts.append(f'<p>{escape(SNAPSHOT_SENTENCE)}</p>')
+        if book.manual_balances:
+            rows = []
+            for row in book.manual_balances:
+                if row['holding'] == 'cash':
+                    holding = 'cash'
+                else:
+                    holding = book.instrument_label(row['instrument'])
+                rows.append(
+                    '<tr>'
+                    f'<td>{escape(book.account_label(row["account"]))}</td>'
+                    f'<td>{escape(holding)}</td>'
+                    f'<td class="figure">{escape(row["amount"])}</td>'
+                    f'<td>{escape(row["currency"])}</td>'
+                    f'<td>{escape(row["as_of"])}</td>'
+                    '</tr>'
+                )
+            parts.append(
+                '<table><thead><tr><th>Account</th><th>Holding</th>'
+                '<th class="figure">Amount</th><th>Currency</th><th>As of</th>'
+                '</tr></thead><tbody>'
+                + ''.join(rows)
+                + '</tbody></table>'
+            )
+        else:
+            parts.append('<p>No manual balances yet.</p>')
+    parts.append('<h2>Add an account</h2>')
+    parts.append(
+        '<form method="post" action="/portfolio" '
+        'enctype="application/x-www-form-urlencoded">'
+        '<input type="hidden" name="action" value="account">'
+        + _portfolio_input('account', 'institution', 'Institution')
+        + _portfolio_input('account', 'account_name', 'Account name')
+        + '<button type="submit">Add account</button></form>'
+    )
+    parts.append('<h2>Add an instrument</h2>')
+    kind_options = [('', 'Choose a kind')]
+    for kind in KINDS:
+        kind_options.append((kind, kind))
+    parts.append(
+        '<form method="post" action="/portfolio" '
+        'enctype="application/x-www-form-urlencoded">'
+        '<input type="hidden" name="action" value="instrument">'
+        + _portfolio_input('instrument', 'display_name', 'Name')
+        + _portfolio_select('instrument', 'kind', 'Kind', kind_options)
+        + _portfolio_input('instrument', 'listing_currency', 'Listing currency')
+        + _portfolio_input('instrument', 'isin', 'ISIN, if you have one')
+        + '<p>Leave the ISIN blank when you do not have one.</p>'
+        + '<button type="submit">Add instrument</button></form>'
+    )
+    activity_options = [('', 'Choose an activity')]
+    for word in ACTIVITY_WORDS:
+        activity_options.append((word, word))
+    parts.append('<h2>Record an activity</h2>')
+    parts.append(
+        '<p>Contribution, withdrawal, and fee use an amount and a currency. '
+        'Purchase and sale use an instrument, a quantity, a cash amount, a '
+        'cash currency, and a fee of zero or more. Dividend uses an '
+        'instrument, an amount, and a currency. Manual balance uses cash or '
+        'one instrument, an amount, a currency, and the date as the as-of '
+        'date.</p>'
+        '<form method="post" action="/portfolio" '
+        'enctype="application/x-www-form-urlencoded">'
+        '<input type="hidden" name="action" value="activity">'
+        + _portfolio_select('activity', 'activity', 'Activity', activity_options)
+        + _portfolio_select('activity', 'account', 'Account', _account_choices(book))
+        + _portfolio_select(
+            'activity',
+            'instrument',
+            'Instrument',
+            _instrument_choices(book),
+        )
+        + _portfolio_select(
+            'activity',
+            'balance_subject',
+            'Manual balance holding',
+            _balance_choices(book),
+        )
+        + _portfolio_input('activity', 'event_date', 'Date')
+        + _portfolio_input('activity', 'provenance', 'Where this came from')
+        + _portfolio_input('activity', 'currency', 'Currency')
+        + _portfolio_input('activity', 'amount', 'Amount')
+        + _portfolio_input('activity', 'quantity', 'Quantity')
+        + _portfolio_input('activity', 'cash_currency', 'Cash currency')
+        + _portfolio_input('activity', 'cash_amount', 'Cash amount')
+        + _portfolio_input('activity', 'fee', 'Fee')
+        + '<button type="submit">Save activity</button></form>'
+    )
+    return _page(state, 'Entered portfolio', ''.join(parts), status, footer='')
+
+
+def _post_portfolio(state, form):
+    book = state.entered
+    action = _field(form, 'action')
+    if action == 'account':
+        result = book.add_account(
+            _field(form, 'institution'),
+            _field(form, 'account_name'),
+        )
+    elif action == 'instrument':
+        result = book.add_instrument(
+            _field(form, 'display_name'),
+            _field(form, 'kind'),
+            _field(form, 'listing_currency'),
+            _field(form, 'isin'),
+        )
+    elif action == 'activity':
+        activity = _field(form, 'activity')
+        if activity == 'manual balance':
+            result = book.add_manual_balance(
+                _field(form, 'account'),
+                _field(form, 'balance_subject'),
+                _field(form, 'amount'),
+                _field(form, 'currency'),
+                _field(form, 'event_date'),
+                _field(form, 'provenance'),
+            )
+        else:
+            result = book.add_activity(
+                activity,
+                _field(form, 'account'),
+                _field(form, 'event_date'),
+                _field(form, 'provenance'),
+                currency=_field(form, 'currency'),
+                amount=_field(form, 'amount'),
+                instrument=_field(form, 'instrument'),
+                quantity=_field(form, 'quantity'),
+                cash_currency=_field(form, 'cash_currency'),
+                cash_amount=_field(form, 'cash_amount'),
+                fee=_field(form, 'fee'),
+            )
+    else:
+        result = book.add_activity(
+            '',
+            '',
+            '',
+            '',
+        )
+    status = 200 if result.accepted else 400
+    return _portfolio(state, result, status)
+
+
 def dispatch(state, method, path, form):
     verb = str(method or '').upper()
     parsed = urlsplit(path or '/')
@@ -1147,6 +1498,10 @@ def dispatch(state, method, path, form):
         return _desk(state, query)
     if verb == 'GET' and route == '/ledger':
         return _home(state)
+    if verb == 'GET' and route == '/portfolio':
+        return _portfolio(state)
+    if verb == 'POST' and route == '/portfolio':
+        return _post_portfolio(state, form)
     if verb == 'GET' and route == '/api/desk':
         return _api_desk(state, query)
     if verb == 'GET' and route == '/evidence':
@@ -1179,6 +1534,7 @@ def dispatch(state, method, path, form):
     known = {
         '/',
         '/ledger',
+        '/portfolio',
         '/api/desk',
         '/conversation',
         '/transactions',

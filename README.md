@@ -6,6 +6,10 @@ This repository is prepared for the shared AI development harness. Product scope
 
 This isolated `cursor/hm-01` branch preserves the accepted HM-01 slice: discoverable synthetic tests and an explicit known Decimal subtotal with completeness. The HM-01 `Portfolio` still does not qualify currency, as-of, or provenance. The separate HM-02 snapshot does. Conversion and coverage qualification remain unfinished. The branch is not merged into the canonical Huginn & Muninn repository.
 
+## Entered portfolio
+
+`GET /portfolio` and `POST /portfolio` are the entered book. A person adds an institution and account name, an instrument, and an activity in ordinary words. The page says: "This is your entered portfolio. Northline and Harbor on the other pages are a synthetic demo." The entered store is `var/entered-portfolio/book.json`. It is not the synthetic fixture. Reporting currency is NOK. Foreign currency stays in the currency that was entered. Manual balances are snapshots. The page says: "Manual balances are snapshots. They are not a full performance record." Resetting the demo overlay does not delete this book. The listening desk process was not restarted, so the new route is not on that process until a later explicit restart. Connecting a bank or broker is not part of onboarding. Independent review on 2026-10-11 approved ONBOARD-01. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3`. The product path is `ROADMAP.md`.
+
 ## Run the HM-01 walkthrough
 
 From the checkout root, `python scripts/hm01_walkthrough.py` prints the synthetic demonstration. What the output means, and the offline sandbox command, are in `docs/HM01_WALKTHROUGH.md`.
