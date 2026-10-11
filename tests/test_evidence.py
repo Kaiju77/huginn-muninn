@@ -1443,6 +1443,13 @@ class EvidencePageTest(unittest.TestCase):
             source,
         )
         self.assertIn('A later calendar day is not a scheduled refresh.', source)
+        self.assertIn(
+            'The cap drops the oldest observation dates that are absent from a new batch.',
+            source,
+        )
+        self.assertIn('A quality flag is a label.', source)
+        self.assertIn('MAX_STORED_OBSERVATIONS', source)
+        self.assertNotIn('MAX_STORED_OBSERVATIONS =', source)
         self.assertNotIn('schedule.every', source)
         self.assertNotIn('BackgroundScheduler', source)
 
@@ -1617,6 +1624,239 @@ class EvidencePageTest(unittest.TestCase):
         self.assertNotIn('api.stlouisfed.org', section)
         self.assertNotIn('data.stlouisfed.org', section)
         self.assertNotIn('live_transport', desk)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def _quality_item(self, body, name):
+        section = body.split('id="series-quality"', 1)[1].split('</section>', 1)[0]
+        marker = f'data-requested-series="{name}"'
+        return section.split(marker, 1)[1].split('</li>', 1)[0]
+
+    def test_empty_cache_shows_zero_beside_the_cap_and_fixture_flags(self):
+        import socket
+        import urllib.request
+        from src.huginn_muninn.ingest.cache import MAX_STORED_OBSERVATIONS
+        from src.huginn_muninn.ingest.refresh import REQUESTED_SERIES
+
+        cap_sentence = (
+            'The cap drops the oldest observation dates that are absent from a new batch.'
+        )
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(response.status, 200)
+        body = response.body
+        self.assertEqual(MAX_STORED_OBSERVATIONS, 500)
+        count = body.split('id="stored-observation-count"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('data-stored-count="0"', count)
+        self.assertIn('data-cap="500"', count)
+        self.assertIn('Stored observations 0. Cap 500.', count)
+        self.assertEqual(count.count(cap_sentence), 1)
+        self.assertEqual(body.count(cap_sentence), 1)
+        self.assertEqual(body.count('A quality flag is a label.'), 1)
+        quality = body.split('id="series-quality"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('A quality flag is a label.', quality)
+        usd = self._quality_item(body, 'Norges Bank USD/NOK')
+        self.assertIn('data-stored="true"', usd)
+        self.assertIn('data-latest="2026-03-31"', usd)
+        self.assertIn('data-quality="synthetic_fixture"', usd)
+        self.assertIn('Quality synthetic_fixture.', usd)
+        self.assertNotIn('data-multiple="true"', usd)
+        self.assertNotIn('The date has more than one row.', usd)
+        policy = self._quality_item(body, 'the policy rate')
+        self.assertIn('data-latest="2026-01-02"', policy)
+        self.assertIn('data-quality="synthetic_fixture"', policy)
+        self.assertIn('Quality synthetic_fixture.', policy)
+        for name in (
+            'Norges Bank EUR/NOK',
+            'NOWA',
+            'ECB NOK/EUR',
+            'the one Statistics Norway CPI cell for table 14700, 2026M07, total',
+        ):
+            item = self._quality_item(body, name)
+            self.assertIn('data-stored="false"', item)
+            self.assertIn(f'{name} is not stored.', item)
+            self.assertNotIn('Quality ', item)
+        self.assertEqual(quality.count('data-requested-series='), len(REQUESTED_SERIES))
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_cache_count_and_newest_quality_flags_stay_on_stored_rows(self):
+        import socket
+        import urllib.request
+
+        cap_sentence = (
+            'The cap drops the oldest observation dates that are absent from a new batch.'
+        )
+        rows = (
+            self._cache_row(
+                'nb-exr-USD-NOK-2026-10-09',
+                'norges-bank-open-data',
+                'USD/NOK',
+                '9.5623',
+                '2026-10-09',
+                '2026-10-11',
+            ),
+            self._cache_row(
+                'nb-exr-USD-NOK-2026-10-09-b',
+                'norges-bank-open-data',
+                'USD/NOK',
+                '9.5600',
+                '2026-10-09',
+                '2026-10-12',
+            ),
+            self._cache_row(
+                'nb-exr-USD-NOK-2026-03-01',
+                'norges-bank-open-data',
+                'USD/NOK',
+                '10.00',
+                '2026-03-01',
+                '2026-03-01',
+            ),
+            self._cache_row(
+                'nb-exr-EUR-NOK-2026-10-09',
+                'norges-bank-open-data',
+                'EUR/NOK',
+                '10.7155',
+                '2026-10-09',
+                '2026-10-11',
+            ),
+            self._cache_row(
+                'ecb-exr-NOK-EUR-2026-10-09',
+                'ecb-sdw',
+                'EUR/NOK',
+                '10.7155',
+                '2026-10-09',
+                '2026-10-11',
+            ),
+            self._cache_row(
+                'ecb-exr-NOK-EUR-2026-10-08',
+                'ecb-sdw',
+                'EUR/NOK',
+                '10.717',
+                '2026-10-08',
+                '2026-10-11',
+            ),
+            self._cache_row(
+                'nb-ir-KPRA-SD-2026-10-08',
+                'norges-bank-open-data',
+                'policy-rate',
+                '4.5',
+                '2026-10-08',
+                '2026-10-11',
+            ),
+            self._cache_row(
+                'nb-short-NOWA-ON-R-2026-10-08',
+                'norges-bank-open-data',
+                'nowa',
+                '4.50',
+                '2026-10-08',
+                '2026-10-11',
+            ),
+            self._cache_row(
+                'ssb-cpi-total-2026M07',
+                'ssb-statbank',
+                'cpi-total',
+                '103.8',
+                '2026-07-01',
+                '2026-10-11',
+            ),
+        )
+        rows[1]['quality'] = ['live_retrieval']
+        rows[4]['quality'] = ['live_retrieval']
+        rows[6]['quality'] = ['live_retrieval']
+        rows[7]['quality'] = []
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T09:21:00+00:00',
+            rows,
+            (),
+        )
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(response.status, 200)
+        body = response.body
+        count = body.split('id="stored-observation-count"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('data-stored-count="9"', count)
+        self.assertIn('data-cap="500"', count)
+        self.assertIn('Stored observations 9. Cap 500.', count)
+        self.assertEqual(body.count(cap_sentence), 1)
+        self.assertNotIn('Stored observations 11.', body)
+        self.assertEqual(body.count('A quality flag is a label.'), 1)
+        usd = self._quality_item(body, 'Norges Bank USD/NOK')
+        self.assertIn('data-latest="2026-10-09"', usd)
+        self.assertIn('data-multiple="true"', usd)
+        self.assertIn('data-quality="recorded_fixture, live_retrieval"', usd)
+        self.assertIn('Quality recorded_fixture.', usd)
+        self.assertIn('Quality live_retrieval.', usd)
+        self.assertIn('The date has more than one row.', usd)
+        self.assertNotIn('synthetic_fixture', usd)
+        self.assertNotIn('2026-03-01', usd)
+        self.assertNotIn('2026-03-31', usd)
+        norges = self._quality_item(body, 'Norges Bank EUR/NOK')
+        self.assertIn('data-latest="2026-10-09"', norges)
+        self.assertIn('data-quality="recorded_fixture"', norges)
+        self.assertIn('Quality recorded_fixture.', norges)
+        self.assertNotIn('live_retrieval', norges)
+        self.assertNotIn('ecb-exr-NOK-EUR', norges)
+        self.assertNotIn('The date has more than one row.', norges)
+        ecb = self._quality_item(body, 'ECB NOK/EUR')
+        self.assertIn('data-latest="2026-10-09"', ecb)
+        self.assertIn('data-quality="live_retrieval"', ecb)
+        self.assertIn('Quality live_retrieval.', ecb)
+        self.assertNotIn('recorded_fixture', ecb)
+        self.assertNotIn('nb-exr-EUR-NOK', ecb)
+        self.assertNotIn('The date has more than one row.', ecb)
+        policy = self._quality_item(body, 'the policy rate')
+        self.assertIn('data-latest="2026-10-08"', policy)
+        self.assertIn('Quality live_retrieval.', policy)
+        self.assertNotIn('synthetic_fixture', policy)
+        self.assertNotIn('2026-01-02', policy)
+        nowa = self._quality_item(body, 'NOWA')
+        self.assertIn('data-stored="true"', nowa)
+        self.assertIn('data-quality=""', nowa)
+        self.assertIn('This row has no quality flag.', nowa)
+        self.assertNotIn('unknown', nowa)
+        self.assertNotIn('Quality live_retrieval', nowa)
+        self.assertNotIn('Quality recorded_fixture', nowa)
+        cpi = self._quality_item(
+            body,
+            'the one Statistics Norway CPI cell for table 14700, 2026M07, total',
+        )
+        self.assertIn('data-latest="2026-07-01"', cpi)
+        self.assertIn('Quality recorded_fixture.', cpi)
+        self.assertNotIn('is not stored.', cpi)
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
             ['10', '10.25'],

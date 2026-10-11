@@ -24,7 +24,10 @@ from src.huginn_muninn.evidence import (
     source_posture,
     visible_observations,
 )
-from src.huginn_muninn.ingest.cache import read_desk_cache
+from src.huginn_muninn.ingest.cache import (
+    MAX_STORED_OBSERVATIONS,
+    read_desk_cache,
+)
 from src.huginn_muninn.ingest.client import ALLOWLIST
 from src.huginn_muninn.ingest.refresh import REQUESTED_SERIES
 
@@ -1094,6 +1097,17 @@ _ALLOWLIST_SENTENCE = (
     'These hosts are the allowlist. This page does not open a connection.'
 )
 _CALENDAR_DAY_SENTENCE = 'A later calendar day is not a scheduled refresh.'
+_CAP_SENTENCE = (
+    'The cap drops the oldest observation dates that are absent from a new batch.'
+)
+_QUALITY_LABEL_SENTENCE = 'A quality flag is a label.'
+_SERIES_SUBJECTS = {
+    'Norges Bank USD/NOK': 'USD/NOK',
+    'Norges Bank EUR/NOK': 'EUR/NOK',
+    'the policy rate': 'policy-rate',
+    'NOWA': 'nowa',
+    'the one Statistics Norway CPI cell for table 14700, 2026M07, total': 'cpi-total',
+}
 _SERIES_OWNERS = {
     'Norges Bank USD/NOK': 'norges-bank-open-data',
     'Norges Bank EUR/NOK': 'norges-bank-open-data',
@@ -1304,6 +1318,109 @@ def _manual_refresh_list(status_by_source):
         '<h2>Series a manual refresh requests</h2>'
         '<p>This list is not a refresh.</p>'
         f'<ol>{"".join(items)}</ol>'
+        '</section>'
+    )
+
+
+def _stored_count_section(cached):
+    """Cache length beside the existing cap. This does not fetch or trim."""
+    count = len(cached.observations)
+    cap = MAX_STORED_OBSERVATIONS
+    return (
+        '<section id="stored-observation-count">'
+        '<h2>Stored observations</h2>'
+        f'<p data-stored-count="{count}" data-cap="{cap}">'
+        f'Stored observations {count}. Cap {cap}. '
+        f'{_CAP_SENTENCE}</p>'
+        '</section>'
+    )
+
+
+def _series_members(name, observations):
+    """Visible rows for one requested series. ECB is an id prefix."""
+    if name == 'ECB NOK/EUR':
+        return [
+            item for item in observations
+            if isinstance(item.observation_id, str)
+            and item.observation_id.startswith(_ECB_NOK_EUR)
+        ]
+    subject = _SERIES_SUBJECTS.get(name)
+    if subject is None:
+        return []
+    found = []
+    for item in observations:
+        if item.subject != subject:
+            continue
+        if (
+            subject == 'EUR/NOK'
+            and isinstance(item.observation_id, str)
+            and item.observation_id.startswith(_ECB_NOK_EUR)
+        ):
+            continue
+        found.append(item)
+    return found
+
+
+def _rows_on_newest_date(rows):
+    latest = max(item.observation_time for item in rows)
+    on_latest = [item for item in rows if item.observation_time == latest]
+    on_latest.sort(key=lambda item: (
+        item.source_id,
+        item.observation_id,
+        item.retrieval_time.isoformat(),
+        '' if item.value is None else format(item.value, 'f'),
+        item.provenance,
+    ))
+    return latest, tuple(on_latest)
+
+
+def _quality_phrase(row):
+    if not row.quality:
+        return 'This row has no quality flag.'
+    return f'Quality {escape(", ".join(row.quality))}.'
+
+
+def _quality_item(name, observations):
+    rows = _series_members(name, observations)
+    if not rows:
+        return (
+            '<li'
+            f' data-requested-series="{escape(name)}"'
+            ' data-stored="false"'
+            f'>{escape(name)} is not stored.</li>'
+        )
+    latest, on_latest = _rows_on_newest_date(rows)
+    labels = tuple(' '.join(item.quality) for item in on_latest)
+    phrases = ' '.join(_quality_phrase(item) for item in on_latest)
+    multiple = ''
+    trailing = ''
+    if len(on_latest) > 1:
+        multiple = ' data-multiple="true"'
+        trailing = ' The date has more than one row.'
+    return (
+        '<li'
+        f' data-requested-series="{escape(name)}"'
+        ' data-stored="true"'
+        f' data-latest="{escape(latest.isoformat())}"'
+        f' data-quality="{escape(", ".join(labels))}"'
+        f'{multiple}'
+        '>'
+        f'{escape(name)}. '
+        f'Observation date {escape(latest.isoformat())}. '
+        f'{phrases}{trailing}</li>'
+    )
+
+
+def _series_quality_section(observations):
+    """Newest stored quality flags for each requested series. This does not fetch."""
+    items = ''.join(
+        _quality_item(name, observations) for name in REQUESTED_SERIES
+    )
+    return (
+        '<section id="series-quality">'
+        '<h2>Quality flags</h2>'
+        f'<p>{_QUALITY_LABEL_SENTENCE}</p>'
+        f'<ol>{items}</ol>'
         '</section>'
     )
 
@@ -1579,7 +1696,8 @@ def render_evidence(state, on_date):
         + ''.join(error_notes)
         + '<p>Refresh is manual. It is not a scheduler.</p>'
         '</section>'
-        '<section><h2>Sources</h2>'
+        + _stored_count_section(cached)
+        + '<section><h2>Sources</h2>'
         '<div class="table-wrap"><table><thead><tr>'
         '<th>Source</th><th>Publisher</th><th>Category</th><th>Cadence</th>'
         '<th>Posture</th><th>Live fetch</th><th>Due</th><th>Limitation</th>'
@@ -1633,6 +1751,7 @@ def render_evidence(state, on_date):
         '<button type="submit">Show this date</button>'
         '</form></section>'
         + _manual_refresh_list(status_by_source)
+        + _series_quality_section(shown_observations)
         + _allowlist_section()
         + '<section><h2>Refresh</h2>'
         '<form method="post" action="/evidence/refresh">'
