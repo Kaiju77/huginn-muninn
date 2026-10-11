@@ -5,10 +5,15 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from src.huginn_muninn.desk import INTELLIGENCE
+from src.huginn_muninn.desk import (
+    INTELLIGENCE,
+    _future_kept_note,
+    _usd_nok_ledger_section,
+)
 from src.huginn_muninn.evidence import (
     MAX_AGE_DAYS,
     EvidenceStore,
+    Observation,
     assess,
     due_status,
     freshness_flags,
@@ -571,6 +576,27 @@ class EvidencePageTest(unittest.TestCase):
             'The match is not a live source confirmation.',
             body,
         )
+        ledger_note = body.split('id="usd-nok-ledger"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('data-ledger-rate="10.25"', ledger_note)
+        self.assertIn('data-observation-id="obs-usd-nok-2026-03-31"', ledger_note)
+        self.assertIn('data-stored-value="10.25"', ledger_note)
+        self.assertIn('data-observation-date="2026-03-31"', ledger_note)
+        self.assertIn('data-quality="synthetic_fixture"', ledger_note)
+        self.assertIn('data-equals="true"', ledger_note)
+        self.assertIn('Newest stored observation 10.25.', ledger_note)
+        self.assertIn('Observation date 2026-03-31.', ledger_note)
+        self.assertIn('Quality synthetic_fixture.', ledger_note)
+        self.assertIn('Ledger rate 10.25.', ledger_note)
+        self.assertIn('The stored value equals 10.25.', ledger_note)
+        self.assertIn('A match and a gap are not a ledger update.', ledger_note)
+        self.assertEqual(body.count('A match and a gap are not a ledger update.'), 1)
+        self.assertNotIn('The date has more than one row.', ledger_note)
+        self.assertNotIn('data-multiple', ledger_note)
+        self.assertNotIn(
+            'A row later than the selected date stays on the page. It was not dropped.',
+            body,
+        )
+        self.assertNotIn('No stored USD/NOK observation is visible.', body)
         self.assertIn('4.50', body)
         self.assertNotIn('probability', body.lower())
         self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
@@ -592,6 +618,33 @@ class EvidencePageTest(unittest.TestCase):
             'data-freshness="future_observation future_retrieval"',
             selected.body,
         )
+        self.assertNotIn(
+            'data-observation="obs-usd-nok-2026-03-31" data-freshness="fresh"',
+            selected.body,
+        )
+        self.assertEqual(
+            selected.body.count(
+                'A row later than the selected date stays on the page. It was not dropped.'
+            ),
+            1,
+        )
+        self.assertIn(
+            'The match is not a live source confirmation.',
+            selected.body,
+        )
+        later = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(later.status, 200)
+        self.assertIn(
+            'data-observation="obs-usd-nok-2026-03-31" data-freshness="stale"',
+            later.body,
+        )
+        self.assertNotIn(
+            'A row later than the selected date stays on the page. It was not dropped.',
+            later.body,
+        )
+        later_note = later.body.split('id="usd-nok-ledger"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('data-stored-value="10.25"', later_note)
+        self.assertIn('A match and a gap are not a ledger update.', later_note)
         rejected = dispatch(self.state, 'GET', '/evidence?date=2026-02-31', None)
         self.assertEqual(rejected.status, 400)
         blocked = dispatch(self.state, 'POST', '/evidence', {})
@@ -717,4 +770,294 @@ class EvidencePageTest(unittest.TestCase):
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
             ['10', '10.25'],
+        )
+
+    def _usd_row(self, observation_id, value, observed, quality, retrieval='2026-10-11'):
+        return {
+            'observation_id': observation_id,
+            'source_id': 'norges-bank-open-data',
+            'subject': 'USD/NOK',
+            'unit': 'NOK per 1 USD',
+            'value': value,
+            'observation_time': observed,
+            'retrieval_time': retrieval,
+            'provenance': 'Norges Bank open data.',
+            'quality': quality,
+        }
+
+    def _ledger_section(self, body):
+        return body.split('id="usd-nok-ledger"', 1)[1].split('</section>', 1)[0]
+
+    def test_newest_usd_nok_date_beats_the_older_fixture(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T08:03:34+00:00',
+            (self._usd_row(
+                'nb-exr-USD-NOK-2026-10-09',
+                '9.5623',
+                '2026-10-09',
+                ['live_retrieval'],
+            ),),
+            (),
+        )
+        before = self.state.ledger.value('2026-03-31')
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(response.status, 200)
+        note = self._ledger_section(response.body)
+        self.assertIn('data-ledger-rate="10.25"', note)
+        self.assertIn('data-observation-id="nb-exr-USD-NOK-2026-10-09"', note)
+        self.assertIn('data-stored-value="9.5623"', note)
+        self.assertIn('data-observation-date="2026-10-09"', note)
+        self.assertIn('data-quality="live_retrieval"', note)
+        self.assertIn('data-equals="false"', note)
+        self.assertIn('Newest stored observation 9.5623.', note)
+        self.assertNotIn('Newest stored observation 10.25.', note)
+        self.assertIn('Observation date 2026-10-09.', note)
+        self.assertIn('Quality live_retrieval.', note)
+        self.assertIn('Ledger rate 10.25.', note)
+        self.assertIn('The stored value does not equal 10.25.', note)
+        self.assertIn('A match and a gap are not a ledger update.', note)
+        self.assertEqual(response.body.count('A match and a gap are not a ledger update.'), 1)
+        self.assertIn('The match is not a live source confirmation.', response.body)
+        self.assertNotIn(
+            'A row later than the selected date stays on the page. It was not dropped.',
+            response.body,
+        )
+        self.assertIn(
+            'data-observation="nb-exr-USD-NOK-2026-10-09" data-freshness="fresh"',
+            response.body,
+        )
+        self.assertIn('data-observation="obs-usd-nok-2026-03-31"', response.body)
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before)
+        self.assertEqual(before.known_subtotal, Decimal('24932.50'))
+        rates = [row['rate'] for row, _posting in self.state.rate_postings]
+        self.assertEqual(rates, ['10', '10.25'])
+        self.assertNotIn('9.5623', rates)
+
+    def test_shared_newest_usd_nok_date_uses_the_first_visible_row(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T08:03:34+00:00',
+            (
+                self._usd_row(
+                    'nb-z-usd-nok-2026-10-09',
+                    '9.10',
+                    '2026-10-09',
+                    ['recorded_fixture'],
+                ),
+                self._usd_row(
+                    'nb-a-usd-nok-2026-10-09',
+                    '9.70',
+                    '2026-10-09',
+                    ['live_retrieval'],
+                ),
+            ),
+            (),
+        )
+        before = self.state.ledger.value('2026-03-31')
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(response.status, 200)
+        note = self._ledger_section(response.body)
+        self.assertIn('data-observation-id="nb-z-usd-nok-2026-10-09"', note)
+        self.assertIn('data-stored-value="9.10"', note)
+        self.assertIn('data-quality="recorded_fixture"', note)
+        self.assertIn('data-multiple="true"', note)
+        self.assertIn('data-equals="false"', note)
+        self.assertIn('Newest stored observation 9.10.', note)
+        self.assertNotIn('Newest stored observation 9.70.', note)
+        self.assertNotIn('Newest stored observation 10.25.', note)
+        self.assertIn('The date has more than one row.', note)
+        self.assertIn('A match and a gap are not a ledger update.', note)
+        self.assertIn('data-observation="nb-a-usd-nok-2026-10-09"', response.body)
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_later_visible_conflict_date_is_the_newest_usd_nok(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T08:03:34+00:00',
+            (
+                self._usd_row(
+                    'nb-exr-USD-NOK-shared',
+                    '9.50',
+                    '2026-10-08',
+                    ['recorded_fixture'],
+                    retrieval='2026-10-11',
+                ),
+                self._usd_row(
+                    'nb-exr-USD-NOK-shared',
+                    '9.20',
+                    '2026-10-10',
+                    ['recorded_fixture'],
+                    retrieval='2026-10-12',
+                ),
+            ),
+            (),
+        )
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(response.status, 200)
+        note = self._ledger_section(response.body)
+        self.assertIn('data-observation-id="nb-exr-USD-NOK-shared"', note)
+        self.assertIn('data-stored-value="9.20"', note)
+        self.assertIn('data-observation-date="2026-10-10"', note)
+        self.assertNotIn('data-multiple', note)
+        self.assertNotIn('Newest stored observation 9.50.', note)
+        self.assertNotIn('Newest stored observation 10.25.', note)
+        self.assertIn('A match and a gap are not a ledger update.', note)
+        self.assertIn('Both observation dates stay visible: 2026-10-08, 2026-10-10.', response.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_scaled_stored_value_can_equal_the_ledger_rate(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T08:03:34+00:00',
+            (self._usd_row(
+                'nb-scaled-usd-nok',
+                '10.250',
+                '2026-04-01',
+                ['recorded_fixture'],
+                retrieval='2026-04-01',
+            ),),
+            (),
+        )
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-04-01', None)
+        self.assertEqual(response.status, 200)
+        note = self._ledger_section(response.body)
+        self.assertIn('data-stored-value="10.250"', note)
+        self.assertIn('data-equals="true"', note)
+        self.assertIn('Newest stored observation 10.250.', note)
+        self.assertIn('The stored value equals 10.25.', note)
+        self.assertIn('A match and a gap are not a ledger update.', note)
+        self.assertEqual(response.body.count('A match and a gap are not a ledger update.'), 1)
+        rates = [row['rate'] for row, _posting in self.state.rate_postings]
+        self.assertEqual(rates, ['10', '10.25'])
+        self.assertNotIn('10.250', rates)
+
+    def test_missing_stored_usd_nok_does_not_equal_the_ledger_rate(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T08:03:34+00:00',
+            (self._usd_row(
+                'nb-missing-usd-nok',
+                None,
+                '2026-04-05',
+                ['recorded_fixture'],
+                retrieval='2026-04-05',
+            ),),
+            (),
+        )
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-04-05', None)
+        self.assertEqual(response.status, 200)
+        note = self._ledger_section(response.body)
+        self.assertIn('data-stored-value="missing"', note)
+        self.assertIn('data-equals="false"', note)
+        self.assertIn('Newest stored observation missing.', note)
+        self.assertIn('The stored value does not equal 10.25.', note)
+        self.assertIn('Ledger rate 10.25.', note)
+        self.assertIn('A match and a gap are not a ledger update.', note)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_no_visible_usd_nok_still_shows_the_ledger_rate(self):
+        note = _usd_nok_ledger_section(())
+        self.assertIn('No stored USD/NOK observation is visible.', note)
+        self.assertIn('Ledger rate 10.25.', note)
+        self.assertIn('data-ledger-rate="10.25"', note)
+        self.assertIn('A match and a gap are not a ledger update.', note)
+        self.assertNotIn('Newest stored observation', note)
+        self.assertNotIn('data-stored-value', note)
+        policy = Observation(
+            'obs-stale-policy',
+            'norges-bank-open-data',
+            'policy-rate',
+            'percent',
+            Decimal('4.50'),
+            date(2026, 1, 2),
+            date(2026, 1, 2),
+            'synthetic-stale-policy-fixture',
+            ('synthetic_fixture',),
+        )
+        policy_note = _usd_nok_ledger_section((policy,))
+        self.assertIn('No stored USD/NOK observation is visible.', policy_note)
+        self.assertIn('A match and a gap are not a ledger update.', policy_note)
+        self.assertEqual(_future_kept_note((policy,), date(2026, 1, 2)), '')
+        later = _future_kept_note((policy,), date(2026, 1, 1))
+        self.assertEqual(
+            later.count(
+                'A row later than the selected date stays on the page. It was not dropped.'
+            ),
+            1,
+        )
+
+    def test_future_rows_stay_and_the_sentence_is_once(self):
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T08:03:34+00:00',
+            (
+                self._usd_row(
+                    'nb-future-obs',
+                    '9.40',
+                    '2026-04-02',
+                    ['recorded_fixture'],
+                    retrieval='2026-04-02',
+                ),
+                {
+                    'observation_id': 'nb-future-retrieval',
+                    'source_id': 'norges-bank-open-data',
+                    'subject': 'policy-rate',
+                    'unit': 'percent',
+                    'value': '4.25',
+                    'observation_time': '2026-03-31',
+                    'retrieval_time': '2026-04-03',
+                    'provenance': 'Norges Bank open data.',
+                    'quality': ['recorded_fixture'],
+                },
+            ),
+            (),
+        )
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        self.assertEqual(response.status, 200)
+        sentence = (
+            'A row later than the selected date stays on the page. It was not dropped.'
+        )
+        self.assertEqual(response.body.count(sentence), 1)
+        self.assertIn(
+            'data-observation="nb-future-obs" '
+            'data-freshness="future_observation future_retrieval"',
+            response.body,
+        )
+        self.assertNotIn(
+            'data-observation="nb-future-obs" data-freshness="fresh"',
+            response.body,
+        )
+        self.assertIn(
+            'data-observation="nb-future-retrieval" data-freshness="future_retrieval"',
+            response.body,
+        )
+        self.assertNotIn(
+            'data-observation="nb-future-retrieval" data-freshness="fresh"',
+            response.body,
+        )
+        self.assertIn('The match is not a live source confirmation.', response.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_evidence_page_does_not_call_add_rate(self):
+        source = (ROOT / 'src' / 'huginn_muninn' / 'desk.py').read_text(encoding='utf-8')
+        self.assertNotIn('add_rate', source)
+        self.assertIn('The match is not a live source confirmation.', source)
+        self.assertIn('A match and a gap are not a ledger update.', source)
+        self.assertIn(
+            'A row later than the selected date stays on the page. It was not dropped.',
+            source,
         )

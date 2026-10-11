@@ -1078,6 +1078,11 @@ _CPI_MONTHLY_SENTENCE = (
     'Stale in October means the monthly index is older than 7 days. '
     'It is not a failed daily refresh.'
 )
+_LEDGER_USD_NOK = Decimal('10.25')
+_LEDGER_GAP_SENTENCE = 'A match and a gap are not a ledger update.'
+_FUTURE_ROW_SENTENCE = (
+    'A row later than the selected date stays on the page. It was not dropped.'
+)
 
 
 def _pair_day(observation_id, prefix):
@@ -1174,6 +1179,75 @@ def _cpi_monthly_note(observations):
         f'<p data-cpi-note="{_CPI_OBSERVATION_ID}">'
         f'{_CPI_MONTHLY_SENTENCE}</p>'
     )
+
+
+def _newest_usd_nok(observations):
+    """First visible USD/NOK row on the newest observation date.
+
+    Visible order is kept. This does not fetch and does not write the ledger.
+    """
+    rows = [item for item in observations if item.subject == 'USD/NOK']
+    if not rows:
+        return None, False
+    latest = max(item.observation_time for item in rows)
+    on_latest = [item for item in rows if item.observation_time == latest]
+    return on_latest[0], len(on_latest) > 1
+
+
+def _usd_nok_ledger_section(observations):
+    """Stored USD/NOK beside the synthetic ledger rate. This does not fetch."""
+    rate = format(_LEDGER_USD_NOK, 'f')
+    chosen, shared = _newest_usd_nok(observations)
+    if chosen is None:
+        return (
+            '<section id="usd-nok-ledger"><h2>USD/NOK beside the ledger rate</h2>'
+            f'<p data-ledger-rate="{escape(rate)}">'
+            'No stored USD/NOK observation is visible. '
+            f'Ledger rate {escape(rate)}. '
+            f'{_LEDGER_GAP_SENTENCE}</p></section>'
+        )
+    shown = 'missing' if chosen.value is None else format(chosen.value, 'f')
+    equals = chosen.value == _LEDGER_USD_NOK
+    if equals:
+        equality = f'The stored value equals {rate}.'
+    else:
+        equality = f'The stored value does not equal {rate}.'
+    quality = ', '.join(chosen.quality)
+    shared_text = ''
+    shared_attr = ''
+    if shared:
+        shared_attr = ' data-multiple="true"'
+        shared_text = ' The date has more than one row.'
+    return (
+        '<section id="usd-nok-ledger"><h2>USD/NOK beside the ledger rate</h2>'
+        '<p'
+        f' data-ledger-rate="{escape(rate)}"'
+        f' data-observation-id="{escape(chosen.observation_id)}"'
+        f' data-stored-value="{escape(shown)}"'
+        f' data-observation-date="{escape(chosen.observation_time.isoformat())}"'
+        f' data-quality="{escape(" ".join(chosen.quality))}"'
+        f' data-equals="{"true" if equals else "false"}"'
+        f'{shared_attr}'
+        '>'
+        f'Newest stored observation {escape(shown)}. '
+        f'Observation date {escape(chosen.observation_time.isoformat())}. '
+        f'Quality {escape(quality)}. '
+        f'Ledger rate {escape(rate)}. '
+        f'{escape(equality)} '
+        f'{_LEDGER_GAP_SENTENCE}{shared_text}</p></section>'
+    )
+
+
+def _future_kept_note(observations, on_date):
+    """One sentence when a visible row is later than the selected date.
+
+    Freshness flags are read and not changed. A future row is not marked fresh.
+    """
+    for observation in observations:
+        flags = freshness_flags(observation, on_date, MAX_AGE_DAYS)
+        if 'future_observation' in flags or 'future_retrieval' in flags:
+            return f'<p data-future-row="kept">{_FUTURE_ROW_SENTENCE}</p>'
+    return ''
 
 
 def _series_inventory_section(observations):
@@ -1377,7 +1451,8 @@ def render_evidence(state, on_date):
         'drawn as a Norges Bank point. NOWA is not drawn on this chart. Stored dates '
         'only. Missing dates are not interpolated.</figcaption>'
         '</figure></section>'
-        '<section><h2>Policy rate observations</h2>'
+        + _usd_nok_ledger_section(shown_observations)
+        + '<section><h2>Policy rate observations</h2>'
         '<figure>'
         + _policy_rate_svg(shown_observations)
         + '<figcaption>The synthetic 4.50 fixture is labeled synthetic and is not '
@@ -1400,6 +1475,7 @@ def render_evidence(state, on_date):
         '</tr></thead><tbody>'
         + ''.join(observation_rows)
         + '</tbody></table></div>'
+        + _future_kept_note(shown_observations, parsed)
         + ''.join(match_notes)
         + ''.join(conflict_notes)
         + _cpi_monthly_note(shown_observations)
