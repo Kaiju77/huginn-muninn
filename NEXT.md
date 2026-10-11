@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-08 is reviewed in this commit. Reviewer `05ef935a-e39b-4b92-990a-0807c762b6bc` approved the labeled USD/NOK gap and the freshness flags on the stored-series lines. The next executable task is item 2.
+1. INGEST-08 is reviewed at `ce01011006d46c91c7027b6cbb94385b887d0410`. Reviewer `05ef935a-e39b-4b92-990a-0807c762b6bc` approved the labeled USD/NOK gap and the freshness flags on the stored-series lines. The next executable task is item 2.
 2. After it: beside the static six-series list, show the existing due or current label for the source that owns each series. Map Norges Bank USD/NOK, Norges Bank EUR/NOK, the policy rate, and NOWA to norges-bank-open-data. Map ECB NOK/EUR to ecb-sdw. Map the CPI cell to ssb-statbank. Use due_status. Do not fetch. A source with no fresh non-synthetic row stays due.
 3. After that: on the evidence page, repeat the last stored refresh timestamp that is already in the cache, and say that a later calendar day is not a scheduled refresh. Do not add a scheduler.
 
