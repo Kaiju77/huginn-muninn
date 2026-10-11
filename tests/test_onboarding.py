@@ -1991,3 +1991,395 @@ class EnteredPriceAcceptTest(unittest.TestCase):
                 _holding_price_refusal(observed, 'NOK'),
                 NOT_A_HOLDING_PRICE,
             )
+
+
+OBSERVED_NOTE_SENTENCE = 'This note restates a stored observation.'
+HYPOTHESIS_SENTENCE = 'This is a hypothesis. It is not a recommendation.'
+NOTES_NOT_RECOMMENDATION = 'These notes are not a recommendation.'
+OBSERVATION_NOT_ONE = 'That observation is not one visible stored row.'
+HYPOTHESIS_BLANK = 'The hypothesis text is blank.'
+CITATION_NOT_ONE = 'A cited observation is not one visible stored row.'
+
+
+class EnteredNotesTest(unittest.TestCase):
+    def setUp(self):
+        self._before_fixture = FIXTURE.read_bytes()
+        self._tmp = tempfile.TemporaryDirectory()
+        root = Path(self._tmp.name)
+        self.overlay = root / 'synthetic-book.json'
+        self.entered_path = root / 'book.json'
+        self.state = open_state(ROOT, self.overlay, self.entered_path)
+        self.state.ingest_cache_dir = root / 'ingest-cache'
+        self.book = self.state.entered
+        self._price_postings = list(self.state.price_postings)
+        self._rate_postings = list(self.state.rate_postings)
+
+    def tearDown(self):
+        self.assertEqual(FIXTURE.read_bytes(), self._before_fixture)
+        self._tmp.cleanup()
+
+    def _instrument(self, name, currency):
+        saved = self.book.add_instrument(name, 'fund', currency)
+        self.assertTrue(saved.accepted, saved.message)
+        return saved.identity
+
+    def _ready(self):
+        account = self.book.add_account('Bank', 'Main').identity
+        saved = self.book.add_activity(
+            'contribution',
+            account,
+            '2026-05-01',
+            'transfer',
+            currency='NOK',
+            amount='20',
+        )
+        self.assertTrue(saved.accepted, saved.message)
+        instrument = self._instrument('Local fund', 'NOK')
+        price = self.book.record_price(
+            instrument,
+            '3',
+            'NOK',
+            '2026-05-02',
+            '2026-05-04',
+            'entered by hand',
+        )
+        self.assertTrue(price.accepted, price.message)
+        self._account = account
+        self._before = {
+            'cash': self.book.books().cash,
+            'positions': self.book.books().positions,
+            'prices': self.book.prices,
+            'activities': self.book.activities,
+            'events': self.book.recorded_events(),
+        }
+        return instrument
+
+    def _store(self, rows):
+        from src.huginn_muninn.ingest.cache import write_refresh
+
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-05-04T12:00:00+00:00',
+            tuple(rows),
+            (),
+        )
+
+    def _row(
+        self,
+        observation_id,
+        subject,
+        unit,
+        value,
+        quality,
+        observed='2026-05-02',
+        retrieved='2026-05-04',
+    ):
+        return {
+            'observation_id': observation_id,
+            'source_id': 'norges-bank-open-data',
+            'subject': subject,
+            'unit': unit,
+            'value': value,
+            'observation_time': observed,
+            'retrieval_time': retrieved,
+            'provenance': 'recorded for a note',
+            'quality': list(quality),
+        }
+
+    def _post(self, form):
+        return dispatch(self.state, 'POST', '/portfolio/notes', form)
+
+    def _assert_book_unchanged(self):
+        self.assertEqual(self.book.books().cash, self._before['cash'])
+        self.assertEqual(self.book.books().positions, self._before['positions'])
+        self.assertEqual(self.book.prices, self._before['prices'])
+        self.assertEqual(self.book.activities, self._before['activities'])
+        self.assertEqual(self.book.recorded_events(), self._before['events'])
+        self.assertEqual(self.book.ledger()._prices, [])
+        self.assertEqual(self.book.ledger()._rates, [])
+        self.assertEqual(
+            self.book.books().cash,
+            (CashBalance(self._account, 'NOK', Decimal('20')),),
+        )
+        ledger = dispatch(self.state, 'GET', '/ledger', None)
+        self.assertIn('15050', ledger.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+        self.assertEqual(list(self.state.price_postings), self._price_postings)
+        self.assertEqual(list(self.state.rate_postings), self._rate_postings)
+
+    def _section(self, page, section_id):
+        return page.body.split(f'id="{section_id}"', 1)[1].split('</section>', 1)[0]
+
+    def test_get_shows_notes_and_does_not_store_one(self):
+        import socket
+        import urllib.request
+
+        self._ready()
+        observation_id = 'obs-local-note'
+        self._store((
+            self._row(
+                observation_id,
+                'price',
+                'NOK',
+                '12.345',
+                ('recorded_fixture',),
+            ),
+        ))
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            page = dispatch(
+                self.state,
+                'GET',
+                (
+                    '/portfolio/notes?kind=observed&observation_id='
+                    + observation_id
+                    + '&text=hello'
+                ),
+                None,
+            )
+            portfolio = dispatch(self.state, 'GET', '/portfolio', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.body.count(NOTES_NOT_RECOMMENDATION), 1)
+        self.assertEqual(page.body.count(OBSERVED_NOTE_SENTENCE), 1)
+        self.assertEqual(page.body.count(HYPOTHESIS_SENTENCE), 1)
+        self.assertNotIn('Saved.', page.body)
+        self.assertIn('method="post" action="/portfolio/notes"', page.body)
+        self.assertIn('data-observation="obs-usd-nok-2026-03-31"', page.body)
+        self.assertIn('data-observation="obs-local-note"', page.body)
+        self.assertIn('href="/portfolio/notes"', portfolio.body)
+        observed_form = page.body.split('id="observed-note-form"', 1)[1].split(
+            '</form>',
+            1,
+        )[0]
+        hypothesis_form = page.body.split('id="hypothesis-note-form"', 1)[1].split(
+            '</form>',
+            1,
+        )[0]
+        self.assertIn('name="observation_id"', observed_form)
+        self.assertNotIn('name="text"', observed_form)
+        self.assertNotIn('<textarea', observed_form)
+        self.assertIn('name="text"', hypothesis_form)
+        self.assertIn('<textarea', hypothesis_form)
+        self.assertIn('name="citation"', hypothesis_form)
+        self.assertEqual(self.book.notes, ())
+        self.assertNotIn('notes', json.loads(self.entered_path.read_text(encoding='utf-8')))
+        self._assert_book_unchanged()
+        prototype = (ROOT / 'src' / 'huginn_muninn' / 'prototype.py').read_text(
+            encoding='utf-8',
+        )
+        getter = prototype.split('def _entered_notes', 1)[1].split('\ndef ', 1)[0]
+        poster = prototype.split('def _post_entered_notes', 1)[1].split('\ndef ', 1)[0]
+        saver = prototype.split('def _save_observed_note', 1)[1].split('\ndef ', 1)[0]
+        hypothesis = prototype.split('def _save_hypothesis', 1)[1].split('\ndef ', 1)[0]
+        restated = prototype.split('def _restated_observation', 1)[1].split(
+            '\ndef ',
+            1,
+        )[0]
+        self.assertIn('open_recorded_store', getter)
+        self.assertNotIn('add_note', getter)
+        self.assertNotIn('_save_observed_note', getter)
+        self.assertNotIn('_save_hypothesis', getter)
+        self.assertIn('open_recorded_store', poster)
+        self.assertIn('_save_observed_note', poster)
+        self.assertIn('_save_hypothesis', poster)
+        self.assertIn('add_note', saver)
+        self.assertIn('_restated_observation', saver)
+        for chunk in (getter, poster, saver, hypothesis, restated):
+            self.assertNotIn('add_price', chunk)
+            self.assertNotIn('add_rate', chunk)
+            self.assertNotIn('socket', chunk)
+            self.assertNotIn('urllib', chunk)
+            self.assertNotIn('requests', chunk)
+        for word in ('buy', 'sell', 'hold', 'allocation'):
+            self.assertNotIn(word, restated)
+            self.assertNotIn(word, hypothesis)
+            self.assertNotIn(word, saver)
+        onboarding = (ROOT / 'src' / 'huginn_muninn' / 'onboarding.py').read_text(
+            encoding='utf-8',
+        )
+        adder = onboarding.split('def add_note', 1)[1].split('\n    def ', 1)[0]
+        self.assertNotIn('add_price', adder)
+        self.assertNotIn('add_rate', adder)
+        for word in ('buy', 'sell', 'hold', 'allocation'):
+            self.assertNotIn(word, adder)
+
+    def test_a_missing_repeated_or_hidden_observation_stores_nothing(self):
+        self._ready()
+        self._store((
+            self._row('obs-repeat', 'price', 'NOK', '1', ('recorded_fixture',)),
+            self._row('obs-repeat', 'price', 'NOK', '2', ('recorded_fixture',)),
+            self._row('obs-local-note', 'price', 'NOK', '12.345', ('recorded_fixture',)),
+        ))
+        shown = dispatch(self.state, 'GET', '/portfolio/notes', None)
+        self.assertEqual(shown.body.count('data-observation="obs-repeat"'), 2)
+        for observation_id in ('', 'not-stored', 'obs-repeat'):
+            page = self._post({
+                'kind': 'observed',
+                'observation_id': observation_id,
+                'text': 'buy sell hold allocation',
+            })
+            self.assertEqual(page.status, 400)
+            self.assertEqual(page.body.count(OBSERVATION_NOT_ONE), 1)
+            self.assertEqual(page.body.count(OBSERVED_NOTE_SENTENCE), 1)
+            self.assertNotIn('Saved.', page.body)
+            self.assertNotIn('buy sell hold allocation', page.body)
+            self.assertEqual(self.book.notes, ())
+        self.assertNotIn('notes', json.loads(self.entered_path.read_text(encoding='utf-8')))
+        self._assert_book_unchanged()
+
+    def test_an_observed_note_restates_one_stored_observation(self):
+        import socket
+        import urllib.request
+
+        self._ready()
+        observation_id = 'obs-local-note'
+        self._store((
+            self._row(
+                observation_id,
+                'price',
+                'NOK',
+                '12.345',
+                ('recorded_fixture',),
+            ),
+        ))
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            with localcontext(Context(prec=2)):
+                accepted = self._post({
+                    'kind': 'observed',
+                    'observation_id': observation_id,
+                    'text': 'buy sell hold allocation',
+                })
+                again = dispatch(self.state, 'GET', '/portfolio/notes', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        expected = 'obs-local-note price NOK 12.345 2026-05-02 2026-05-04'
+        self.assertEqual(accepted.status, 200)
+        self.assertIn('Saved.', accepted.body)
+        self.assertNotIn(OBSERVATION_NOT_ONE, accepted.body)
+        self.assertNotIn('buy sell hold allocation', accepted.body)
+        observed = self._section(accepted, 'observed-notes')
+        hypotheses = self._section(accepted, 'hypotheses')
+        self.assertIn(OBSERVED_NOTE_SENTENCE, observed)
+        self.assertIn(expected, observed.split(OBSERVED_NOTE_SENTENCE, 1)[1])
+        self.assertNotIn(HYPOTHESIS_SENTENCE, observed)
+        self.assertNotIn('data-note="hypothesis"', observed)
+        self.assertNotIn(expected, hypotheses)
+        self.assertEqual(len(self.book.notes), 1)
+        note = self.book.notes[0]
+        self.assertEqual(note['origin'], 'entered')
+        self.assertEqual(note['kind'], 'observed')
+        self.assertEqual(note['text'], expected)
+        self.assertEqual(note['citations'], [observation_id])
+        for word in ('buy', 'sell', 'hold', 'allocation'):
+            self.assertNotIn(word, note['text'])
+            self.assertNotIn(word, observed)
+        self.assertEqual(again.status, 200)
+        self.assertEqual(len(self.book.notes), 1)
+        self.assertNotIn('Saved.', again.body)
+        reloaded = EnteredPortfolio(self.entered_path)
+        self.assertEqual(reloaded.load_error, '')
+        self.assertEqual(reloaded.notes[0]['text'], expected)
+        self.assertEqual(self.book.prices[0]['amount'], '3')
+        self._assert_book_unchanged()
+
+    def test_a_hypothesis_is_labeled_and_is_not_an_observed_note(self):
+        self._ready()
+        first = 'obs-local-note'
+        second = 'obs-other-note'
+        self._store((
+            self._row(first, 'price', 'NOK', '12.345', ('recorded_fixture',)),
+            self._row(second, 'price', 'USD', '8', ('recorded_fixture',), '2026-05-03', '2026-05-04'),
+        ))
+        typed = 'The stored reading can be read again.'
+        page = self._post({
+            'kind': 'hypothesis',
+            'text': typed,
+            'citation': [first, second],
+        })
+        self.assertEqual(page.status, 200)
+        self.assertIn('Saved.', page.body)
+        self.assertEqual(page.body.count(HYPOTHESIS_SENTENCE), 1)
+        self.assertEqual(page.body.count(NOTES_NOT_RECOMMENDATION), 1)
+        observed = self._section(page, 'observed-notes')
+        hypotheses = self._section(page, 'hypotheses')
+        self.assertNotIn(typed, observed)
+        self.assertNotIn('data-note="hypothesis"', observed)
+        self.assertIn(HYPOTHESIS_SENTENCE, hypotheses)
+        self.assertIn(typed, hypotheses.split(HYPOTHESIS_SENTENCE, 1)[1])
+        self.assertNotIn(OBSERVED_NOTE_SENTENCE, hypotheses)
+        for word in ('buy', 'sell', 'hold', 'allocation'):
+            self.assertNotIn(word, hypotheses)
+        self.assertEqual(len(self.book.notes), 1)
+        note = self.book.notes[0]
+        self.assertEqual(note['origin'], 'entered')
+        self.assertEqual(note['kind'], 'hypothesis')
+        self.assertEqual(note['text'], typed)
+        self.assertEqual(note['citations'], [first, second])
+        self.assertEqual(self.book.prices[0]['amount'], '3')
+        self._assert_book_unchanged()
+
+    def test_a_blank_or_uncited_hypothesis_stores_nothing(self):
+        self._ready()
+        observation_id = 'obs-local-note'
+        self._store((
+            self._row(
+                observation_id,
+                'price',
+                'NOK',
+                '12.345',
+                ('recorded_fixture',),
+            ),
+            self._row('obs-repeat', 'price', 'NOK', '1', ('recorded_fixture',)),
+            self._row('obs-repeat', 'price', 'NOK', '2', ('recorded_fixture',)),
+        ))
+        typed = 'The stored reading can be read again.'
+        attempts = (
+            ({'kind': 'hypothesis', 'text': '   ', 'citation': [observation_id]}, HYPOTHESIS_BLANK),
+            ({'kind': 'hypothesis', 'text': '', 'citation': [observation_id]}, HYPOTHESIS_BLANK),
+            ({'kind': 'hypothesis', 'text': typed, 'citation': []}, CITATION_NOT_ONE),
+            ({'kind': 'hypothesis', 'text': typed, 'citation': ['not-stored']}, CITATION_NOT_ONE),
+            ({'kind': 'hypothesis', 'text': typed, 'citation': [observation_id, 'not-stored']}, CITATION_NOT_ONE),
+            ({'kind': 'hypothesis', 'text': typed, 'citation': ['obs-repeat']}, CITATION_NOT_ONE),
+            ({'kind': 'hypothesis', 'text': typed, 'citation': [observation_id, observation_id]}, CITATION_NOT_ONE),
+            ({'kind': 'hypothesis', 'text': '   ', 'citation': ['not-stored']}, HYPOTHESIS_BLANK),
+            ({'kind': ''}, ''),
+        )
+        for form, message in attempts:
+            page = self._post(form)
+            self.assertEqual(page.status, 400, form)
+            if message:
+                self.assertIn(message, page.body)
+            self.assertNotIn('Saved.', page.body)
+            self.assertNotIn('data-note="hypothesis"', page.body)
+            self.assertNotIn('data-note="observed"', page.body)
+            self.assertEqual(self.book.notes, ())
+        self.assertNotIn('notes', json.loads(self.entered_path.read_text(encoding='utf-8')))
+        self._assert_book_unchanged()

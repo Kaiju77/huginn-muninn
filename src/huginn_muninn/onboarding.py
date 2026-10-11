@@ -1,9 +1,10 @@
 """Entered portfolio store.
 
-People record accounts, instruments, activities, manual balances, and prices.
+People record accounts, instruments, activities, manual balances, prices, and notes.
 This module does not fetch and does not load the synthetic fixture.
 Currency rates are not recorded here. Valuation reads this book only.
-Attribution reads this book only. HTTP stays in the prototype.
+Attribution reads this book only. Notes are not ledger events.
+HTTP stays in the prototype.
 """
 
 from copy import deepcopy
@@ -75,6 +76,14 @@ MANUAL_BALANCE_CONFLICT = (
     'This holding is a manual balance. A purchase would invent a quantity.'
 )
 UNREADABLE = 'The entered portfolio could not be read.'
+OBSERVED_NOTE_SENTENCE = 'This note restates a stored observation.'
+HYPOTHESIS_SENTENCE = 'This is a hypothesis. It is not a recommendation.'
+NOTES_NOT_RECOMMENDATION = 'These notes are not a recommendation.'
+OBSERVATION_NOT_ONE = 'That observation is not one visible stored row.'
+HYPOTHESIS_BLANK = 'The hypothesis text is blank.'
+CITATION_NOT_ONE = 'A cited observation is not one visible stored row.'
+NOTE_NOT_STORED = 'That note was not stored.'
+NOTE_KINDS = ('observed', 'hypothesis')
 
 _LEDGER_SENTENCES = (
     ('unknown_account', 'That account is not in this portfolio.'),
@@ -610,6 +619,30 @@ def _validate_document(raw):
                 raise ValueError(field)
         if _clean_provenance(price.get('provenance')) is None:
             raise ValueError('price provenance')
+    stored_notes = raw.get('notes', [])
+    if not isinstance(stored_notes, list):
+        raise ValueError('notes')
+    for note in stored_notes:
+        if not isinstance(note, dict) or note.get('origin') != ORIGIN:
+            raise ValueError('note')
+        kind = _string_field(note, 'kind')
+        if kind not in NOTE_KINDS:
+            raise ValueError('note kind')
+        if _string_field(note, 'text').strip() == '':
+            raise ValueError('note text')
+        citations = note.get('citations')
+        if (
+            not isinstance(citations, list)
+            or not citations
+            or any(
+                not isinstance(item, str) or item.strip() == ''
+                for item in citations
+            )
+            or len(citations) != len(set(citations))
+        ):
+            raise ValueError('note citations')
+        if kind == 'observed' and len(citations) != 1:
+            raise ValueError('note citations')
     ledger, postings = replay(raw)
     if any(not posting.accepted for posting in postings):
         raise ValueError('rejected activity')
@@ -663,6 +696,10 @@ class EnteredPortfolio:
     @property
     def prices(self):
         return tuple(self.document.get('prices', ()))
+
+    @property
+    def notes(self):
+        return tuple(self.document.get('notes', ()))
 
     def account_label(self, identity):
         for account in self.accounts:
@@ -1024,6 +1061,49 @@ class EnteredPortfolio:
             self._commit(staged)
         except (ValueError, TypeError, InvalidOperation, OSError):
             return _fail('The entry was not recorded.')
+        return _ok('')
+
+    def add_note(self, kind, text, citations):
+        """Store one note on this book. It is not a ledger event."""
+        refused = self._refused()
+        if refused is not None:
+            return refused
+        if kind not in NOTE_KINDS:
+            return _fail(NOTE_NOT_STORED)
+        if not isinstance(text, str) or text.strip() == '':
+            if kind == 'hypothesis':
+                return _fail(HYPOTHESIS_BLANK)
+            return _fail(NOTE_NOT_STORED)
+        if not isinstance(citations, (list, tuple)):
+            return _fail(CITATION_NOT_ONE)
+        stored_citations = []
+        for citation in citations:
+            if (
+                not isinstance(citation, str)
+                or citation.strip() == ''
+                or citation in stored_citations
+            ):
+                if kind == 'observed':
+                    return _fail(OBSERVATION_NOT_ONE)
+                return _fail(CITATION_NOT_ONE)
+            stored_citations.append(citation)
+        if kind == 'observed' and len(stored_citations) != 1:
+            return _fail(OBSERVATION_NOT_ONE)
+        if kind == 'hypothesis' and not stored_citations:
+            return _fail(CITATION_NOT_ONE)
+        staged = deepcopy(self.document)
+        notes = list(staged.get('notes', []))
+        notes.append({
+            'origin': ORIGIN,
+            'kind': kind,
+            'text': text,
+            'citations': stored_citations,
+        })
+        staged['notes'] = notes
+        try:
+            self._commit(staged)
+        except (ValueError, TypeError, InvalidOperation, OSError):
+            return _fail(NOTE_NOT_STORED)
         return _ok('')
 
     def value_on(self, on_date):
@@ -1407,6 +1487,8 @@ class EnteredPortfolio:
             raise RuntimeError('refusing to overwrite an unreadable book')
         if not document.get('prices'):
             document.pop('prices', None)
+        if not document.get('notes'):
+            document.pop('notes', None)
         _validate_document(document)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         text = json.dumps(document, indent=2, ensure_ascii=False) + '\n'

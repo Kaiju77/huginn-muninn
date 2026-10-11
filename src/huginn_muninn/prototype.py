@@ -44,11 +44,18 @@ from src.huginn_muninn.onboarding import (
     ATTRIBUTION_UNAVAILABLE,
     CASH_SNAPSHOT_NOT_ADDED,
     DIVIDEND_SENTENCE,
+    CITATION_NOT_ONE,
     ENTERED_SENTENCE,
     FEE_SENTENCE,
+    HYPOTHESIS_BLANK,
+    HYPOTHESIS_SENTENCE,
     INCOMPLETE_IDENTIFICATION,
     KINDS,
     MISSING_PRICE_SENTENCE,
+    NOTE_NOT_STORED,
+    NOTES_NOT_RECOMMENDATION,
+    OBSERVATION_NOT_ONE,
+    OBSERVED_NOTE_SENTENCE,
     SNAPSHOT_SENTENCE,
     SNAPSHOT_VALUE_SENTENCE,
     VALUATION_SENTENCE,
@@ -1241,6 +1248,7 @@ def _portfolio(state, result=None, status=200):
         f'<p>{escape(ENTERED_SENTENCE)}</p>',
         '<p>Reporting currency is NOK. Foreign currency stays in its own currency.</p>',
         f'<p><a href="{_entered_valuation_href(book)}">Value this portfolio</a></p>',
+        '<p><a href="/portfolio/notes">Notes</a></p>',
     ]
     if book.load_error:
         parts.append(f'<p class="break">{escape(book.load_error)}</p>')
@@ -1990,6 +1998,170 @@ def _post_entered_price(state, form):
     return _entered_price_accept(state, result, status)
 
 
+def _restated_observation(observation):
+    """Text built only from the stored observation fields."""
+    return ' '.join((
+        observation.observation_id,
+        observation.subject,
+        observation.unit,
+        _observation_amount(observation.value),
+        observation.observation_time.isoformat(),
+        observation.retrieval_time.isoformat(),
+    ))
+
+
+def _save_observed_note(book, rows, observation_id):
+    """Store one restatement, or store nothing."""
+    observation = _chosen_observation(rows, observation_id)
+    if observation is None:
+        return EntryResult(False, OBSERVATION_NOT_ONE, (), '')
+    return book.add_note(
+        'observed',
+        _restated_observation(observation),
+        (observation.observation_id,),
+    )
+
+
+def _save_hypothesis(book, rows, text, citations):
+    """Store typed text with visible citations, or store nothing."""
+    problems = []
+    if not isinstance(text, str) or text.strip() == '':
+        problems.append(HYPOTHESIS_BLANK)
+    chosen = []
+    if not citations:
+        problems.append(CITATION_NOT_ONE)
+    else:
+        for citation in citations:
+            if citation in chosen:
+                problems.append(CITATION_NOT_ONE)
+                chosen = None
+                break
+            observation = _chosen_observation(rows, citation)
+            if observation is None:
+                problems.append(CITATION_NOT_ONE)
+                chosen = None
+                break
+            chosen.append(observation.observation_id)
+    if problems or not chosen:
+        if not problems:
+            problems.append(CITATION_NOT_ONE)
+        return EntryResult(False, ' '.join(problems), (), '')
+    return book.add_note('hypothesis', text, tuple(chosen))
+
+
+def _note_sections(notes):
+    observed = [
+        '<section id="observed-notes">',
+        f'<p>{escape(OBSERVED_NOTE_SENTENCE)}</p>',
+    ]
+    hypotheses = [
+        '<section id="hypotheses">',
+        f'<p>{escape(HYPOTHESIS_SENTENCE)}</p>',
+    ]
+    for note in notes:
+        kind = note.get('kind')
+        text = escape(note.get('text') or '')
+        cited = escape(' '.join(note.get('citations') or ()))
+        if kind == 'observed':
+            observed.append(
+                f'<p data-note="observed" data-citation="{cited}">{text}</p>'
+            )
+        elif kind == 'hypothesis':
+            hypotheses.append(
+                f'<p data-note="hypothesis" data-citations="{cited}">{text}</p>'
+            )
+    observed.append('</section>')
+    hypotheses.append('</section>')
+    return ''.join(observed) + ''.join(hypotheses)
+
+
+def _observed_note_form(rows):
+    return (
+        '<h2>Observed note</h2>'
+        '<form id="observed-note-form" method="post" action="/portfolio/notes" '
+        'enctype="application/x-www-form-urlencoded">'
+        '<input type="hidden" name="kind" value="observed">'
+        + _portfolio_select(
+            'observed',
+            'observation_id',
+            'Observation',
+            _observation_choices(rows),
+        )
+        + '<button type="submit">Save observed note</button></form>'
+    )
+
+
+def _hypothesis_note_form(rows):
+    boxes = []
+    for observation in rows:
+        boxes.append(
+            '<label>'
+            f'<input type="checkbox" name="citation" '
+            f'value="{escape(observation.observation_id)}">'
+            f' {escape(observation.observation_id)}'
+            '</label>'
+        )
+    return (
+        '<h2>Hypothesis</h2>'
+        '<form id="hypothesis-note-form" method="post" action="/portfolio/notes" '
+        'enctype="application/x-www-form-urlencoded">'
+        '<input type="hidden" name="kind" value="hypothesis">'
+        '<label for="portfolio-hypothesis-text">Text'
+        '<textarea id="portfolio-hypothesis-text" name="text"></textarea>'
+        '</label>'
+        + ''.join(boxes)
+        + '<button type="submit">Save hypothesis</button></form>'
+    )
+
+
+def _entered_notes(state, result=None, status=200):
+    book = state.entered
+    parts = [
+        f'<p>{escape(NOTES_NOT_RECOMMENDATION)}</p>',
+        '<p><a href="/portfolio">Entered portfolio</a></p>',
+        _result_banner(result),
+    ]
+    try:
+        store, _cached = open_recorded_store(state)
+        rows = visible_observations(store)
+    except ValueError as exc:
+        parts.append(f'<p class="break">{escape(str(exc))}</p>')
+        rows = ()
+    parts.append('<h2>Stored observations</h2>')
+    parts.append(_stored_observation_table(rows))
+    parts.append(_note_sections(book.notes))
+    parts.append(_observed_note_form(rows))
+    parts.append(_hypothesis_note_form(rows))
+    return _page(state, 'Portfolio notes', ''.join(parts), status, footer='')
+
+
+def _post_entered_notes(state, form):
+    try:
+        store, _cached = open_recorded_store(state)
+        rows = visible_observations(store)
+    except ValueError as exc:
+        result = EntryResult(False, str(exc), (), '')
+        return _entered_notes(state, result, 400)
+    kind = _field(form, 'kind')
+    if kind == 'observed':
+        result = _save_observed_note(
+            state.entered,
+            rows,
+            _field(form, 'observation_id'),
+        )
+    elif kind == 'hypothesis':
+        result = _save_hypothesis(
+            state.entered,
+            rows,
+            _field(form, 'text'),
+            _fields(form, 'citation'),
+        )
+    else:
+        result = EntryResult(False, NOTE_NOT_STORED, (), '')
+    status = 200 if result.accepted else 400
+    return _entered_notes(state, result, status)
+
+
 def dispatch(state, method, path, form):
     verb = str(method or '').upper()
     parsed = urlsplit(path or '/')
@@ -2018,6 +2190,10 @@ def dispatch(state, method, path, form):
         return _entered_price_accept(state)
     if verb == 'POST' and route == '/portfolio/price':
         return _post_entered_price(state, form)
+    if verb == 'GET' and route == '/portfolio/notes':
+        return _entered_notes(state)
+    if verb == 'POST' and route == '/portfolio/notes':
+        return _post_entered_notes(state, form)
     if verb == 'GET' and route == '/portfolio/performance':
         return _entered_performance(state, query)
     if verb == 'GET' and route == '/api/desk':
@@ -2055,6 +2231,7 @@ def dispatch(state, method, path, form):
         '/portfolio',
         '/portfolio/valuation',
         '/portfolio/price',
+        '/portfolio/notes',
         '/portfolio/performance',
         '/api/desk',
         '/conversation',

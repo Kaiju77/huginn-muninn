@@ -23,3 +23,5 @@ Practical adapters for filings, macro releases, permitted prices, and verified n
 ## 4. Portfolio-aware notes
 
 Notes keep observed facts separate from hypotheses. No recommendations until a later explicit authorization.
+
+NOTE-01 is GET and POST /portfolio/notes, linked from the entered portfolio. An observed note restates one stored observation. A hypothesis is labeled text that cites stored observation ids, and it is not a recommendation. Independent review on 2026-10-11 approved NOTE-01. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208`.

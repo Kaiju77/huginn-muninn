@@ -2,9 +2,9 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. PRICE-01 is reviewed at `5237ad76643887bef8994a0b69985c90fc14758f`. Reviewer `205dc4e4-7f9f-48cc-a38e-8a79d0059c51` approved the explicit accept of one stored observation as an entered price. The next executable task is item 2.
-2. Add a portfolio note that cites stored observation ids. An observed note only restates the observation id, subject, value, and dates. A hypothesis is labeled and is not a recommendation. The page does not produce a buy, sell, or allocation instruction.
-3. Leave EDGAR, FRED, news feeds, and brokerage connections in `HUMAN_TASKS.md`. Do not scrape.
+1. NOTE-01 is reviewed. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208` approved notes that restate a stored observation and keep a hypothesis labeled. The commit id is recorded in the following note. The next executable task is item 2.
+2. Leave EDGAR, FRED, news feeds, market-data vendors, and brokerage connections in `HUMAN_TASKS.md`. Do not scrape. Do not fetch EDGAR without a real contact string. Do not fetch FRED.
+3. A later slice can match a holding to a filing only after that contact string exists. Do not invent a filing.
 
 Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`. The product path is `ROADMAP.md`.
 
