@@ -1101,6 +1101,10 @@ _CAP_SENTENCE = (
     'The cap drops the oldest observation dates that are absent from a new batch.'
 )
 _QUALITY_LABEL_SENTENCE = 'A quality flag is a label.'
+_MISSING_SERIES_SENTENCE = 'A missing series is not a zero.'
+_FIXTURE_COUNT_SENTENCE = (
+    'The synthetic fixture is not part of the cache count.'
+)
 _SERIES_SUBJECTS = {
     'Norges Bank USD/NOK': 'USD/NOK',
     'Norges Bank EUR/NOK': 'EUR/NOK',
@@ -1323,7 +1327,11 @@ def _manual_refresh_list(status_by_source):
 
 
 def _stored_count_section(cached):
-    """Cache length beside the existing cap. This does not fetch or trim."""
+    """Cache length beside the existing cap. This does not fetch or trim.
+
+    The count is the refresh cache length. Synthetic fixture rows loaded
+    from the evidence fixture are not added to it.
+    """
     count = len(cached.observations)
     cap = MAX_STORED_OBSERVATIONS
     return (
@@ -1331,7 +1339,8 @@ def _stored_count_section(cached):
         '<h2>Stored observations</h2>'
         f'<p data-stored-count="{count}" data-cap="{cap}">'
         f'Stored observations {count}. Cap {cap}. '
-        f'{_CAP_SENTENCE}</p>'
+        f'{_CAP_SENTENCE} '
+        f'{_FIXTURE_COUNT_SENTENCE}</p>'
         '</section>'
     )
 
@@ -1411,15 +1420,32 @@ def _quality_item(name, observations):
     )
 
 
+def _missing_series_count(observations):
+    """How many requested series have no stored row.
+
+    This uses the same membership as the quality list. A missing series
+    is left absent. It is not stored as zero.
+    """
+    return sum(
+        1 for name in REQUESTED_SERIES
+        if not _series_members(name, observations)
+    )
+
+
 def _series_quality_section(observations):
     """Newest stored quality flags for each requested series. This does not fetch."""
     items = ''.join(
         _quality_item(name, observations) for name in REQUESTED_SERIES
     )
+    missing = _missing_series_count(observations)
+    total = len(REQUESTED_SERIES)
     return (
         '<section id="series-quality">'
         '<h2>Quality flags</h2>'
         f'<p>{_QUALITY_LABEL_SENTENCE}</p>'
+        f'<p data-missing-series="{missing}">'
+        f'{missing} of {total} requested series are not stored. '
+        f'{_MISSING_SERIES_SENTENCE}</p>'
         f'<ol>{items}</ol>'
         '</section>'
     )

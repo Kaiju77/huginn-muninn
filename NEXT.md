@@ -2,6 +2,22 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
+1. INGEST-11 is reviewed in this commit. Reviewer `03aa61c5-c3d3-44ef-9f33-332065d20934` approved the missing-series count and the sentence that the synthetic fixture is not part of the cache count. The next executable task is item 2.
+2. When the cache count is greater than the cap, say the stored count is above the cap because the first batch can stay above 500. Use the existing trim rule. Do not change the cap. If the count is not above the cap, omit that sentence.
+3. After that: keep three ready notes on the evidence page that do not fetch. State the number of stored conflicts. State the number of stored revisions. State whether the last refresh recorded an error. Each line is omitted when the count is zero or no error is stored.
+
+Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`.
+
+The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
+
+## Historical
+
+The following pointer was current before INGEST-11. It is not the current next step.
+
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
+
 1. INGEST-10 is reviewed at `9552b0b2a8e523b20430f6725e69e82cabd5df5c`. Reviewer `8a53642d-f76a-4fcd-985c-3f1fd545f043` approved the stored observation count beside the 500 cap and the quality flag of the newest stored row for each of the six series. The next executable task is item 2.
 2. State how many of the six series are not stored. That count is computed from the same rows as the quality section. Include the exact sentence "A missing series is not a zero." Do not fetch.
 3. State that the cache count does not include the synthetic fixture rows. Include the exact sentence "The synthetic fixture is not part of the cache count." Do not fetch.

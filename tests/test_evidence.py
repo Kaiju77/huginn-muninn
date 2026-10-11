@@ -1448,6 +1448,8 @@ class EvidencePageTest(unittest.TestCase):
             source,
         )
         self.assertIn('A quality flag is a label.', source)
+        self.assertIn('A missing series is not a zero.', source)
+        self.assertIn('The synthetic fixture is not part of the cache count.', source)
         self.assertIn('MAX_STORED_OBSERVATIONS', source)
         self.assertNotIn('MAX_STORED_OBSERVATIONS =', source)
         self.assertNotIn('schedule.every', source)
@@ -1668,9 +1670,18 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('Stored observations 0. Cap 500.', count)
         self.assertEqual(count.count(cap_sentence), 1)
         self.assertEqual(body.count(cap_sentence), 1)
+        fixture_sentence = 'The synthetic fixture is not part of the cache count.'
+        self.assertEqual(count.count(fixture_sentence), 1)
+        self.assertEqual(body.count(fixture_sentence), 1)
+        self.assertNotIn('Stored observations 2.', body)
         self.assertEqual(body.count('A quality flag is a label.'), 1)
+        missing_sentence = 'A missing series is not a zero.'
+        self.assertEqual(body.count(missing_sentence), 1)
         quality = body.split('id="series-quality"', 1)[1].split('</section>', 1)[0]
         self.assertIn('A quality flag is a label.', quality)
+        self.assertIn('data-missing-series="4"', quality)
+        self.assertIn('4 of 6 requested series are not stored.', quality)
+        self.assertIn(missing_sentence, quality)
         usd = self._quality_item(body, 'Norges Bank USD/NOK')
         self.assertIn('data-stored="true"', usd)
         self.assertIn('data-latest="2026-03-31"', usd)
@@ -1692,6 +1703,8 @@ class EvidencePageTest(unittest.TestCase):
             self.assertIn('data-stored="false"', item)
             self.assertIn(f'{name} is not stored.', item)
             self.assertNotIn('Quality ', item)
+            self.assertNotIn('Value 0', item)
+            self.assertNotIn('data-quality="0"', item)
         self.assertEqual(quality.count('data-requested-series='), len(REQUESTED_SERIES))
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
@@ -1812,8 +1825,17 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-cap="500"', count)
         self.assertIn('Stored observations 9. Cap 500.', count)
         self.assertEqual(body.count(cap_sentence), 1)
+        fixture_sentence = 'The synthetic fixture is not part of the cache count.'
+        self.assertEqual(count.count(fixture_sentence), 1)
+        self.assertEqual(body.count(fixture_sentence), 1)
         self.assertNotIn('Stored observations 11.', body)
         self.assertEqual(body.count('A quality flag is a label.'), 1)
+        missing_sentence = 'A missing series is not a zero.'
+        self.assertEqual(body.count(missing_sentence), 1)
+        quality = body.split('id="series-quality"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('data-missing-series="0"', quality)
+        self.assertIn('0 of 6 requested series are not stored.', quality)
+        self.assertIn(missing_sentence, quality)
         usd = self._quality_item(body, 'Norges Bank USD/NOK')
         self.assertIn('data-latest="2026-10-09"', usd)
         self.assertIn('data-multiple="true"', usd)
@@ -1857,6 +1879,70 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-latest="2026-07-01"', cpi)
         self.assertIn('Quality recorded_fixture.', cpi)
         self.assertNotIn('is not stored.', cpi)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_one_cache_row_leaves_the_fixture_out_and_does_not_zero_a_gap(self):
+        import socket
+        import urllib.request
+
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T09:21:00+00:00',
+            (self._cache_row(
+                'nb-short-NOWA-ON-R-2026-10-08',
+                'norges-bank-open-data',
+                'nowa',
+                '4.50',
+                '2026-10-08',
+                '2026-10-11',
+            ),),
+            (),
+        )
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(response.status, 200)
+        body = response.body
+        count = body.split('id="stored-observation-count"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('data-stored-count="1"', count)
+        self.assertIn('Stored observations 1. Cap 500.', count)
+        self.assertIn('The synthetic fixture is not part of the cache count.', count)
+        self.assertNotIn('Stored observations 3.', body)
+        quality = body.split('id="series-quality"', 1)[1].split('</section>', 1)[0]
+        self.assertEqual(body.count('A missing series is not a zero.'), 1)
+        self.assertIn('data-missing-series="3"', quality)
+        self.assertIn('3 of 6 requested series are not stored.', quality)
+        self.assertIn('A missing series is not a zero.', quality)
+        nowa = self._quality_item(body, 'NOWA')
+        self.assertIn('data-stored="true"', nowa)
+        self.assertIn('Quality recorded_fixture.', nowa)
+        for name in (
+            'Norges Bank EUR/NOK',
+            'ECB NOK/EUR',
+            'the one Statistics Norway CPI cell for table 14700, 2026M07, total',
+        ):
+            item = self._quality_item(body, name)
+            self.assertIn('data-stored="false"', item)
+            self.assertIn(f'{name} is not stored.', item)
+            self.assertNotIn('Value 0', item)
+            self.assertNotIn('data-quality="0"', item)
+            self.assertNotIn('Quality 0', item)
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
             ['10', '10.25'],
