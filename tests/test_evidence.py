@@ -381,8 +381,10 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertEqual(lines['USD/NOK'].source_ids, ('norges-bank-open-data',))
         self.assertEqual(lines['USD/NOK'].latest_date, date(2026, 3, 31))
         self.assertEqual(lines['USD/NOK'].values, (Decimal('10.25'),))
+        self.assertEqual(lines['USD/NOK'].retrieval_dates, (date(2026, 3, 31),))
         self.assertEqual(lines['policy-rate'].latest_date, date(2026, 1, 2))
         self.assertEqual(lines['policy-rate'].values, (Decimal('4.50'),))
+        self.assertEqual(lines['policy-rate'].retrieval_dates, (date(2026, 1, 2),))
         self.assertEqual(series_inventory(()), ())
         conflict = _first()
         conflict['value'] = '10.26'
@@ -394,6 +396,10 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertEqual(
             lines['USD/NOK'].values,
             (Decimal('10.25'), Decimal('10.26')),
+        )
+        self.assertEqual(
+            lines['USD/NOK'].retrieval_dates,
+            (date(2026, 3, 31), date(2026, 3, 31)),
         )
         self.assertEqual(lines['USD/NOK'].latest_date, date(2026, 3, 31))
         later = _first()
@@ -410,16 +416,17 @@ class EvidenceContractTest(unittest.TestCase):
         }
         self.assertEqual(lines['USD/NOK'].latest_date, date(2026, 10, 9))
         self.assertEqual(lines['USD/NOK'].values, (Decimal('9.5623'),))
+        self.assertEqual(lines['USD/NOK'].retrieval_dates, (date(2026, 10, 11),))
         self.assertEqual(len(lines), 2)
 
     def test_shared_latest_date_keeps_both_values_for_one_subject(self):
         store = _store()
         rows = (
-            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-09', '10.7155', '2026-10-09'),
-            ('ecb-sdw', 'ecb-exr-NOK-EUR-2026-10-09', '10.717', '2026-10-09'),
-            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-08', '10.700', '2026-10-08'),
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-09', '10.7155', '2026-10-09', '2026-10-12'),
+            ('ecb-sdw', 'ecb-exr-NOK-EUR-2026-10-09', '10.717', '2026-10-09', '2026-10-11'),
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-08', '10.700', '2026-10-08', '2026-10-10'),
         )
-        for source_id, observation_id, value, observed in rows:
+        for source_id, observation_id, value, observed, retrieved in rows:
             row = _first()
             row['observation_id'] = observation_id
             row['source_id'] = source_id
@@ -427,7 +434,7 @@ class EvidenceContractTest(unittest.TestCase):
             row['unit'] = 'NOK per 1 EUR'
             row['value'] = value
             row['observation_time'] = observed
-            row['retrieval_time'] = '2026-10-11'
+            row['retrieval_time'] = retrieved
             row['provenance'] = 'recorded'
             row['quality'] = ['recorded_fixture']
             self.assertTrue(store.ingest(row).stored)
@@ -438,6 +445,12 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertEqual(line.source_ids, ('ecb-sdw', 'norges-bank-open-data'))
         self.assertEqual(line.latest_date, date(2026, 10, 9))
         self.assertEqual(line.values, (Decimal('10.717'), Decimal('10.7155')))
+        self.assertEqual(
+            line.retrieval_dates,
+            (date(2026, 10, 11), date(2026, 10, 12)),
+        )
+        self.assertEqual(len(line.retrieval_dates), len(line.values))
+        self.assertNotIn(date(2026, 10, 10), line.retrieval_dates)
         self.assertNotIn(Decimal('10.700'), line.values)
 
     def test_cpi_observation_stays_stale_on_2026_10_11(self):
@@ -520,12 +533,16 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-source-id="norges-bank-open-data"', usd_series)
         self.assertIn('data-latest="2026-03-31"', usd_series)
         self.assertIn('data-values="10.25"', usd_series)
+        self.assertIn('data-retrieval-dates="2026-03-31"', usd_series)
         self.assertIn('Latest observation date 2026-03-31.', usd_series)
         self.assertIn('Value 10.25.', usd_series)
+        self.assertIn('Retrieved 2026-03-31.', usd_series)
         self.assertNotIn('The date has more than one row.', usd_series)
         policy_series = body.split('data-series-subject="policy-rate"', 1)[1].split('</p>', 1)[0]
         self.assertIn('data-latest="2026-01-02"', policy_series)
         self.assertIn('data-values="4.50"', policy_series)
+        self.assertIn('data-retrieval-dates="2026-01-02"', policy_series)
+        self.assertIn('Retrieved 2026-01-02.', policy_series)
         self.assertNotIn('The date has more than one row.', policy_series)
         self.assertEqual(body.count('data-series-subject='), 2)
         self.assertIn('Computed from stored rows.', body)
@@ -709,7 +726,10 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-source-id="ssb-statbank"', cpi)
         self.assertIn('data-latest="2026-07-01"', cpi)
         self.assertIn('data-values="103.8"', cpi)
+        self.assertIn('data-retrieval-dates="2026-10-11"', cpi)
         self.assertIn('Value 103.8.', cpi)
+        self.assertIn('Retrieved 2026-10-11.', cpi)
+        self.assertNotIn('Retrieved 2026-07-01.', cpi)
         self.assertNotIn('data-multiple', cpi)
         self.assertNotIn('The date has more than one row.', cpi)
         self.assertIn(
@@ -724,11 +744,11 @@ class EvidencePageTest(unittest.TestCase):
     def test_inventory_shows_both_values_when_the_latest_date_has_two_rows(self):
         rows = []
         samples = (
-            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-09', '10.7155', '2026-10-09'),
-            ('ecb-sdw', 'ecb-exr-NOK-EUR-2026-10-09', '10.717', '2026-10-09'),
-            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-08', '10.700', '2026-10-08'),
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-09', '10.7155', '2026-10-09', '2026-10-12'),
+            ('ecb-sdw', 'ecb-exr-NOK-EUR-2026-10-09', '10.717', '2026-10-09', '2026-10-11'),
+            ('norges-bank-open-data', 'nb-exr-EUR-NOK-2026-10-08', '10.700', '2026-10-08', '2026-10-10'),
         )
-        for source_id, observation_id, value, observed in samples:
+        for source_id, observation_id, value, observed, retrieved in samples:
             rows.append({
                 'observation_id': observation_id,
                 'source_id': source_id,
@@ -736,7 +756,7 @@ class EvidencePageTest(unittest.TestCase):
                 'unit': 'NOK per 1 EUR',
                 'value': value,
                 'observation_time': observed,
-                'retrieval_time': '2026-10-11',
+                'retrieval_time': retrieved,
                 'provenance': 'recorded',
                 'quality': ['recorded_fixture'],
             })
@@ -753,13 +773,19 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-source-id="ecb-sdw norges-bank-open-data"', line)
         self.assertIn('data-latest="2026-10-09"', line)
         self.assertIn('data-values="10.717 10.7155"', line)
+        self.assertIn('data-retrieval-dates="2026-10-11 2026-10-12"', line)
         self.assertIn('data-multiple="true"', line)
         self.assertIn('Source ecb-sdw.', line)
         self.assertIn('Source norges-bank-open-data.', line)
         self.assertIn('Value 10.717.', line)
         self.assertIn('Value 10.7155.', line)
+        self.assertIn('Retrieved 2026-10-11.', line)
+        self.assertIn('Retrieved 2026-10-12.', line)
+        self.assertLess(line.index('Value 10.717.'), line.index('Retrieved 2026-10-11.'))
+        self.assertLess(line.index('Retrieved 2026-10-11.'), line.index('Retrieved 2026-10-12.'))
         self.assertIn('The date has more than one row.', line)
         self.assertNotIn('10.700', line)
+        self.assertNotIn('2026-10-10', line)
         usd = response.body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
         self.assertNotIn('The date has more than one row.', usd)
         self.assertNotIn(
@@ -1047,6 +1073,90 @@ class EvidencePageTest(unittest.TestCase):
             response.body,
         )
         self.assertIn('The match is not a live source confirmation.', response.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_static_refresh_list_follows_the_request_order_without_fetching(self):
+        from src.huginn_muninn.ingest.ecb import fetch_nok_eur
+        from src.huginn_muninn.ingest.norges import (
+            fetch_eur_nok,
+            fetch_nowa,
+            fetch_policy_rate,
+            fetch_usd_nok,
+        )
+        from src.huginn_muninn.ingest.refresh import (
+            CPI_REQUEST,
+            REQUESTED_SERIES,
+            _WINDOWED_REQUESTS,
+            refresh_public,
+        )
+        import src.huginn_muninn.ingest.refresh as refresh_module
+        import urllib.request
+
+        self.assertEqual(
+            tuple(name for name, _fetch in _WINDOWED_REQUESTS),
+            REQUESTED_SERIES[:-1],
+        )
+        self.assertEqual(REQUESTED_SERIES[-1], CPI_REQUEST)
+        self.assertEqual(
+            tuple(fetch for _name, fetch in _WINDOWED_REQUESTS),
+            (
+                fetch_usd_nok,
+                fetch_eur_nok,
+                fetch_policy_rate,
+                fetch_nowa,
+                fetch_nok_eur,
+            ),
+        )
+        self.assertEqual(
+            REQUESTED_SERIES,
+            (
+                'Norges Bank USD/NOK',
+                'Norges Bank EUR/NOK',
+                'the policy rate',
+                'NOWA',
+                'ECB NOK/EUR',
+                'the one Statistics Norway CPI cell for table 14700, 2026M07, total',
+            ),
+        )
+        self.assertEqual(len(REQUESTED_SERIES), 6)
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        original = refresh_module.refresh_public
+
+        def refused(*args, **kwargs):
+            raise AssertionError('refresh')
+
+        refresh_module.refresh_public = refused
+        try:
+            response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        finally:
+            refresh_module.refresh_public = original
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+        self.assertIs(original, refresh_public)
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.body.count('This list is not a refresh.'), 1)
+        section = response.body.split('id="manual-refresh-list"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('This list is not a refresh.', section)
+        listed = section.split('<ol>', 1)[1].split('</ol>', 1)[0]
+        self.assertEqual(
+            listed,
+            ''.join(f'<li>{name}</li>' for name in REQUESTED_SERIES),
+        )
+        desk = (ROOT / 'src' / 'huginn_muninn' / 'desk.py').read_text(encoding='utf-8')
+        self.assertNotIn('refresh_public', desk)
+        self.assertNotIn('live_transport', desk)
+        self.assertNotIn('add_rate', desk)
+        self.assertNotIn('urllib', (ROOT / 'src' / 'huginn_muninn' / 'evidence.py').read_text(encoding='utf-8'))
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
             ['10', '10.25'],

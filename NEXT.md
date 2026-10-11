@@ -2,6 +2,22 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
+1. INGEST-06 is reviewed in this commit. Reviewer `836d93f4-c13a-499b-879f-5a9daf50a79f` approved the retrieval dates on the stored-series inventory and the static six-series list. The next executable task is item 2.
+2. After it: a read-only note that the policy rate and NOWA are different series. Show each latest stored value when that subject is visible. Do not add them, average them, or treat a shared percent unit as one rate. Say they are not combined.
+3. After that: state the allowlist hosts on the evidence page as text taken from the existing client allowlist constant, still without opening a socket on GET.
+
+Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`.
+
+The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
+
+## Historical
+
+The following pointer was current before INGEST-06. It is not the current next step.
+
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
+
 1. INGEST-05 is reviewed at `ffdb4096b83fc9417a95a78f1b4833d7ad717732`. Reviewer `a3090eaf-710a-40ca-8a86-d26c3075a5c4` approved the newest USD/NOK note beside 10.25 and the future-date sentence. The next executable task is item 2.
 2. After it: add the retrieval date of the latest row to each stored-series inventory line. Still computed from stored rows. No fetch and no scheduler.
 3. After that: on the evidence page, name the six series a manual refresh requests, as a static list, without calling the network on GET. The list is USD/NOK, EUR/NOK, policy rate, NOWA, ECB NOK/EUR, and the one CPI cell.

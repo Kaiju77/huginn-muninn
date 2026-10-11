@@ -25,6 +25,7 @@ from src.huginn_muninn.evidence import (
     visible_observations,
 )
 from src.huginn_muninn.ingest.cache import read_desk_cache
+from src.huginn_muninn.ingest.refresh import REQUESTED_SERIES
 
 
 INTELLIGENCE = (
@@ -1250,8 +1251,20 @@ def _future_kept_note(observations, on_date):
     return ''
 
 
+def _manual_refresh_list():
+    """Names from the refresh request order. This does not fetch."""
+    items = ''.join(f'<li>{escape(name)}</li>' for name in REQUESTED_SERIES)
+    return (
+        '<section id="manual-refresh-list">'
+        '<h2>Series a manual refresh requests</h2>'
+        '<p>This list is not a refresh.</p>'
+        f'<ol>{items}</ol>'
+        '</section>'
+    )
+
+
 def _series_inventory_section(observations):
-    """Stored subjects only. A shared latest date keeps every value on that date."""
+    """Stored subjects only. A shared latest date keeps every value and retrieval date."""
     lines = series_inventory(observations)
     if not lines:
         return (
@@ -1270,6 +1283,12 @@ def _series_inventory_section(observations):
         value_text = '. '.join(
             f'Value {escape(shown)}' for shown in shown_values
         )
+        retrieved = tuple(
+            day.isoformat() for day in line.retrieval_dates
+        )
+        retrieval_text = '. '.join(
+            f'Retrieved {escape(day)}' for day in retrieved
+        )
         multiple = ''
         trailing = ''
         if len(line.values) > 1:
@@ -1281,12 +1300,14 @@ def _series_inventory_section(observations):
             f' data-source-id="{escape(" ".join(line.source_ids))}"'
             f' data-latest="{escape(line.latest_date.isoformat())}"'
             f' data-values="{escape(" ".join(shown_values))}"'
+            f' data-retrieval-dates="{escape(" ".join(retrieved))}"'
             f'{multiple}'
             '>'
             f'{escape(line.subject)}. '
             f'{source_text}. '
             f'Latest observation date {escape(line.latest_date.isoformat())}. '
-            f'{value_text}.{trailing}</p>'
+            f'{value_text}. '
+            f'{retrieval_text}.{trailing}</p>'
         )
     return (
         '<section id="series-inventory"><h2>Stored series</h2>'
@@ -1489,7 +1510,8 @@ def render_evidence(state, on_date):
         '</label>'
         '<button type="submit">Show this date</button>'
         '</form></section>'
-        '<section><h2>Refresh</h2>'
+        + _manual_refresh_list()
+        + '<section><h2>Refresh</h2>'
         '<form method="post" action="/evidence/refresh">'
         '<label for="start_period">Start'
         '<input id="start_period" name="start_period" value="2026-10-01">'

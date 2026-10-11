@@ -66,6 +66,7 @@ class SeriesLine(NamedTuple):
     source_ids: tuple
     latest_date: date
     values: tuple
+    retrieval_dates: tuple
 
 
 def _ordered(reasons):
@@ -243,8 +244,9 @@ def series_inventory(observations):
     """One line per stored subject from visible rows.
 
     The latest date is the newest observation date among those rows.
-    Values are the amounts on that date. This does not fetch and does
-    not write the ledger.
+    Values are the amounts on that date. Retrieval dates are the
+    retrieval dates of those same rows, in the same order as the values.
+    This does not fetch and does not write the ledger.
     """
     grouped = {}
     for observation in observations:
@@ -266,7 +268,14 @@ def series_inventory(observations):
         ))
         source_ids = tuple(dict.fromkeys(item.source_id for item in on_latest))
         values = tuple(item.value for item in on_latest)
-        lines.append(SeriesLine(subject, source_ids, latest, values))
+        retrieval_dates = tuple(item.retrieval_time for item in on_latest)
+        lines.append(SeriesLine(
+            subject,
+            source_ids,
+            latest,
+            values,
+            retrieval_dates,
+        ))
     return tuple(lines)
 
 

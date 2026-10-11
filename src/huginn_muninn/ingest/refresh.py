@@ -27,6 +27,23 @@ from src.huginn_muninn.ingest.norges import (
 from src.huginn_muninn.ingest.ssb import fetch_cpi_total
 
 
+_WINDOWED_REQUESTS = (
+    ('Norges Bank USD/NOK', fetch_usd_nok),
+    ('Norges Bank EUR/NOK', fetch_eur_nok),
+    ('the policy rate', fetch_policy_rate),
+    ('NOWA', fetch_nowa),
+    ('ECB NOK/EUR', fetch_nok_eur),
+)
+
+CPI_REQUEST = (
+    'the one Statistics Norway CPI cell for table 14700, 2026M07, total'
+)
+
+REQUESTED_SERIES = tuple(
+    name for name, _fetch in _WINDOWED_REQUESTS
+) + (CPI_REQUEST,)
+
+
 class RefreshResult(NamedTuple):
     observations: tuple
     errors: tuple
@@ -119,7 +136,7 @@ async def _refresh_async(
     )
     observations = []
     errors = []
-    for fetch in (fetch_usd_nok, fetch_eur_nok, fetch_policy_rate, fetch_nowa, fetch_nok_eur):
+    for _name, fetch in _WINDOWED_REQUESTS:
         fetched = await fetch(client, start_period, end_period)
         observations.extend(fetched.observations)
         if fetched.error is not None:
