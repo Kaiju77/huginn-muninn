@@ -10,9 +10,11 @@ from src.huginn_muninn.evidence import open_evidence
 from src.huginn_muninn.ingest.cache import read_desk_cache, write_refresh
 from src.huginn_muninn.ingest.client import (
     ALLOWLIST,
+    MAX_BODY_BYTES,
     MAX_RETRIES,
     MIN_INTERVAL_SECONDS,
     RETRY_STATUSES,
+    STRUCTURED_ERRORS,
     TIMEOUT_SECONDS,
     Client,
     TransportResponse,
@@ -23,7 +25,10 @@ from src.huginn_muninn.ingest.fred import HOSTS, status
 from src.huginn_muninn.ingest.norges import (
     POLICY_RATE_KEY,
     POLICY_RATE_HTTP_STATUS,
+    POLICY_RATE_SERIES,
     parse_exr,
+    parse_nowa,
+    parse_policy_rate,
     usd_nok_url,
 )
 from src.huginn_muninn.ingest.refresh import refresh_public
@@ -86,6 +91,19 @@ class ClientContractTest(unittest.TestCase):
         self.assertEqual(TIMEOUT_SECONDS, 15)
         self.assertEqual(MIN_INTERVAL_SECONDS, 2)
         self.assertEqual(MAX_RETRIES, 2)
+        self.assertEqual(MAX_BODY_BYTES, 1000000)
+        self.assertIn('body_too_large', STRUCTURED_ERRORS)
+        self.assertEqual(
+            STRUCTURED_ERRORS,
+            frozenset((
+                'not_allowlisted',
+                'timeout',
+                'http_status',
+                'parse_error',
+                'configuration_required',
+                'body_too_large',
+            )),
+        )
         self.assertEqual(RETRY_STATUSES, frozenset((429, 500, 502, 503, 504)))
         self.assertEqual(
             ALLOWLIST,
@@ -224,6 +242,29 @@ class ClientContractTest(unittest.TestCase):
         self.assertTrue(sync_result.ok)
         self.assertTrue(async_result.ok)
 
+    def test_a_body_larger_than_one_million_bytes_is_rejected_before_parsing(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        url = usd_nok_url(*WINDOW)
+        accepted = _client(
+            Script([_response(200, b'a' * MAX_BODY_BYTES)]),
+            Path(temporary.name),
+            Clock(),
+        )
+        within = accepted.fetch(url)
+        self.assertTrue(within.ok)
+        self.assertNotEqual(within.reason, 'body_too_large')
+        rejected = _client(
+            Script([_response(200, b'a' * (MAX_BODY_BYTES + 1))]),
+            Path(temporary.name),
+            Clock(),
+        )
+        result = rejected.fetch(url)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.reason, 'body_too_large')
+        self.assertEqual(result.attempts, 1)
+        self.assertEqual(len(result.body), MAX_BODY_BYTES + 1)
+
 
 class AdapterContractTest(unittest.TestCase):
     def test_norges_bank_fixture_parses_without_relabeling_the_collection(self):
@@ -293,6 +334,101 @@ class AdapterContractTest(unittest.TestCase):
         self.assertNotIn('ECB concertation', row['provenance'])
         self.assertEqual(POLICY_RATE_KEY, 'IR/K.POL.NOK')
         self.assertEqual(POLICY_RATE_HTTP_STATUS, 404)
+        self.assertEqual(POLICY_RATE_SERIES, 'IR/B.KPRA.SD.R')
+
+    def test_captured_eur_nok_fixture_stays_a_norges_bank_series(self):
+        path = FIXTURES / 'norges-bank-eur-nok.csv'
+        text = path.read_text(encoding='utf-8')
+        usd_header = (FIXTURES / 'norges-bank-usd-nok.csv').read_text(encoding='utf-8').splitlines()[0]
+        self.assertEqual(text.splitlines()[0], usd_header)
+        self.assertEqual(
+            [line.split(';')[-2:] for line in text.splitlines()[1:]],
+            [['2026-10-08', '10.717'], ['2026-10-09', '10.7155']],
+        )
+        url = 'https://data.norges-bank.no/api/data/EXR/B.EUR.NOK.SP?format=csv&startPeriod=2026-10-08&endPeriod=2026-10-09'
+        parsed = parse_exr(text, url, '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        self.assertEqual(
+            [(row['observation_id'], row['value'], row['unit']) for row in parsed.observations],
+            [
+                ('nb-exr-EUR-NOK-2026-10-08', '10.717', 'NOK per 1 EUR'),
+                ('nb-exr-EUR-NOK-2026-10-09', '10.7155', 'NOK per 1 EUR'),
+            ],
+        )
+        last = parsed.observations[-1]
+        self.assertEqual(last['source_id'], 'norges-bank-open-data')
+        self.assertEqual(last['subject'], 'EUR/NOK')
+        self.assertIn('Norges Bank open data', last['provenance'])
+        self.assertIn(url, last['provenance'])
+        self.assertNotIn(CITATION, last['provenance'])
+        self.assertNotIn('ECB concertation', last['provenance'])
+
+    def test_policy_rate_fixture_keeps_the_value_text_and_rejects_another_tenor(self):
+        path = FIXTURES / 'norges-bank-policy-rate.csv'
+        text = path.read_text(encoding='utf-8')
+        self.assertIn('4.5', text)
+        self.assertNotIn('4.50', text)
+        self.assertNotIn(POLICY_RATE_KEY, text)
+        url = 'https://data.norges-bank.no/api/data/IR/B.KPRA.SD.R?format=csv&startPeriod=2026-10-06&endPeriod=2026-10-08'
+        parsed = parse_policy_rate(text, url, '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        self.assertEqual(
+            [(row['observation_id'], row['value']) for row in parsed.observations],
+            [
+                ('nb-ir-KPRA-SD-2026-10-06', '4.5'),
+                ('nb-ir-KPRA-SD-2026-10-07', '4.5'),
+                ('nb-ir-KPRA-SD-2026-10-08', '4.5'),
+            ],
+        )
+        last = parsed.observations[-1]
+        self.assertEqual(last['subject'], 'policy-rate')
+        self.assertEqual(last['unit'], 'percent')
+        self.assertEqual(last['value'], '4.5')
+        self.assertIn('Norges Bank open data', last['provenance'])
+        self.assertIn(url, last['provenance'])
+        self.assertNotIn(CITATION, last['provenance'])
+        lines = text.splitlines()
+        mixed = '\n'.join((
+            lines[0],
+            lines[1],
+            'B;Business;KPRA;Key policy rate;OL;Overnight lending;R;Rate;2;E;End of day;2026-10-07;5.0;;',
+        ))
+        rejected = parse_policy_rate(mixed, url, '2026-10-11', 'recorded')
+        self.assertEqual(rejected.observations, ())
+        self.assertEqual(rejected.error.reason, 'parse_error')
+
+    def test_nowa_fixture_stores_the_rate_and_skips_other_rows(self):
+        path = FIXTURES / 'norges-bank-nowa.csv'
+        text = path.read_text(encoding='utf-8')
+        url = 'https://data.norges-bank.no/api/data/SHORT_RATES/B.NOWA.ON.R?format=csv'
+        parsed = parse_nowa(text, url, '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        self.assertEqual(
+            [(row['observation_id'], row['value']) for row in parsed.observations],
+            [
+                ('nb-short-NOWA-ON-R-2026-10-06', '4.50'),
+                ('nb-short-NOWA-ON-R-2026-10-07', '4.50'),
+                ('nb-short-NOWA-ON-R-2026-10-08', '4.50'),
+            ],
+        )
+        last = parsed.observations[-1]
+        self.assertEqual(last['subject'], 'nowa')
+        self.assertEqual(last['unit'], 'percent')
+        self.assertEqual(last['value'], '4.50')
+        self.assertIn('Norges Bank open data', last['provenance'])
+        self.assertIn(url, last['provenance'])
+        header = text.splitlines()[0]
+        mixed = '\n'.join((
+            header,
+            'B;Business;NOWA;NOWA;ON;Overnight;VOL;Volume;;2;2026-10-06;100;N;Normal',
+            'B;Business;NOWA;NOWA;IDX;Index;R;Rate;;2;2026-10-06;9;N;Normal',
+            'B;Business;NOWA;NOWA;ON;Overnight;R;Rate;;2;2026-10-06;4.50;N;Normal',
+        ))
+        selected = parse_nowa(mixed, url, '2026-10-11', 'recorded')
+        self.assertIsNone(selected.error)
+        self.assertEqual(len(selected.observations), 1)
+        self.assertEqual(selected.observations[0]['value'], '4.50')
+        self.assertEqual(selected.observations[0]['observation_id'], 'nb-short-NOWA-ON-R-2026-10-06')
 
     def test_ecb_fixture_keeps_the_observation_text_and_the_citation(self):
         text = (FIXTURES / 'ecb-nok-eur.csv').read_text(encoding='utf-8')
@@ -377,7 +513,12 @@ class RefreshDeskTest(unittest.TestCase):
         self._tmp.cleanup()
 
     def _transport(self, ecb_status=200):
-        norges = (FIXTURES / 'norges-bank-usd-nok.csv').read_bytes()
+        bodies = {
+            'EXR/B.USD.NOK.SP': (FIXTURES / 'norges-bank-usd-nok.csv').read_bytes(),
+            'EXR/B.EUR.NOK.SP': (FIXTURES / 'norges-bank-eur-nok.csv').read_bytes(),
+            'IR/B.KPRA.SD.R': (FIXTURES / 'norges-bank-policy-rate.csv').read_bytes(),
+            'SHORT_RATES/B.NOWA.ON.R': (FIXTURES / 'norges-bank-nowa.csv').read_bytes(),
+        }
         ecb = (FIXTURES / 'ecb-nok-eur.csv').read_bytes()
 
         class Transport:
@@ -387,8 +528,12 @@ class RefreshDeskTest(unittest.TestCase):
             def __call__(self, request):
                 self.urls.append(request.url)
                 host = urlsplit(request.url).hostname
+                path = urlsplit(request.url).path
                 if host == 'data.norges-bank.no':
-                    return TransportResponse(200, norges, 'recorded')
+                    for key, body in bodies.items():
+                        if key in path:
+                            return TransportResponse(200, body, 'recorded')
+                    raise AssertionError(request.url)
                 if host == 'data-api.ecb.europa.eu':
                     body = ecb if ecb_status == 200 else b'missing'
                     return TransportResponse(ecb_status, body, 'recorded')
@@ -411,23 +556,33 @@ class RefreshDeskTest(unittest.TestCase):
             sleep=clock.sleep,
         )
         self.assertEqual(result.errors, ())
-        self.assertEqual(clock.sleeps, [])
-        self.assertEqual(len(transport.urls), 2)
+        self.assertEqual(clock.sleeps, [2.0, 2.0, 2.0])
+        self.assertEqual(len(transport.urls), 5)
+        self.assertIn('/api/data/EXR/B.USD.NOK.SP?', transport.urls[0])
+        self.assertIn('/api/data/EXR/B.EUR.NOK.SP?', transport.urls[1])
+        self.assertIn('/api/data/IR/B.KPRA.SD.R?', transport.urls[2])
+        self.assertIn('/api/data/SHORT_RATES/B.NOWA.ON.R?', transport.urls[3])
+        self.assertIn('/service/data/EXR/D.NOK.EUR.SP00.A?', transport.urls[4])
         joined = '\n'.join(transport.urls)
         self.assertIn('startPeriod=2026-10-01', joined)
         self.assertIn('endPeriod=2026-10-09', joined)
         self.assertIn('EXR/B.USD.NOK.SP', joined)
         self.assertIn('EXR/D.NOK.EUR.SP00.A', joined)
         self.assertNotIn(POLICY_RATE_KEY, joined)
-        self.assertNotIn('EXR/B.EUR.NOK.SP', joined)
+        self.assertIn('EXR/B.EUR.NOK.SP', joined)
+        self.assertIn(POLICY_RATE_SERIES, joined)
+        self.assertIn('SHORT_RATES/B.NOWA.ON.R', joined)
         self.assertNotIn('data.ssb.no', joined)
         self.assertNotIn('data.sec.gov', joined)
         self.assertNotIn('stlouisfed.org', joined)
         values = [row['value'] for row in result.observations]
+        self.assertIn('4.5', values)
         self.assertIn('9.5623', values)
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
         self.assertIn('9.584', values)
         self.assertIn('10.717', values)
         self.assertIn('10.7155', values)
+        self.assertIn('4.50', values)
         nok = [row for row in result.observations if row['observation_id'] == 'nb-exr-USD-NOK-2026-10-09']
         self.assertEqual(nok[0]['quality'], ['recorded_fixture'])
         self.assertIn(CITATION, result.observations[-1]['provenance'])
@@ -455,6 +610,30 @@ class RefreshDeskTest(unittest.TestCase):
         self.assertNotIn('data-segment="2026-10-02/2026-10-05"', svg)
         self.assertNotIn('10.25', svg)
         self.assertNotIn('2026-03-31', svg)
+        self.assertNotIn('data-value="4.5"', svg)
+        self.assertNotIn('data-value="4.50"', svg)
+        policy = body.split('id="policy-rate-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertIn('data-value="4.5"', policy)
+        self.assertIn('data-kind="recorded"', policy)
+        self.assertIn('data-date="2026-10-08"', policy)
+        self.assertIn('data-segment="2026-10-06/2026-10-07"', policy)
+        self.assertIn('data-segment="2026-10-07/2026-10-08"', policy)
+        self.assertNotIn('data-value="4.50"', policy)
+        self.assertNotIn('data-date="2026-01-02"', policy)
+        self.assertNotIn('>live<', policy)
+        self.assertIn('data-due="due"', body)
+        self.assertNotIn('data-due="current"', body)
+        self.assertIn('No revision is stored.', body)
+        current = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(current.status, 200)
+        self.assertIn(
+            'data-source="norges-bank-open-data" data-posture="connected" data-due="current"',
+            current.body,
+        )
+        self.assertIn(
+            'data-source="ecb-sdw" data-posture="connected" data-due="current"',
+            current.body,
+        )
         self.assertIn(CITATION, body)
         self.assertIn('Norges Bank open data', body)
         self.assertIn('Last refresh ' + STAMP + '.', body)
@@ -462,6 +641,8 @@ class RefreshDeskTest(unittest.TestCase):
         rates = [row['rate'] for row, _posting in self.state.rate_postings]
         self.assertEqual(rates, ['10', '10.25'])
         self.assertNotIn('9.5623', rates)
+        self.assertNotIn('4.5', rates)
+        self.assertNotIn('4.50', rates)
         self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
         self.assertEqual(self.state.ledger.books('2026-03-31'), before_books)
         calls = len(transport.urls)
@@ -473,13 +654,98 @@ class RefreshDeskTest(unittest.TestCase):
             'end_period': '2026-10-09',
         })
         self.assertEqual(posted.status, 200)
-        self.assertEqual(len(transport.urls), calls + 2)
+        self.assertEqual(len(transport.urls), calls + 5)
         self.assertIn('data-value="9.5623"', posted.body)
         self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
             ['10', '10.25'],
         )
+
+    def _stored_row(self, index, value='1', retrieval='2026-10-11', observation_id=None, observation_time=None):
+        from datetime import date as date_cls
+
+        day = date_cls.fromordinal(date_cls(2020, 1, 1).toordinal() + index).isoformat()
+        return {
+            'observation_id': observation_id or f'id-{index}',
+            'source_id': 'norges-bank-open-data',
+            'subject': 'USD/NOK',
+            'unit': 'NOK per 1 USD',
+            'value': value,
+            'observation_time': observation_time or day,
+            'retrieval_time': retrieval,
+            'provenance': 'Norges Bank open data. URL: https://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP?format=csv',
+            'quality': ['recorded_fixture'],
+        }
+
+    def test_identical_refresh_keeps_one_row_and_a_change_keeps_both(self):
+        first = self._stored_row(1, '4.5')
+        other = self._stored_row(2, '9.5623')
+        write_refresh(self.cache, STAMP, (first, other), ())
+        write_refresh(self.cache, STAMP, (dict(first),), ())
+        view = read_desk_cache(self.cache)
+        self.assertEqual(view.revisions, ())
+        self.assertEqual(
+            [item['value'] for item in view.observations if item['observation_id'] == 'id-1'],
+            ['4.5'],
+        )
+        self.assertIn('id-2', [item['observation_id'] for item in view.observations])
+        changed = self._stored_row(1, '4.25', retrieval='2026-10-12')
+        write_refresh(self.cache, STAMP, (changed,), ())
+        view = read_desk_cache(self.cache)
+        self.assertEqual(len(view.revisions), 1)
+        self.assertEqual(view.revisions[0]['observation_id'], 'id-1')
+        self.assertEqual(view.revisions[0]['values'], ['4.5', '4.25'])
+        self.assertEqual(view.revisions[0]['retrieval_times'], ['2026-10-11', '2026-10-12'])
+        self.assertEqual(
+            [item['value'] for item in view.observations if item['observation_id'] == 'id-1'],
+            ['4.5', '4.25'],
+        )
+        self.assertIn('id-2', [item['observation_id'] for item in view.observations])
+        write_refresh(self.cache, STAMP, (dict(changed),), ())
+        view = read_desk_cache(self.cache)
+        self.assertEqual(len(view.revisions), 1)
+        self.assertEqual(
+            [item['value'] for item in view.observations if item['observation_id'] == 'id-1'],
+            ['4.5', '4.25'],
+        )
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        self.assertEqual(response.body.count('data-revision="id-1"'), 1)
+        self.assertIn('Values 4.5, 4.25.', response.body)
+        self.assertIn('Retrieval times 2026-10-11, 2026-10-12.', response.body)
+        self.assertEqual(self.state.ledger.value('2026-03-31').known_subtotal, Decimal('24932.50'))
+
+    def test_cap_drops_oldest_dates_that_are_absent_from_the_new_batch(self):
+        cache = self.cache.parent / 'cap-cache'
+        batch = [self._stored_row(index) for index in range(499)]
+        batch.append(self._stored_row(0, observation_id='shared-date', observation_time='2026-10-09'))
+        write_refresh(cache, STAMP, batch, ())
+        self.assertEqual(len(read_desk_cache(cache).observations), 500)
+        incoming = self._stored_row(0, '2', observation_id='incoming', observation_time='2026-10-09')
+        write_refresh(cache, STAMP, (incoming,), ())
+        view = read_desk_cache(cache)
+        ids = [item['observation_id'] for item in view.observations]
+        self.assertEqual(len(view.observations), 500)
+        self.assertNotIn('id-0', ids)
+        self.assertIn('id-1', ids)
+        self.assertIn('shared-date', ids)
+        self.assertIn('incoming', ids)
+        wide = self.cache.parent / 'wide-cache'
+        write_refresh(wide, STAMP, [self._stored_row(index) for index in range(600)], ())
+        self.assertEqual(len(read_desk_cache(wide).observations), 600)
+        write_refresh(
+            wide,
+            STAMP,
+            (self._stored_row(0, observation_id='kept-new', observation_time='2026-10-09'),),
+            (),
+        )
+        view = read_desk_cache(wide)
+        ids = [item['observation_id'] for item in view.observations]
+        self.assertEqual(len(ids), 500)
+        self.assertIn('kept-new', ids)
+        self.assertNotIn('id-0', ids)
+        self.assertNotIn('id-100', ids)
+        self.assertIn('id-101', ids)
 
     def test_recorded_and_live_points_are_labeled_differently(self):
         write_refresh(
@@ -540,7 +806,7 @@ class RefreshDeskTest(unittest.TestCase):
             transport=transport,
             retrieved_at=STAMP,
         )
-        self.assertEqual(len(transport.urls), 2)
+        self.assertEqual(len(transport.urls), 5)
         self.assertEqual(result.errors[0].reason, 'http_status')
         self.assertEqual(result.errors[0].status, 404)
         self.assertEqual(result.errors[0].attempts, 1)

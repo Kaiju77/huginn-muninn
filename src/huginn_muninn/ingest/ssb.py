@@ -2,6 +2,8 @@
 
 live_fetch stays false. refresh_public does not call this module.
 A bounded live query was not locked in this increment.
+Table 03013 is discontinued through 2025M12 and is not called.
+A current table id is still an open human decision.
 """
 
 from datetime import date

@@ -192,6 +192,33 @@ def source_posture(source):
     return 'prepared'
 
 
+def due_status(sources, observations, as_of, max_age_days=MAX_AGE_DAYS):
+    """Current or due for each connected source.
+
+    A connected source is current when one stored observation is not a
+    synthetic fixture and its freshness is fresh. Otherwise it is due.
+    This does not fetch and does not schedule a refresh.
+    """
+    day = _as_of(as_of)
+    window = _age_window(max_age_days)
+    statuses = []
+    for source in sources:
+        if source_posture(source) != 'connected':
+            continue
+        source_id = source.get('source_id')
+        label = 'due'
+        for observation in observations:
+            if observation.source_id != source_id:
+                continue
+            if 'synthetic_fixture' in observation.quality:
+                continue
+            if 'fresh' in freshness_flags(observation, day, window):
+                label = 'current'
+                break
+        statuses.append((source_id, label))
+    return tuple(statuses)
+
+
 def visible_observations(store):
     """Stored rows plus later conflicting rows. The first row is not replaced."""
     rows = list(store.observations())

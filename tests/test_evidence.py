@@ -10,6 +10,7 @@ from src.huginn_muninn.evidence import (
     MAX_AGE_DAYS,
     EvidenceStore,
     assess,
+    due_status,
     freshness_flags,
     load_registry,
     open_evidence,
@@ -301,6 +302,25 @@ class EvidenceContractTest(unittest.TestCase):
         assessed = assess(store, AS_OF)
         self.assertIn('excluded social source', assessed.limitations)
 
+    def test_synthetic_rows_do_not_make_a_connected_source_current(self):
+        store = open_evidence(ROOT)
+        statuses = dict(due_status(store.sources(), store.observations(), AS_OF))
+        self.assertEqual(statuses['norges-bank-open-data'], 'due')
+        self.assertEqual(statuses['ecb-sdw'], 'due')
+        self.assertNotIn('ssb-statbank', statuses)
+        self.assertNotIn('fred', statuses)
+        row = _first()
+        row['observation_id'] = 'nb-exr-USD-NOK-2026-03-31'
+        row['quality'] = ['recorded_fixture']
+        row['provenance'] = (
+            'Norges Bank open data. URL: '
+            'https://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP?format=csv'
+        )
+        self.assertTrue(store.ingest(row).stored)
+        statuses = dict(due_status(store.sources(), store.observations(), AS_OF))
+        self.assertEqual(statuses['norges-bank-open-data'], 'current')
+        self.assertEqual(statuses['ecb-sdw'], 'due')
+
     def test_assess_returns_limitations_only(self):
         store = open_evidence(ROOT)
         result = assess(store, AS_OF)
@@ -404,6 +424,22 @@ class EvidencePageTest(unittest.TestCase):
         self.assertNotIn('10.25', svg)
         self.assertNotIn('2026-03-31', svg)
         self.assertNotIn('9.5623', svg)
+        self.assertNotIn('data-value="4.50"', svg)
+        policy = body.split('id="policy-rate-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertNotIn('4.50', policy)
+        self.assertNotIn('2026-01-02', policy)
+        self.assertNotIn('data-value="4.5"', policy)
+        self.assertIn(
+            'data-source="norges-bank-open-data" data-posture="connected" data-due="due"',
+            body,
+        )
+        self.assertIn(
+            'data-source="ecb-sdw" data-posture="connected" data-due="due"',
+            body,
+        )
+        self.assertNotIn('data-due="current"', body)
+        self.assertNotIn('data-source="fred" data-posture="blocked" data-due=', body)
+        self.assertIn('No revision is stored.', body)
         self.assertIn(
             "The number matches the ledger's supplied 10.25 rate. "
             'The match is not a live source confirmation.',

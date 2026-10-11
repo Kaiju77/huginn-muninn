@@ -25,6 +25,15 @@ RETRY_STATUSES = frozenset((429, 500, 502, 503, 504))
 TIMEOUT_SECONDS = 15
 MIN_INTERVAL_SECONDS = 2
 MAX_RETRIES = 2
+MAX_BODY_BYTES = 1000000
+STRUCTURED_ERRORS = frozenset((
+    'not_allowlisted',
+    'timeout',
+    'http_status',
+    'parse_error',
+    'configuration_required',
+    'body_too_large',
+))
 
 
 class TransportError(Exception):
@@ -107,6 +116,20 @@ class Client:
             if not isinstance(body, bytes):
                 body = b''
             origin = response.origin or 'recorded'
+            if len(body) > MAX_BODY_BYTES:
+                result = FetchResult(
+                    False,
+                    'body_too_large',
+                    response.status,
+                    url,
+                    body,
+                    self._stamp(),
+                    attempt,
+                    origin,
+                    'body_too_large',
+                )
+                write_response(self.cache_dir, result)
+                return result
             if response.status in RETRY_STATUSES and attempt < max_attempts:
                 continue
             reason = '' if response.status == 200 else 'http_status'

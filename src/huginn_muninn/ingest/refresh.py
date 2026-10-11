@@ -1,9 +1,12 @@
 """One explicit public refresh. This is not a scheduler.
 
-Norges Bank USD/NOK and ECB NOK/EUR are the only requests.
+When the caller passes a transport or explicit_live, the requests are
+Norges Bank USD/NOK, Norges Bank EUR/NOK, the verified policy rate
+IR/B.KPRA.SD.R, the NOWA rate SHORT_RATES/B.NOWA.ON.R, and ECB NOK/EUR.
+IR/K.POL.NOK returned HTTP 404 and is not requested.
 Statistics Norway is not called: a bounded live query was not locked.
+Table 03013 is discontinued through 2025M12 and is not called.
 SEC EDGAR is not called. FRED is not allowlisted.
-The Norges Bank policy-rate series is not requested.
 """
 
 from datetime import date
@@ -13,7 +16,12 @@ from typing import NamedTuple
 from src.huginn_muninn.ingest.cache import write_refresh
 from src.huginn_muninn.ingest.client import Client, FetchResult, live_transport
 from src.huginn_muninn.ingest.ecb import fetch_nok_eur
-from src.huginn_muninn.ingest.norges import fetch_usd_nok
+from src.huginn_muninn.ingest.norges import (
+    fetch_eur_nok,
+    fetch_nowa,
+    fetch_policy_rate,
+    fetch_usd_nok,
+)
 
 
 class RefreshResult(NamedTuple):
@@ -56,7 +64,7 @@ def refresh_public(
     clock=None,
     sleep=None,
 ):
-    """Fetch the two connected series for one posted window."""
+    """Fetch the connected public series for one posted window."""
     return asyncio.run(_refresh_async(
         cache_dir,
         start_period,
@@ -108,13 +116,10 @@ async def _refresh_async(
     )
     observations = []
     errors = []
-    norges = await fetch_usd_nok(client, start_period, end_period)
-    observations.extend(norges.observations)
-    if norges.error is not None:
-        errors.append(norges.error)
-    ecb = await fetch_nok_eur(client, start_period, end_period)
-    observations.extend(ecb.observations)
-    if ecb.error is not None:
-        errors.append(ecb.error)
+    for fetch in (fetch_usd_nok, fetch_eur_nok, fetch_policy_rate, fetch_nowa, fetch_nok_eur):
+        fetched = await fetch(client, start_period, end_period)
+        observations.extend(fetched.observations)
+        if fetched.error is not None:
+            errors.append(fetched.error)
     write_refresh(cache_dir, stamp, observations, errors)
     return RefreshResult(tuple(observations), tuple(errors), stamp)

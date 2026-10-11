@@ -1,10 +1,14 @@
 # Next Steps
 
-INGEST-01 is a reviewed read-only ingestion layer on branch `cursor/hm-01` at `d9cad72ab052ca6d1e2517c4d7ebef918e783a3c` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `578c23c7f08059f5bf53acb4bced9e8441a52ae2`. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it. This implementation does not authorize a further phase, a merge, or a push.
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. These tasks do not depend on the open human decisions in `HUMAN_TASKS.md`.
 
-Norges Bank USD/NOK and ECB NOK/EUR can be refreshed by an explicit `POST /evidence/refresh`. Statistics Norway is not called, because a bounded live query was not locked. SEC EDGAR waits for a User-Agent contact string. FRED stays blocked. The desk remains in research mode. See `docs/INGEST.md`. No recommendation follows from a stored public observation. The synthetic ledger rate remains 10.25 until a separate decision says otherwise.
+1. INGEST-02 is reviewed. It adds Norges Bank EUR/NOK, the verified policy-rate key `IR/B.KPRA.SD.R`, and the NOWA rate to the explicit manual refresh, keeps revision records, caps stored observations at 500, prints connected sources as current or due, and draws stored policy-rate points. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff` approved it. The next executable task is item 2.
+2. Show NOWA beside the policy rate with its own stored-point chart, still without a scheduler.
+3. A read-only comparison on the evidence page between the Norges Bank EUR/NOK observation and the ECB NOK/EUR observation for the same date, labeled as two sources, with no recommendation and no ledger write.
 
-The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this implementation.
+Statistics Norway remains blocked on a current table id, so it stays under human decisions rather than in this ready queue. The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
 
 ## Historical
 

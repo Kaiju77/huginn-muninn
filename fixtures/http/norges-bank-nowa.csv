@@ -1,0 +1,4 @@
+FREQ;Frequency;INSTRUMENT_TYPE;Instrument Type;TENOR;Tenor;UNIT_MEASURE;Unit of Measure;COLLECTION;DECIMALS;TIME_PERIOD;OBS_VALUE;CALC_METHOD;Calculation Method
+B;Business;NOWA;NOWA;ON;Overnight;R;Rate;;2;2026-10-06;4.50;N;Normal
+B;Business;NOWA;NOWA;ON;Overnight;R;Rate;;2;2026-10-07;4.50;N;Normal
+B;Business;NOWA;NOWA;ON;Overnight;R;Rate;;2;2026-10-08;4.50;N;Normal

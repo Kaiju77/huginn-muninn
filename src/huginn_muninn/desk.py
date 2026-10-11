@@ -17,6 +17,7 @@ from src.huginn_muninn.allocation import (
 from src.huginn_muninn.evidence import (
     MAX_AGE_DAYS,
     assess,
+    due_status,
     freshness_flags,
     open_evidence,
     source_posture,
@@ -943,10 +944,11 @@ def _px(value):
     return format(value.quantize(Decimal('0.01')), 'f')
 
 
-def _ingested_usd_nok(observations):
+def _ingested_series(observations, subject):
+    """Stored Norges Bank points for one subject. NOWA is not USD/NOK."""
     points = []
     for observation in observations:
-        if observation.subject != 'USD/NOK':
+        if observation.subject != subject:
             continue
         if observation.source_id != 'norges-bank-open-data':
             continue
@@ -965,15 +967,19 @@ def _ingested_usd_nok(observations):
     return tuple(points)
 
 
-def _usd_nok_svg(observations):
+def _ingested_usd_nok(observations):
+    return _ingested_series(observations, 'USD/NOK')
+
+
+def _series_svg(observations, subject, svg_id, title):
     """Markers for stored ingested points. Missing dates are not filled in."""
     opening = (
-        '<svg id="usd-nok-ingested" xmlns="http://www.w3.org/2000/svg" '
+        f'<svg id="{svg_id}" xmlns="http://www.w3.org/2000/svg" '
         'viewBox="0 0 720 280" role="img">'
-        '<title>Ingested USD/NOK</title>'
+        f'<title>{title}</title>'
         '<line x1="40" y1="220" x2="680" y2="220" stroke="#2a3140" stroke-width="1"></line>'
     )
-    points = _ingested_usd_nok(observations)
+    points = _ingested_series(observations, subject)
     parts = [opening]
     if any(kind == 'recorded' for _observation, kind in points):
         parts.append('<text x="40" y="28" fill="#d7b58a">recorded</text>')
@@ -1043,6 +1049,41 @@ def _usd_nok_svg(observations):
     return ''.join(parts)
 
 
+def _usd_nok_svg(observations):
+    return _series_svg(observations, 'USD/NOK', 'usd-nok-ingested', 'Ingested USD/NOK')
+
+
+def _policy_rate_svg(observations):
+    return _series_svg(
+        observations,
+        'policy-rate',
+        'policy-rate-ingested',
+        'Ingested policy rate',
+    )
+
+
+def _revision_section(revisions):
+    if not revisions:
+        return (
+            '<section><h2>Revisions</h2>'
+            '<p>No revision is stored.</p></section>'
+        )
+    notes = []
+    for revision in revisions:
+        observation_id = str(revision.get('observation_id') or '')
+        values = revision.get('values') or []
+        times = revision.get('retrieval_times') or []
+        shown_values = ', '.join(str(item) for item in values)
+        shown_times = ', '.join(str(item) for item in times)
+        notes.append(
+            f'<p data-revision="{escape(observation_id)}">'
+            f'Revision {escape(observation_id)}. '
+            f'Values {escape(shown_values)}. '
+            f'Retrieval times {escape(shown_times)}.</p>'
+        )
+    return '<section><h2>Revisions</h2>' + ''.join(notes) + '</section>'
+
+
 def render_evidence(state, on_date):
     """Server-rendered registry and stored observations. This does not fetch."""
     parsed = date.fromisoformat(on_date)
@@ -1055,16 +1096,30 @@ def render_evidence(state, on_date):
     for row in cached.observations:
         store.ingest(row)
     assessment = assess(store, parsed, MAX_AGE_DAYS)
+    shown_observations = visible_observations(store)
+    status_by_source = dict(due_status(
+        store.sources(),
+        shown_observations,
+        parsed,
+        MAX_AGE_DAYS,
+    ))
     source_rows = []
     for source in store.sources():
         fetch = 'live_fetch false' if source.get('live_fetch') is False else 'live_fetch true'
         posture = source_posture(source)
         cadence = source.get('cadence') or ''
         source_id = str(source.get('source_id', ''))
+        due_attribute = ''
+        due_cell = '<td></td>'
+        if posture == 'connected':
+            label = status_by_source.get(source_id, 'due')
+            due_attribute = f' data-due="{escape(label)}"'
+            due_cell = f'<td>{escape(label)}</td>'
         source_rows.append(
             '<tr'
             f' data-source="{escape(source_id)}"'
             f' data-posture="{escape(posture)}"'
+            f'{due_attribute}'
             '>'
             f'<td>{escape(source_id)}</td>'
             f'<td>{escape(str(source.get("publisher", "")))}</td>'
@@ -1072,10 +1127,10 @@ def render_evidence(state, on_date):
             f'<td>{escape(str(cadence))}</td>'
             f'<td>{escape(posture)}</td>'
             f'<td>{escape(fetch)}</td>'
+            f'{due_cell}'
             f'<td>{escape(_source_limitation(source))}</td>'
             '</tr>'
         )
-    shown_observations = visible_observations(store)
     observation_rows = []
     match_notes = []
     for observation in shown_observations:
@@ -1173,7 +1228,7 @@ def render_evidence(state, on_date):
         '<section><h2>Sources</h2>'
         '<div class="table-wrap"><table><thead><tr>'
         '<th>Source</th><th>Publisher</th><th>Category</th><th>Cadence</th>'
-        '<th>Posture</th><th>Live fetch</th><th>Limitation</th>'
+        '<th>Posture</th><th>Live fetch</th><th>Due</th><th>Limitation</th>'
         '</tr></thead><tbody>'
         + ''.join(source_rows)
         + '</tbody></table></div></section>'
@@ -1181,7 +1236,14 @@ def render_evidence(state, on_date):
         '<figure>'
         + _usd_nok_svg(shown_observations)
         + '<figcaption>The synthetic 10.25 fixture is labeled synthetic and is not '
-        'drawn as a Norges Bank point. Stored dates only. Missing dates are not '
+        'drawn as a Norges Bank point. NOWA is not drawn on this chart. Stored dates '
+        'only. Missing dates are not interpolated.</figcaption>'
+        '</figure></section>'
+        '<section><h2>Policy rate observations</h2>'
+        '<figure>'
+        + _policy_rate_svg(shown_observations)
+        + '<figcaption>The synthetic 4.50 fixture is labeled synthetic and is not '
+        'drawn as a live Norges Bank point. Stored dates only. Missing dates are not '
         'interpolated.</figcaption>'
         '</figure></section>'
         '<section><h2>Recorded observations</h2>'
@@ -1195,7 +1257,8 @@ def render_evidence(state, on_date):
         + ''.join(match_notes)
         + ''.join(conflict_notes)
         + '</section>'
-        '<section><h2>Date</h2>'
+        + _revision_section(cached.revisions)
+        + '<section><h2>Date</h2>'
         '<form method="get" action="/evidence">'
         '<label for="date">Date'
         f'<input id="date" name="date" value="{escape(on_date)}">'
