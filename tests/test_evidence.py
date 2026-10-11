@@ -8,8 +8,10 @@ from pathlib import Path
 from src.huginn_muninn.desk import (
     INTELLIGENCE,
     _future_kept_note,
+    _policy_nowa_section,
     _usd_nok_ledger_section,
 )
+from src.huginn_muninn.ingest.client import ALLOWLIST
 from src.huginn_muninn.evidence import (
     MAX_AGE_DAYS,
     EvidenceStore,
@@ -609,6 +611,32 @@ class EvidencePageTest(unittest.TestCase):
         self.assertEqual(body.count('A match and a gap are not a ledger update.'), 1)
         self.assertNotIn('The date has more than one row.', ledger_note)
         self.assertNotIn('data-multiple', ledger_note)
+        pair = body.split('id="policy-nowa"', 1)[1].split('</section>', 1)[0]
+        self.assertEqual(pair.count('The policy rate and NOWA are not combined.'), 1)
+        self.assertEqual(body.count('The policy rate and NOWA are not combined.'), 1)
+        policy_note = pair.split('data-subject="policy-rate"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-visible="true"', policy_note)
+        self.assertIn('data-latest="2026-01-02"', policy_note)
+        self.assertIn('data-values="4.50"', policy_note)
+        self.assertIn('Latest observation date 2026-01-02.', policy_note)
+        self.assertIn('Value 4.50.', policy_note)
+        self.assertNotIn('The date has more than one row.', policy_note)
+        nowa_note = pair.split('data-subject="nowa"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-visible="false"', nowa_note)
+        self.assertIn('nowa is not visible.', nowa_note)
+        self.assertNotIn('Value ', nowa_note)
+        hosts = body.split('id="allowlist-hosts"', 1)[1].split('</section>', 1)[0]
+        self.assertEqual(
+            hosts.count(
+                'These hosts are the allowlist. This page does not open a connection.'
+            ),
+            1,
+        )
+        listed = hosts.split('<ul>', 1)[1].split('</ul>', 1)[0]
+        self.assertEqual(
+            listed,
+            ''.join(f'<li>{host}</li>' for host in sorted(ALLOWLIST)),
+        )
         self.assertNotIn(
             'A row later than the selected date stays on the page. It was not dropped.',
             body,
@@ -1170,4 +1198,185 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn(
             'A row later than the selected date stays on the page. It was not dropped.',
             source,
+        )
+        self.assertIn('The policy rate and NOWA are not combined.', source)
+        self.assertIn(
+            'These hosts are the allowlist. This page does not open a connection.',
+            source,
+        )
+
+    def _rate_row(self, subject, value, observed, observation_id, retrieval=None):
+        return Observation(
+            observation_id,
+            'norges-bank-open-data',
+            subject,
+            'percent',
+            None if value is None else Decimal(value),
+            date.fromisoformat(observed),
+            date.fromisoformat(retrieval or observed),
+            'recorded',
+            ('recorded_fixture',),
+        )
+
+    def test_absent_policy_rate_and_nowa_say_they_are_not_visible(self):
+        html = _policy_nowa_section(())
+        self.assertEqual(html.count('The policy rate and NOWA are not combined.'), 1)
+        self.assertIn('data-subject="policy-rate" data-visible="false"', html)
+        self.assertIn('policy-rate is not visible.', html)
+        self.assertIn('data-subject="nowa" data-visible="false"', html)
+        self.assertIn('nowa is not visible.', html)
+        self.assertNotIn('Latest observation date', html)
+        self.assertNotIn('Value ', html)
+        self.assertNotIn('The date has more than one row.', html)
+
+    def test_shared_latest_date_shows_both_values_without_combining_them(self):
+        rows = (
+            self._rate_row('policy-rate', '4.50', '2026-01-02', 'policy-old'),
+            self._rate_row('policy-rate', '4.25', '2026-10-08', 'policy-b', '2026-10-11'),
+            self._rate_row('policy-rate', '4.00', '2026-10-08', 'policy-c', '2026-10-12'),
+            self._rate_row('policy-rate', '3.00', '2026-10-07', 'policy-earlier'),
+            self._rate_row('nowa', '4.40', '2026-10-08', 'nowa-e'),
+            self._rate_row('nowa', '4.41', '2026-10-08', 'nowa-f'),
+            self._rate_row('nowa', '4.10', '2026-10-07', 'nowa-older'),
+            self._rate_row('USD/NOK', '9.5623', '2026-10-09', 'usd'),
+        )
+        html = _policy_nowa_section(rows)
+        self.assertEqual(html.count('The policy rate and NOWA are not combined.'), 1)
+        policy = html.split('data-subject="policy-rate"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-visible="true"', policy)
+        self.assertIn('data-latest="2026-10-08"', policy)
+        self.assertIn('data-values="4.25 4.00"', policy)
+        self.assertIn('data-multiple="true"', policy)
+        self.assertIn('Value 4.25.', policy)
+        self.assertIn('Value 4.00.', policy)
+        self.assertIn('The date has more than one row.', policy)
+        self.assertNotIn('4.50', policy)
+        self.assertNotIn('3.00', policy)
+        self.assertNotIn('8.25', policy)
+        self.assertNotIn('4.125', policy)
+        nowa = html.split('data-subject="nowa"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-latest="2026-10-08"', nowa)
+        self.assertIn('data-values="4.40 4.41"', nowa)
+        self.assertIn('data-multiple="true"', nowa)
+        self.assertIn('Value 4.40.', nowa)
+        self.assertIn('Value 4.41.', nowa)
+        self.assertIn('The date has more than one row.', nowa)
+        self.assertNotIn('4.10', nowa)
+        self.assertNotIn('8.81', nowa)
+        self.assertNotIn('4.405', nowa)
+        self.assertNotIn('8.65', html)
+        self.assertNotIn('9.5623', html)
+        self.assertNotIn('average', html.lower())
+
+    def test_stored_nowa_is_shown_beside_the_policy_rate_without_a_fetch(self):
+        import socket
+        import urllib.request
+
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-10-11T09:21:00+00:00',
+            ({
+                'observation_id': 'nb-short-NOWA-ON-R-2026-10-08',
+                'source_id': 'norges-bank-open-data',
+                'subject': 'nowa',
+                'unit': 'percent',
+                'value': '4.50',
+                'observation_time': '2026-10-08',
+                'retrieval_time': '2026-10-11',
+                'provenance': 'recorded',
+                'quality': ['recorded_fixture'],
+            },),
+            (),
+        )
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            response = dispatch(self.state, 'GET', '/evidence?date=2026-10-11', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(response.status, 200)
+        section = response.body.split('id="policy-nowa"', 1)[1].split('</section>', 1)[0]
+        self.assertIn('The policy rate and NOWA are not combined.', section)
+        policy = section.split('data-subject="policy-rate"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-latest="2026-01-02"', policy)
+        self.assertIn('data-values="4.50"', policy)
+        nowa = section.split('data-subject="nowa"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-visible="true"', nowa)
+        self.assertIn('data-latest="2026-10-08"', nowa)
+        self.assertIn('data-values="4.50"', nowa)
+        self.assertIn('Value 4.50.', nowa)
+        self.assertNotIn('The date has more than one row.', nowa)
+        self.assertNotIn('9.00', section)
+        self.assertNotIn('4.50', [
+            row['rate'] for row, _posting in self.state.rate_postings
+        ])
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_allowlist_hosts_come_from_the_client_constant(self):
+        import socket
+        import urllib.request
+        import src.huginn_muninn.ingest.client as client_module
+
+        desk = (ROOT / 'src' / 'huginn_muninn' / 'desk.py').read_text(encoding='utf-8')
+        self.assertIn(
+            'from src.huginn_muninn.ingest.client import ALLOWLIST',
+            desk,
+        )
+        for host in ALLOWLIST:
+            self.assertNotIn(f"'{host}'", desk)
+            self.assertNotIn(f'"{host}"', desk)
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+        fetch = client_module.Client.fetch
+        live = client_module.live_transport
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        client_module.Client.fetch = blocked
+        client_module.live_transport = blocked
+        try:
+            response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+            client_module.Client.fetch = fetch
+            client_module.live_transport = live
+        self.assertEqual(response.status, 200)
+        section = response.body.split('id="allowlist-hosts"', 1)[1].split('</section>', 1)[0]
+        self.assertEqual(
+            section.count(
+                'These hosts are the allowlist. This page does not open a connection.'
+            ),
+            1,
+        )
+        listed = section.split('<ul>', 1)[1].split('</ul>', 1)[0]
+        self.assertEqual(
+            listed,
+            ''.join(f'<li>{host}</li>' for host in sorted(ALLOWLIST)),
+        )
+        self.assertNotIn('api.stlouisfed.org', section)
+        self.assertNotIn('data.stlouisfed.org', section)
+        self.assertNotIn('live_transport', desk)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
         )

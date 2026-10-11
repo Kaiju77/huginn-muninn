@@ -2,6 +2,22 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
+1. INGEST-07 is reviewed in this commit. Reviewer `93b4999a-71c0-4cca-9ca6-522a66b33861` approved the separate policy-rate and NOWA note and the allowlist hosts. The next executable task is item 2.
+2. After it: for the newest stored USD/NOK observation, show stored value minus Decimal('10.25') as a labeled difference. Exact zero renders as 0. Include this exact sentence: "The USD/NOK gap is not a recommendation and is not copied into the ledger." Do not call add_rate. If no USD/NOK row is visible, omit the difference and keep the existing empty-state sentence.
+3. After that: on each stored-series inventory line, state the freshness flag of the latest row against the selected page date, using the existing freshness_flags function. Do not change that function. A line with two rows on the latest date states both flags.
+
+Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`.
+
+The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
+
+## Historical
+
+The following pointer was current before INGEST-07. It is not the current next step.
+
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
+
 1. INGEST-06 is reviewed at `3fbb139ec9eae87a6cc797ac25db3910ed384ca8`. Reviewer `836d93f4-c13a-499b-879f-5a9daf50a79f` approved the retrieval dates on the stored-series inventory and the static six-series list. The next executable task is item 2.
 2. After it: a read-only note that the policy rate and NOWA are different series. Show each latest stored value when that subject is visible. Do not add them, average them, or treat a shared percent unit as one rate. Say they are not combined.
 3. After that: state the allowlist hosts on the evidence page as text taken from the existing client allowlist constant, still without opening a socket on GET.

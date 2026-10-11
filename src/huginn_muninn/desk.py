@@ -25,6 +25,7 @@ from src.huginn_muninn.evidence import (
     visible_observations,
 )
 from src.huginn_muninn.ingest.cache import read_desk_cache
+from src.huginn_muninn.ingest.client import ALLOWLIST
 from src.huginn_muninn.ingest.refresh import REQUESTED_SERIES
 
 
@@ -1084,6 +1085,11 @@ _LEDGER_GAP_SENTENCE = 'A match and a gap are not a ledger update.'
 _FUTURE_ROW_SENTENCE = (
     'A row later than the selected date stays on the page. It was not dropped.'
 )
+_POLICY_NOWA_SENTENCE = 'The policy rate and NOWA are not combined.'
+_POLICY_NOWA_SUBJECTS = ('policy-rate', 'nowa')
+_ALLOWLIST_SENTENCE = (
+    'These hosts are the allowlist. This page does not open a connection.'
+)
 
 
 def _pair_day(observation_id, prefix):
@@ -1259,6 +1265,71 @@ def _manual_refresh_list():
         '<h2>Series a manual refresh requests</h2>'
         '<p>This list is not a refresh.</p>'
         f'<ol>{items}</ol>'
+        '</section>'
+    )
+
+
+def _policy_nowa_paragraph(subject, line):
+    """One subject from stored rows. Values on the latest date stay separate."""
+    if line is None:
+        return (
+            f'<p data-subject="{escape(subject)}" data-visible="false">'
+            f'{escape(subject)} is not visible.</p>'
+        )
+    shown_values = [
+        'missing' if value is None else format(value, 'f')
+        for value in line.values
+    ]
+    value_text = '. '.join(
+        f'Value {escape(shown)}' for shown in shown_values
+    )
+    multiple = ''
+    trailing = ''
+    if len(line.values) > 1:
+        multiple = ' data-multiple="true"'
+        trailing = ' The date has more than one row.'
+    return (
+        '<p'
+        f' data-subject="{escape(subject)}"'
+        ' data-visible="true"'
+        f' data-latest="{escape(line.latest_date.isoformat())}"'
+        f' data-values="{escape(" ".join(shown_values))}"'
+        f'{multiple}'
+        '>'
+        f'{escape(subject)}. '
+        f'Latest observation date {escape(line.latest_date.isoformat())}. '
+        f'{value_text}.{trailing}</p>'
+    )
+
+
+def _policy_nowa_section(observations):
+    """Latest stored policy-rate and nowa rows. This does not add or average them."""
+    by_subject = {
+        line.subject: line for line in series_inventory(observations)
+    }
+    notes = [
+        _policy_nowa_paragraph(subject, by_subject.get(subject))
+        for subject in _POLICY_NOWA_SUBJECTS
+    ]
+    return (
+        '<section id="policy-nowa">'
+        '<h2>Policy rate and NOWA</h2>'
+        f'<p>{_POLICY_NOWA_SENTENCE}</p>'
+        + ''.join(notes)
+        + '</section>'
+    )
+
+
+def _allowlist_section():
+    """Hosts from the client allowlist. This does not open a connection."""
+    items = ''.join(
+        f'<li>{escape(host)}</li>' for host in sorted(ALLOWLIST)
+    )
+    return (
+        '<section id="allowlist-hosts">'
+        '<h2>Allowlist</h2>'
+        f'<p>{_ALLOWLIST_SENTENCE}</p>'
+        f'<ul>{items}</ul>'
         '</section>'
     )
 
@@ -1487,6 +1558,7 @@ def render_evidence(state, on_date):
         'The synthetic policy fixture, USD/NOK points, and EUR/NOK points are not '
         'drawn on this chart.</figcaption>'
         '</figure></section>'
+        + _policy_nowa_section(shown_observations)
         + _eur_nok_comparison(shown_observations)
         + '<section><h2>Recorded observations</h2>'
         '<div class="table-wrap"><table><thead><tr>'
@@ -1511,6 +1583,7 @@ def render_evidence(state, on_date):
         '<button type="submit">Show this date</button>'
         '</form></section>'
         + _manual_refresh_list()
+        + _allowlist_section()
         + '<section><h2>Refresh</h2>'
         '<form method="post" action="/evidence/refresh">'
         '<label for="start_period">Start'
