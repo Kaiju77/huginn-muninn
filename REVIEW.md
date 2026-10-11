@@ -1,5 +1,7 @@
 # Review
 
+Independent review on 2026-10-11 approved INGEST-09. Reviewer `1b77f2bb-714f-4adf-9e95-67699efad7cf` read the series due labels, the calendar-day sentence, the tests, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite and did not fetch. The parent sandbox discovered 151 tests, 151 passed, exit code 0. This verdict covers those page notes. It is not a live-refresh acceptance or a ledger change. The synthetic 10.25 rate remains the ledger rate. This note does not approve INGEST-09.
+
 Independent review on 2026-10-11 approved INGEST-08. Reviewer `05ef935a-e39b-4b92-990a-0807c762b6bc` read the USD/NOK gap, the inventory freshness labels, the unchanged freshness rule, the tests, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite and did not fetch. The parent sandbox discovered 150 tests, 150 passed, exit code 0. This verdict covers the labeled gap and the freshness labels. It is not a live-refresh acceptance or a ledger change. The synthetic 10.25 rate remains the ledger rate.
 
 Independent review on 2026-10-11 approved INGEST-07. Reviewer `93b4999a-71c0-4cca-9ca6-522a66b33861` read the separate policy-rate and NOWA note, the allowlist section, the client constant, the tests, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite and did not fetch. The parent sandbox discovered 150 tests, 150 passed, exit code 0. This verdict covers those page notes. It is not a live-refresh acceptance or a ledger change. The synthetic 10.25 rate remains the ledger rate.

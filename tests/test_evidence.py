@@ -507,6 +507,10 @@ class EvidencePageTest(unittest.TestCase):
         self.assertNotIn('No source is connected.', body)
         self.assertIn('This page is not a recommendation.', body)
         self.assertIn('No live refresh has been stored.', body)
+        self.assertEqual(
+            body.count('A later calendar day is not a scheduled refresh.'),
+            1,
+        )
         self.assertIn('No stored error.', body)
         self.assertIn('Refresh is manual. It is not a scheduler.', body)
         self.assertIn(
@@ -1254,15 +1258,167 @@ class EvidencePageTest(unittest.TestCase):
         section = response.body.split('id="manual-refresh-list"', 1)[1].split('</section>', 1)[0]
         self.assertIn('This list is not a refresh.', section)
         listed = section.split('<ol>', 1)[1].split('</ol>', 1)[0]
+        owners = (
+            'norges-bank-open-data',
+            'norges-bank-open-data',
+            'norges-bank-open-data',
+            'norges-bank-open-data',
+            'ecb-sdw',
+            'ssb-statbank',
+        )
         self.assertEqual(
             listed,
-            ''.join(f'<li>{name}</li>' for name in REQUESTED_SERIES),
+            ''.join(
+                f'<li data-source="{source}" data-due="due">{name}. due</li>'
+                for name, source in zip(REQUESTED_SERIES, owners)
+            ),
+        )
+        self.assertEqual(
+            response.body.count('A later calendar day is not a scheduled refresh.'),
+            1,
         )
         desk = (ROOT / 'src' / 'huginn_muninn' / 'desk.py').read_text(encoding='utf-8')
         self.assertNotIn('refresh_public', desk)
         self.assertNotIn('live_transport', desk)
         self.assertNotIn('add_rate', desk)
         self.assertNotIn('urllib', (ROOT / 'src' / 'huginn_muninn' / 'evidence.py').read_text(encoding='utf-8'))
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def _series_list(self, body):
+        section = body.split('id="manual-refresh-list"', 1)[1].split('</section>', 1)[0]
+        return section.split('<ol>', 1)[1].split('</ol>', 1)[0]
+
+    def _cache_row(self, observation_id, source_id, subject, value, observed, retrieved):
+        return {
+            'observation_id': observation_id,
+            'source_id': source_id,
+            'subject': subject,
+            'unit': 'recorded',
+            'value': value,
+            'observation_time': observed,
+            'retrieval_time': retrieved,
+            'provenance': 'recorded',
+            'quality': ['recorded_fixture'],
+        }
+
+    def test_series_labels_follow_due_status_for_the_selected_date(self):
+        import urllib.request
+        from src.huginn_muninn.ingest.refresh import REQUESTED_SERIES
+
+        sentence = 'A later calendar day is not a scheduled refresh.'
+        owners = (
+            'norges-bank-open-data',
+            'norges-bank-open-data',
+            'norges-bank-open-data',
+            'norges-bank-open-data',
+            'ecb-sdw',
+            'ssb-statbank',
+        )
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        def labels_for(body, expected):
+            listed = self._series_list(body)
+            self.assertEqual(
+                listed,
+                ''.join(
+                    f'<li data-source="{source}" data-due="{label}">{name}. {label}</li>'
+                    for name, source, label in zip(REQUESTED_SERIES, owners, expected)
+                ),
+            )
+            self.assertEqual(body.count(sentence), 1)
+            self.assertNotIn('. overdue', listed)
+            self.assertNotIn('. unknown', listed)
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        try:
+            empty = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+            self.assertEqual(empty.status, 200)
+            labels_for(empty.body, ('due',) * 6)
+            self.assertIn('No live refresh has been stored.', empty.body)
+
+            write_refresh(
+                self.state.ingest_cache_dir,
+                '2026-03-31T12:00:00+00:00',
+                (self._cache_row(
+                    'nb-stale-usd',
+                    'norges-bank-open-data',
+                    'USD/NOK',
+                    '9.10',
+                    '2026-01-02',
+                    '2026-01-02',
+                ),),
+                (),
+            )
+            stale = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+            self.assertEqual(stale.status, 200)
+            labels_for(stale.body, ('due',) * 6)
+            self.assertIn('Last refresh 2026-03-31T12:00:00+00:00.', stale.body)
+            self.assertIn(
+                'data-source="norges-bank-open-data" data-posture="connected" data-due="due"',
+                stale.body,
+            )
+
+            write_refresh(
+                self.state.ingest_cache_dir,
+                '2026-03-31T18:00:00+00:00',
+                (
+                    self._cache_row(
+                        'nb-fresh-usd',
+                        'norges-bank-open-data',
+                        'USD/NOK',
+                        '10.10',
+                        '2026-03-31',
+                        '2026-03-31',
+                    ),
+                    self._cache_row(
+                        'ecb-fresh',
+                        'ecb-sdw',
+                        'EUR/NOK',
+                        '11.10',
+                        '2026-03-31',
+                        '2026-03-31',
+                    ),
+                    self._cache_row(
+                        'cpi-later',
+                        'ssb-statbank',
+                        'cpi-total',
+                        '103.8',
+                        '2026-07-01',
+                        '2026-03-31',
+                    ),
+                ),
+                (),
+            )
+            current = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+            self.assertEqual(current.status, 200)
+            labels_for(
+                current.body,
+                ('current', 'current', 'current', 'current', 'current', 'due'),
+            )
+            self.assertIn('Last refresh 2026-03-31T18:00:00+00:00.', current.body)
+            self.assertIn(
+                'data-source="norges-bank-open-data" data-posture="connected" data-due="current"',
+                current.body,
+            )
+            self.assertIn(
+                'data-source="ecb-sdw" data-posture="connected" data-due="current"',
+                current.body,
+            )
+            self.assertIn(
+                'data-source="ssb-statbank" data-posture="connected" data-due="due"',
+                current.body,
+            )
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
             ['10', '10.25'],
@@ -1286,6 +1442,9 @@ class EvidencePageTest(unittest.TestCase):
             'These hosts are the allowlist. This page does not open a connection.',
             source,
         )
+        self.assertIn('A later calendar day is not a scheduled refresh.', source)
+        self.assertNotIn('schedule.every', source)
+        self.assertNotIn('BackgroundScheduler', source)
 
     def _rate_row(self, subject, value, observed, observation_id, retrieval=None):
         return Observation(

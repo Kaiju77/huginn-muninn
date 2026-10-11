@@ -1093,6 +1093,15 @@ _POLICY_NOWA_SUBJECTS = ('policy-rate', 'nowa')
 _ALLOWLIST_SENTENCE = (
     'These hosts are the allowlist. This page does not open a connection.'
 )
+_CALENDAR_DAY_SENTENCE = 'A later calendar day is not a scheduled refresh.'
+_SERIES_OWNERS = {
+    'Norges Bank USD/NOK': 'norges-bank-open-data',
+    'Norges Bank EUR/NOK': 'norges-bank-open-data',
+    'the policy rate': 'norges-bank-open-data',
+    'NOWA': 'norges-bank-open-data',
+    'ECB NOK/EUR': 'ecb-sdw',
+    'the one Statistics Norway CPI cell for table 14700, 2026M07, total': 'ssb-statbank',
+}
 
 
 def _pair_day(observation_id, prefix):
@@ -1273,14 +1282,28 @@ def _future_kept_note(observations, on_date):
     return ''
 
 
-def _manual_refresh_list():
-    """Names from the refresh request order. This does not fetch."""
-    items = ''.join(f'<li>{escape(name)}</li>' for name in REQUESTED_SERIES)
+def _manual_refresh_list(status_by_source):
+    """Request order, with the owning source's due_status label.
+
+    The label is due or current for the selected page date. This does not fetch.
+    """
+    items = []
+    for name in REQUESTED_SERIES:
+        source_id = _SERIES_OWNERS[name]
+        label = status_by_source.get(source_id, 'due')
+        if label not in ('due', 'current'):
+            label = 'due'
+        items.append(
+            '<li'
+            f' data-source="{escape(source_id)}"'
+            f' data-due="{escape(label)}"'
+            f'>{escape(name)}. {escape(label)}</li>'
+        )
     return (
         '<section id="manual-refresh-list">'
         '<h2>Series a manual refresh requests</h2>'
         '<p>This list is not a refresh.</p>'
-        f'<ol>{items}</ol>'
+        f'<ol>{"".join(items)}</ol>'
         '</section>'
     )
 
@@ -1508,6 +1531,7 @@ def render_evidence(state, on_date):
         refresh_note = f'<p>Last refresh {escape(cached.retrieved_at)}.</p>'
     else:
         refresh_note = '<p>No live refresh has been stored.</p>'
+    calendar_note = f'<p>{_CALENDAR_DAY_SENTENCE}</p>'
     live_rows = any(
         'live_retrieval' in observation.quality for observation in shown_observations
     )
@@ -1551,6 +1575,7 @@ def render_evidence(state, on_date):
         f'<p>Limitations: {escape(limitations)}.</p>'
         f'<p>{escape(evidence_note)}</p>'
         + refresh_note
+        + calendar_note
         + ''.join(error_notes)
         + '<p>Refresh is manual. It is not a scheduler.</p>'
         '</section>'
@@ -1607,7 +1632,7 @@ def render_evidence(state, on_date):
         '</label>'
         '<button type="submit">Show this date</button>'
         '</form></section>'
-        + _manual_refresh_list()
+        + _manual_refresh_list(status_by_source)
         + _allowlist_section()
         + '<section><h2>Refresh</h2>'
         '<form method="post" action="/evidence/refresh">'
