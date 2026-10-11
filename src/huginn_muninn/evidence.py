@@ -1,6 +1,6 @@
 """Recorded evidence for the night desk.
 
-Live retrieval stays off. An observation is ingested from a local fixture
+This module does not fetch. An observation is ingested from a local fixture
 or from a caller. It is not copied into the ledger.
 """
 
@@ -53,6 +53,8 @@ class IngestResult(NamedTuple):
 class Conflict(NamedTuple):
     observation_id: str
     values: tuple
+    observation_times: tuple
+    observations: tuple
 
 
 class Assessment(NamedTuple):
@@ -140,8 +142,8 @@ def load_registry(path):
     for row in rows:
         if not isinstance(row, dict):
             raise ValueError('source must be an object')
-        if row.get('live_fetch') is not False:
-            raise ValueError('live_fetch must be false')
+        if row.get('live_fetch') not in (True, False):
+            raise ValueError('live_fetch must be boolean')
         source_id = row.get('source_id')
         if _blank(source_id) or source_id in seen:
             raise ValueError('source_id is required')
@@ -164,6 +166,45 @@ def _cache_row(row):
     return copied
 
 
+def _same_observation(left, right):
+    """A repeat matches only when every identity field matches."""
+    return (
+        left.observation_id == right.observation_id
+        and left.source_id == right.source_id
+        and left.subject == right.subject
+        and left.unit == right.unit
+        and left.value == right.value
+        and left.observation_time == right.observation_time
+        and left.retrieval_time == right.retrieval_time
+        and left.provenance == right.provenance
+        and left.quality == right.quality
+    )
+
+
+def source_posture(source):
+    """connected, prepared, blocked, or excluded. This does not fetch."""
+    if source.get('status') == 'excluded' or source.get('category') == 'excluded':
+        return 'excluded'
+    if source.get('blocked_reason'):
+        return 'blocked'
+    if source.get('live_fetch') is True:
+        return 'connected'
+    return 'prepared'
+
+
+def visible_observations(store):
+    """Stored rows plus later conflicting rows. The first row is not replaced."""
+    rows = list(store.observations())
+    seen = list(rows)
+    for conflict in store.conflicts():
+        for item in conflict.observations:
+            if any(_same_observation(item, kept) for kept in seen):
+                continue
+            rows.append(item)
+            seen.append(item)
+    return tuple(rows)
+
+
 class EvidenceStore:
     """In-memory observations. An optional cache replays through ingest."""
 
@@ -174,8 +215,8 @@ class EvidenceStore:
         self._sources = []
         seen = set()
         for source in sources:
-            if not isinstance(source, dict) or source.get('live_fetch') is not False:
-                raise ValueError('live_fetch must be false')
+            if not isinstance(source, dict) or source.get('live_fetch') not in (True, False):
+                raise ValueError('live_fetch must be boolean')
             source_id = source.get('source_id')
             if _blank(source_id) or source_id in seen:
                 raise ValueError('source_id is required')
@@ -195,10 +236,15 @@ class EvidenceStore:
         return tuple(self._observations)
 
     def conflicts(self):
-        return tuple(
-            Conflict(observation_id, tuple(values))
-            for observation_id, values in self._conflicts.items()
-        )
+        found = []
+        for observation_id, variants in self._conflicts.items():
+            found.append(Conflict(
+                observation_id,
+                tuple(item.value for item in variants),
+                tuple(item.observation_time for item in variants),
+                tuple(variants),
+            ))
+        return tuple(found)
 
     def _find_source(self, source_id):
         for source in self._sources:
@@ -261,14 +307,6 @@ class EvidenceStore:
             quality = ()
         if reasons:
             return IngestResult(False, False, False, _ordered(reasons))
-        existing = self._index.get(observation_id)
-        if existing is not None:
-            if existing.value == amount:
-                return IngestResult(False, True, False, ())
-            values = self._conflicts.setdefault(observation_id, [existing.value])
-            if amount not in values:
-                values.append(amount)
-            return IngestResult(False, False, True, ('conflict',))
         stored = Observation(
             observation_id,
             source_id,
@@ -280,6 +318,17 @@ class EvidenceStore:
             provenance,
             tuple(quality),
         )
+        existing = self._index.get(observation_id)
+        if existing is not None:
+            known = self._conflicts.get(observation_id, [existing])
+            if any(_same_observation(item, stored) for item in known):
+                return IngestResult(False, True, False, ())
+            variants = self._conflicts.get(observation_id)
+            if variants is None:
+                variants = [existing]
+                self._conflicts[observation_id] = variants
+            variants.append(stored)
+            return IngestResult(False, False, True, ('conflict',))
         self._observations.append(stored)
         self._index[observation_id] = stored
         return IngestResult(True, False, False, ())

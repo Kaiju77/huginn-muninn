@@ -1,0 +1,590 @@
+import asyncio
+import json
+import tempfile
+import unittest
+from decimal import Decimal
+from pathlib import Path
+from urllib.parse import urlsplit
+
+from src.huginn_muninn.evidence import open_evidence
+from src.huginn_muninn.ingest.cache import read_desk_cache, write_refresh
+from src.huginn_muninn.ingest.client import (
+    ALLOWLIST,
+    MAX_RETRIES,
+    MIN_INTERVAL_SECONDS,
+    RETRY_STATUSES,
+    TIMEOUT_SECONDS,
+    Client,
+    TransportResponse,
+)
+from src.huginn_muninn.ingest.ecb import CITATION, parse_nok_eur
+from src.huginn_muninn.ingest.edgar import fetch_filings
+from src.huginn_muninn.ingest.fred import HOSTS, status
+from src.huginn_muninn.ingest.norges import (
+    POLICY_RATE_KEY,
+    POLICY_RATE_HTTP_STATUS,
+    parse_exr,
+    usd_nok_url,
+)
+from src.huginn_muninn.ingest.refresh import refresh_public
+from src.huginn_muninn.ingest.ssb import parse_fixture
+from src.huginn_muninn.prototype import dispatch, open_state
+
+
+ROOT = Path(__file__).resolve().parent.parent
+FIXTURES = ROOT / 'fixtures' / 'http'
+STAMP = '2026-10-11T09:21:00+00:00'
+WINDOW = ('2026-10-01', '2026-10-09')
+
+
+class Clock:
+    def __init__(self):
+        self.now = 0.0
+        self.sleeps = []
+
+    def __call__(self):
+        return self.now
+
+    async def sleep(self, seconds):
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+class Script:
+    def __init__(self, steps):
+        self.steps = list(steps)
+        self.urls = []
+
+    def __call__(self, request):
+        self.urls.append(request.url)
+        step = self.steps.pop(0)
+        if isinstance(step, BaseException):
+            raise step
+        return step
+
+
+def _client(transport, cache, clock=None):
+    if clock is None:
+        clock = Clock()
+    return Client(
+        transport,
+        cache,
+        clock=clock,
+        sleep=clock.sleep,
+        retrieved_at=STAMP,
+    )
+
+
+def _response(status, body, origin='recorded'):
+    if isinstance(body, str):
+        body = body.encode('utf-8')
+    return TransportResponse(status, body, origin)
+
+
+class ClientContractTest(unittest.TestCase):
+    def test_constants_and_allowlist(self):
+        self.assertEqual(TIMEOUT_SECONDS, 15)
+        self.assertEqual(MIN_INTERVAL_SECONDS, 2)
+        self.assertEqual(MAX_RETRIES, 2)
+        self.assertEqual(RETRY_STATUSES, frozenset((429, 500, 502, 503, 504)))
+        self.assertEqual(
+            ALLOWLIST,
+            frozenset((
+                'data.norges-bank.no',
+                'data-api.ecb.europa.eu',
+                'data.ssb.no',
+                'data.sec.gov',
+            )),
+        )
+        for host in HOSTS:
+            self.assertNotIn(host, ALLOWLIST)
+        self.assertEqual(status()['blocked_reason'], 'api_key_and_terms')
+        self.assertIs(status()['live_fetch'], False)
+        self.assertIs(status()['allowlisted'], False)
+
+    def test_other_hosts_fail_before_the_transport(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        script = Script([])
+
+        def explode(request):
+            raise AssertionError(request.url)
+
+        script = explode
+        client = _client(script, Path(temporary.name))
+        for url in (
+            'https://api.stlouisfed.org/fred/series',
+            'https://data.stlouisfed.org/fred/series',
+            'https://example.com/rates',
+            'http://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP?format=csv',
+        ):
+            result = client.fetch(url)
+            self.assertFalse(result.ok)
+            self.assertEqual(result.reason, 'not_allowlisted')
+            self.assertEqual(result.attempts, 0)
+        self.assertEqual(list(Path(temporary.name).glob('**/*')), [])
+
+    def test_timeout_retries_twice_and_other_4xx_do_not(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        clock = Clock()
+        script = Script([TimeoutError('timed out'), TimeoutError('timed out'), TimeoutError('timed out')])
+        client = _client(script, Path(temporary.name), clock)
+        url = usd_nok_url(*WINDOW)
+        result = client.fetch(url)
+        self.assertEqual(result.reason, 'timeout')
+        self.assertEqual(result.attempts, 3)
+        self.assertEqual(len(script.urls), 3)
+        self.assertEqual(clock.sleeps, [2.0, 2.0])
+        for status_code in (400, 404):
+            clock = Clock()
+            script = Script([_response(status_code, b'no')])
+            client = _client(script, Path(temporary.name), clock)
+            result = client.fetch(url)
+            self.assertEqual(result.reason, 'http_status')
+            self.assertEqual(result.status, status_code)
+            self.assertEqual(result.attempts, 1)
+            self.assertEqual(clock.sleeps, [])
+            self.assertEqual(script.steps, [])
+
+    def test_retryable_statuses_stop_after_two_retries(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        url = usd_nok_url(*WINDOW)
+        clock = Clock()
+        script = Script([_response(429, b'later'), _response(200, b'ok')])
+        client = _client(script, Path(temporary.name), clock)
+        result = client.fetch(url)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.attempts, 2)
+        self.assertEqual(result.body, b'ok')
+        self.assertEqual(clock.sleeps, [2.0])
+        clock = Clock()
+        script = Script([
+            _response(503, b'a'),
+            _response(503, b'b'),
+            _response(503, b'c'),
+        ])
+        client = _client(script, Path(temporary.name), clock)
+        result = client.fetch(url)
+        self.assertEqual(result.reason, 'http_status')
+        self.assertEqual(result.status, 503)
+        self.assertEqual(result.attempts, 3)
+        self.assertEqual(clock.sleeps, [2.0, 2.0])
+
+    def test_same_host_waits_and_another_host_does_not(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        clock = Clock()
+        script = Script([
+            _response(200, b'one'),
+            _response(200, b'two'),
+            _response(200, b'three'),
+        ])
+        client = _client(script, Path(temporary.name), clock)
+        first = usd_nok_url(*WINDOW)
+        second = 'https://data-api.ecb.europa.eu/service/data/EXR/D.NOK.EUR.SP00.A?format=csvdata'
+        self.assertTrue(client.fetch(first).ok)
+        self.assertTrue(client.fetch(second).ok)
+        self.assertEqual(clock.sleeps, [])
+        self.assertTrue(client.fetch(first).ok)
+        self.assertEqual(clock.sleeps, [2.0])
+
+    def test_cache_stores_body_url_status_and_timestamp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        cache = Path(temporary.name)
+        body = b'FREQ;TIME_PERIOD;OBS_VALUE\n'
+        script = Script([_response(200, body)])
+        client = _client(script, cache, Clock())
+        url = usd_nok_url(*WINDOW)
+        result = client.fetch(url)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.retrieved_at, STAMP)
+        entries = list((cache / 'entries').glob('*.json'))
+        self.assertEqual(len(entries), 1)
+        stored = json.loads(entries[0].read_text(encoding='utf-8'))
+        self.assertEqual(stored['url'], url)
+        self.assertEqual(stored['status'], 200)
+        self.assertEqual(stored['retrieved_at'], STAMP)
+        raw = (cache / stored['body_file']).read_bytes()
+        self.assertEqual(raw, body)
+
+    def test_async_fetch_and_the_sync_wrapper_return_the_body(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        cache = Path(temporary.name)
+        url = usd_nok_url(*WINDOW)
+        sync_client = _client(Script([_response(200, b'sync')]), cache, Clock())
+        async_client = _client(Script([_response(200, b'async')]), cache, Clock())
+        sync_result = sync_client.fetch(url)
+        async_result = asyncio.run(async_client.fetch_async(url))
+        self.assertEqual(sync_result.body, b'sync')
+        self.assertEqual(async_result.body, b'async')
+        self.assertTrue(sync_result.ok)
+        self.assertTrue(async_result.ok)
+
+
+class AdapterContractTest(unittest.TestCase):
+    def test_norges_bank_fixture_parses_without_relabeling_the_collection(self):
+        path = FIXTURES / 'norges-bank-usd-nok.csv'
+        text = path.read_text(encoding='utf-8')
+        self.assertEqual(
+            text.splitlines()[0],
+            'FREQ;Frequency;BASE_CUR;Base Currency;QUOTE_CUR;Quote Currency;TENOR;Tenor;'
+            'DECIMALS;CALCULATED;UNIT_MULT;Unit Multiplier;COLLECTION;Collection Indicator;'
+            'TIME_PERIOD;OBS_VALUE',
+        )
+        self.assertIn('ECB concertation time 14:15 CET', text)
+        self.assertNotIn('2026-10-03', text)
+        self.assertNotIn('2026-10-04', text)
+        url = usd_nok_url(*WINDOW)
+        parsed = parse_exr(text, url, '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        rows = parsed.observations
+        self.assertEqual(
+            [row['observation_time'] for row in rows],
+            [
+                '2026-10-01',
+                '2026-10-02',
+                '2026-10-05',
+                '2026-10-06',
+                '2026-10-07',
+                '2026-10-08',
+                '2026-10-09',
+            ],
+        )
+        self.assertEqual(
+            [row['value'] for row in rows],
+            ['9.6256', '9.6494', '9.6015', '9.5643', '9.584', '9.5807', '9.5623'],
+        )
+        last = rows[-1]
+        self.assertEqual(last['observation_id'], 'nb-exr-USD-NOK-2026-10-09')
+        self.assertEqual(last['source_id'], 'norges-bank-open-data')
+        self.assertEqual(last['subject'], 'USD/NOK')
+        self.assertEqual(last['unit'], 'NOK per 1 USD')
+        self.assertEqual(last['value'], '9.5623')
+        self.assertEqual(Decimal(last['value']), Decimal('9.5623'))
+        self.assertEqual(last['quality'], ['recorded_fixture'])
+        self.assertIn('Norges Bank open data', last['provenance'])
+        self.assertIn(url, last['provenance'])
+        self.assertNotIn('ECB concertation', last['provenance'])
+        self.assertNotIn(CITATION, last['provenance'])
+        live = parse_exr(text, url, '2026-10-11', 'live')
+        self.assertEqual(live.observations[0]['quality'], ['live_retrieval'])
+        broken = parse_exr(b'nope', url, '2026-10-11', 'recorded')
+        self.assertEqual(broken.error.reason, 'parse_error')
+        self.assertEqual(broken.observations, ())
+
+    def test_eur_nok_uses_the_same_parser_when_a_body_is_supplied(self):
+        body = (
+            'FREQ;Frequency;BASE_CUR;Base Currency;QUOTE_CUR;Quote Currency;TENOR;Tenor;'
+            'DECIMALS;CALCULATED;UNIT_MULT;Unit Multiplier;COLLECTION;Collection Indicator;'
+            'TIME_PERIOD;OBS_VALUE\n'
+            'B;Business;EUR;Euro;NOK;Norwegian krone;SP;Spot;4;false;0;Units;C;'
+            'ECB concertation time 14:15 CET;2026-10-09;11.0001\n'
+        )
+        parsed = parse_exr(body, 'https://data.norges-bank.no/api/data/EXR/B.EUR.NOK.SP?format=csv', '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        row = parsed.observations[0]
+        self.assertEqual(row['observation_id'], 'nb-exr-EUR-NOK-2026-10-09')
+        self.assertEqual(row['unit'], 'NOK per 1 EUR')
+        self.assertEqual(row['value'], '11.0001')
+        self.assertNotIn('ECB concertation', row['provenance'])
+        self.assertEqual(POLICY_RATE_KEY, 'IR/K.POL.NOK')
+        self.assertEqual(POLICY_RATE_HTTP_STATUS, 404)
+
+    def test_ecb_fixture_keeps_the_observation_text_and_the_citation(self):
+        text = (FIXTURES / 'ecb-nok-eur.csv').read_text(encoding='utf-8')
+        url = (
+            'https://data-api.ecb.europa.eu/service/data/EXR/D.NOK.EUR.SP00.A'
+            '?format=csvdata&startPeriod=2026-10-08&endPeriod=2026-10-09'
+        )
+        parsed = parse_nok_eur(text, url, '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        self.assertEqual(
+            [(row['observation_time'], row['value']) for row in parsed.observations],
+            [('2026-10-08', '10.717'), ('2026-10-09', '10.7155')],
+        )
+        last = parsed.observations[-1]
+        self.assertEqual(last['observation_id'], 'ecb-exr-NOK-EUR-2026-10-09')
+        self.assertEqual(last['unit'], 'NOK per 1 EUR')
+        self.assertEqual(last['value'], '10.7155')
+        self.assertIn(CITATION, last['provenance'])
+        self.assertEqual(last['quality'], ['recorded_fixture'])
+        self.assertEqual(Decimal(last['value']), Decimal('10.7155'))
+        earlier = parsed.observations[0]
+        self.assertEqual(earlier['value'], '10.717')
+        self.assertEqual(Decimal(earlier['value']), Decimal('10.717'))
+
+    def test_statistics_norway_parses_one_recorded_row(self):
+        body = (FIXTURES / 'ssb-one-row.json').read_text(encoding='utf-8')
+        parsed = parse_fixture(body, '2026-10-11')
+        self.assertIsNone(parsed.error)
+        self.assertEqual(len(parsed.observations), 1)
+        row = parsed.observations[0]
+        self.assertEqual(row['source_id'], 'ssb-statbank')
+        self.assertEqual(row['value'], '1')
+        self.assertEqual(row['quality'], ['recorded_fixture'])
+        self.assertIn('CC BY 4.0', row['provenance'])
+        self.assertIn('not security prices', row['provenance'])
+
+    def test_edgar_refuses_without_a_contact_string(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+
+        def explode(request):
+            raise AssertionError(request.url)
+
+        client = _client(explode, Path(temporary.name), Clock())
+        result = asyncio.run(fetch_filings(client, '', 'https://data.sec.gov/submissions/sample.json'))
+        self.assertEqual(result.observations, ())
+        self.assertEqual(result.error.reason, 'configuration_required')
+        blank = asyncio.run(fetch_filings(client, '   ', 'https://data.sec.gov/submissions/sample.json'))
+        self.assertEqual(blank.error.reason, 'configuration_required')
+
+    def test_ingest_package_does_not_touch_the_ledger(self):
+        package = ROOT / 'src' / 'huginn_muninn' / 'ingest'
+        for path in package.glob('*.py'):
+            text = path.read_text(encoding='utf-8')
+            self.assertNotIn('add_rate', text)
+            self.assertNotIn('ledger', text)
+        evidence = (ROOT / 'src' / 'huginn_muninn' / 'evidence.py').read_text(encoding='utf-8')
+        self.assertNotIn('urllib', evidence)
+
+
+class RefreshDeskTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.cache = Path(self._tmp.name) / 'ingest-cache'
+        self.overlay = Path(self._tmp.name) / 'synthetic-book.json'
+        self.state = open_state(ROOT, self.overlay)
+        self.state.ingest_cache_dir = self.cache
+        import urllib.request
+        self._opener = urllib.request.build_opener
+        self._urlopen = urllib.request.urlopen
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+
+    def tearDown(self):
+        import urllib.request
+        urllib.request.build_opener = self._opener
+        urllib.request.urlopen = self._urlopen
+        self._tmp.cleanup()
+
+    def _transport(self, ecb_status=200):
+        norges = (FIXTURES / 'norges-bank-usd-nok.csv').read_bytes()
+        ecb = (FIXTURES / 'ecb-nok-eur.csv').read_bytes()
+
+        class Transport:
+            def __init__(self):
+                self.urls = []
+
+            def __call__(self, request):
+                self.urls.append(request.url)
+                host = urlsplit(request.url).hostname
+                if host == 'data.norges-bank.no':
+                    return TransportResponse(200, norges, 'recorded')
+                if host == 'data-api.ecb.europa.eu':
+                    body = ecb if ecb_status == 200 else b'missing'
+                    return TransportResponse(ecb_status, body, 'recorded')
+                raise AssertionError(request.url)
+
+        return Transport()
+
+    def test_fake_transport_keeps_the_synthetic_ledger_rate(self):
+        transport = self._transport()
+        clock = Clock()
+        self.state.ingest_transport = transport
+        before_value = self.state.ledger.value('2026-03-31')
+        before_books = self.state.ledger.books('2026-03-31')
+        result = refresh_public(
+            self.cache,
+            *WINDOW,
+            transport=transport,
+            retrieved_at=STAMP,
+            clock=clock,
+            sleep=clock.sleep,
+        )
+        self.assertEqual(result.errors, ())
+        self.assertEqual(clock.sleeps, [])
+        self.assertEqual(len(transport.urls), 2)
+        joined = '\n'.join(transport.urls)
+        self.assertIn('startPeriod=2026-10-01', joined)
+        self.assertIn('endPeriod=2026-10-09', joined)
+        self.assertIn('EXR/B.USD.NOK.SP', joined)
+        self.assertIn('EXR/D.NOK.EUR.SP00.A', joined)
+        self.assertNotIn(POLICY_RATE_KEY, joined)
+        self.assertNotIn('EXR/B.EUR.NOK.SP', joined)
+        self.assertNotIn('data.ssb.no', joined)
+        self.assertNotIn('data.sec.gov', joined)
+        self.assertNotIn('stlouisfed.org', joined)
+        values = [row['value'] for row in result.observations]
+        self.assertIn('9.5623', values)
+        self.assertIn('9.584', values)
+        self.assertIn('10.717', values)
+        self.assertIn('10.7155', values)
+        nok = [row for row in result.observations if row['observation_id'] == 'nb-exr-USD-NOK-2026-10-09']
+        self.assertEqual(nok[0]['quality'], ['recorded_fixture'])
+        self.assertIn(CITATION, result.observations[-1]['provenance'])
+        store = open_evidence(ROOT)
+        for row in result.observations:
+            self.assertTrue(store.ingest(row).stored)
+        stored = {
+            item.observation_id: item
+            for item in store.observations()
+        }
+        self.assertEqual(stored['nb-exr-USD-NOK-2026-10-09'].value, Decimal('9.5623'))
+        self.assertEqual(stored['ecb-exr-NOK-EUR-2026-10-08'].value, Decimal('10.717'))
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        self.assertEqual(response.status, 200)
+        body = response.body
+        svg = body.split('id="usd-nok-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertIn('data-date="2026-10-09"', svg)
+        self.assertIn('data-value="9.5623"', svg)
+        self.assertIn('data-kind="recorded"', svg)
+        self.assertIn('>recorded<', svg)
+        self.assertNotIn('>live<', svg)
+        self.assertNotIn('data-date="2026-10-03"', svg)
+        self.assertNotIn('data-date="2026-10-04"', svg)
+        self.assertIn('data-segment="2026-10-01/2026-10-02"', svg)
+        self.assertNotIn('data-segment="2026-10-02/2026-10-05"', svg)
+        self.assertNotIn('10.25', svg)
+        self.assertNotIn('2026-03-31', svg)
+        self.assertIn(CITATION, body)
+        self.assertIn('Norges Bank open data', body)
+        self.assertIn('Last refresh ' + STAMP + '.', body)
+        self.assertIn('synthetic_fixture', body)
+        rates = [row['rate'] for row, _posting in self.state.rate_postings]
+        self.assertEqual(rates, ['10', '10.25'])
+        self.assertNotIn('9.5623', rates)
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
+        self.assertEqual(self.state.ledger.books('2026-03-31'), before_books)
+        calls = len(transport.urls)
+        again = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        self.assertEqual(again.status, 200)
+        self.assertEqual(len(transport.urls), calls)
+        posted = dispatch(self.state, 'POST', '/evidence/refresh', {
+            'start_period': '2026-10-01',
+            'end_period': '2026-10-09',
+        })
+        self.assertEqual(posted.status, 200)
+        self.assertEqual(len(transport.urls), calls + 2)
+        self.assertIn('data-value="9.5623"', posted.body)
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+
+    def test_recorded_and_live_points_are_labeled_differently(self):
+        write_refresh(
+            self.cache,
+            STAMP,
+            (
+                {
+                    'observation_id': 'nb-exr-USD-NOK-2026-10-08',
+                    'source_id': 'norges-bank-open-data',
+                    'subject': 'USD/NOK',
+                    'unit': 'NOK per 1 USD',
+                    'value': '9.5807',
+                    'observation_time': '2026-10-08',
+                    'retrieval_time': '2026-10-11',
+                    'provenance': 'Norges Bank open data. URL: https://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP?format=csv',
+                    'quality': ['recorded_fixture'],
+                },
+                {
+                    'observation_id': 'nb-exr-USD-NOK-2026-10-09',
+                    'source_id': 'norges-bank-open-data',
+                    'subject': 'USD/NOK',
+                    'unit': 'NOK per 1 USD',
+                    'value': '9.5623',
+                    'observation_time': '2026-10-09',
+                    'retrieval_time': '2026-10-11',
+                    'provenance': 'Norges Bank open data. URL: https://data.norges-bank.no/api/data/EXR/B.USD.NOK.SP?format=csv',
+                    'quality': ['live_retrieval'],
+                },
+            ),
+            (),
+        )
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        self.assertEqual(response.status, 200)
+        svg = response.body.split('id="usd-nok-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertIn('>recorded<', svg)
+        self.assertIn('>live<', svg)
+        self.assertIn('data-kind="recorded"', svg)
+        self.assertIn('data-kind="live"', svg)
+        self.assertNotIn('10.25', svg)
+        self.assertNotIn('data-date="2026-03-31"', svg)
+        self.assertIn(
+            'Rows marked live_retrieval were read from the public source. '
+            'Rows marked synthetic_fixture were not. '
+            'Neither kind supports a recommendation.',
+            response.body,
+        )
+        self.assertIn(
+            'The ledger remains the synthetic book. '
+            'Evidence rows are labeled live_retrieval, recorded_fixture, or synthetic_fixture.',
+            response.body,
+        )
+
+    def test_stored_http_error_is_shown_and_not_retried_as_a_loop(self):
+        transport = self._transport(ecb_status=404)
+        result = refresh_public(
+            self.cache,
+            *WINDOW,
+            transport=transport,
+            retrieved_at=STAMP,
+        )
+        self.assertEqual(len(transport.urls), 2)
+        self.assertEqual(result.errors[0].reason, 'http_status')
+        self.assertEqual(result.errors[0].status, 404)
+        self.assertEqual(result.errors[0].attempts, 1)
+        self.assertTrue(any(row['value'] == '9.5623' for row in result.observations))
+        self.assertFalse(any(row['source_id'] == 'ecb-sdw' for row in result.observations))
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        self.assertIn('data-stored-error="http_status"', response.body)
+        self.assertIn('Stored error: http_status.', response.body)
+        view = read_desk_cache(self.cache)
+        self.assertEqual(view.retrieved_at, STAMP)
+
+    def test_refresh_requires_an_explicit_window_and_does_not_schedule(self):
+        def explode(request):
+            raise AssertionError(request.url)
+
+        self.state.ingest_transport = explode
+        missing = dispatch(self.state, 'POST', '/evidence/refresh', {})
+        self.assertEqual(missing.status, 400)
+        self.assertIn('explicit start_period and end_period', missing.body)
+        blocked = dispatch(self.state, 'GET', '/evidence/refresh', None)
+        self.assertEqual(blocked.status, 405)
+        still = dispatch(self.state, 'POST', '/evidence', {})
+        self.assertEqual(still.status, 405)
+        idle = refresh_public(self.cache, *WINDOW, transport=None, explicit_live=False)
+        self.assertEqual(idle.errors[0].reason, 'configuration_required')
+        self.assertEqual(idle.observations, ())
+
+    def test_ingest_note_records_the_manual_rules(self):
+        text = (ROOT / 'docs' / 'INGEST.md').read_text(encoding='utf-8')
+        for phrase in (
+            'data.norges-bank.no',
+            'data-api.ecb.europa.eu',
+            'data.ssb.no',
+            'data.sec.gov',
+            'not_allowlisted',
+            '15 seconds',
+            '2 seconds',
+            'At most 2 retries',
+            'IR/K.POL.NOK',
+            '404',
+            'bounded live query was not locked',
+            'configuration_required',
+            'api_key_and_terms',
+            'Refresh is manual',
+            'observation_time',
+        ):
+            self.assertIn(phrase, text)

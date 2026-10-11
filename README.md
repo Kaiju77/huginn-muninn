@@ -26,4 +26,4 @@ From the checkout root, `python scripts/serve_prototype.py` binds `127.0.0.1:876
 
 ## Evidence
 
-`GET /evidence` is linked from the desk. It reads `fixtures/source_registry.json` and the recorded synthetic fixture in `fixtures/evidence_observations.json`. Live fetch is off. No source is connected. The page is not a recommendation. See `docs/EVIDENCE.md`. Independent review on 2026-10-11 approved EVIDENCE-01. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120`.
+`GET /evidence` is linked from the desk. It reads `fixtures/source_registry.json`, the recorded synthetic fixture in `fixtures/evidence_observations.json`, and any stored public refresh under `var/ingest-cache/`. Norges Bank and the ECB are connected. Statistics Norway and SEC EDGAR are prepared. FRED is blocked. Social is excluded. The page is not a recommendation. See `docs/EVIDENCE.md` and `docs/INGEST.md`. Independent review on 2026-10-11 approved EVIDENCE-01. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120`. Independent review on 2026-10-11 approved INGEST-01. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30`. A stored public observation is not copied into the ledger.

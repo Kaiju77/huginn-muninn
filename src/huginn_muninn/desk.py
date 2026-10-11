@@ -19,7 +19,10 @@ from src.huginn_muninn.evidence import (
     assess,
     freshness_flags,
     open_evidence,
+    source_posture,
+    visible_observations,
 )
+from src.huginn_muninn.ingest.cache import read_desk_cache
 
 
 INTELLIGENCE = (
@@ -471,13 +474,15 @@ def _nav(state):
     ) + '</nav>'
 
 
-def _shell(state, inner):
+def _shell(state, inner, note=None):
+    if note is None:
+        note = 'These figures are synthetic. This page is not a recommendation.'
     return _page(
         '<main>\n'
         + _nav(state)
         + '<h1>Huginn &amp; Muninn</h1>\n'
         + inner
-        + '<p class="note">These figures are synthetic. This page is not a recommendation.</p>\n'
+        + f'<p class="note">{escape(note)}</p>\n'
         + '</main>'
     )
 
@@ -934,28 +939,146 @@ def _supplied_rate_match(state, observation):
     return None
 
 
+def _px(value):
+    return format(value.quantize(Decimal('0.01')), 'f')
+
+
+def _ingested_usd_nok(observations):
+    points = []
+    for observation in observations:
+        if observation.subject != 'USD/NOK':
+            continue
+        if observation.source_id != 'norges-bank-open-data':
+            continue
+        if 'synthetic_fixture' in observation.quality:
+            continue
+        if observation.value is None:
+            continue
+        if 'live_retrieval' in observation.quality:
+            kind = 'live'
+        elif 'recorded_fixture' in observation.quality:
+            kind = 'recorded'
+        else:
+            continue
+        points.append((observation, kind))
+    points.sort(key=lambda item: (item[0].observation_time, item[1]))
+    return tuple(points)
+
+
+def _usd_nok_svg(observations):
+    """Markers for stored ingested points. Missing dates are not filled in."""
+    opening = (
+        '<svg id="usd-nok-ingested" xmlns="http://www.w3.org/2000/svg" '
+        'viewBox="0 0 720 280" role="img">'
+        '<title>Ingested USD/NOK</title>'
+        '<line x1="40" y1="220" x2="680" y2="220" stroke="#2a3140" stroke-width="1"></line>'
+    )
+    points = _ingested_usd_nok(observations)
+    parts = [opening]
+    if any(kind == 'recorded' for _observation, kind in points):
+        parts.append('<text x="40" y="28" fill="#d7b58a">recorded</text>')
+    if any(kind == 'live' for _observation, kind in points):
+        parts.append('<text x="160" y="28" fill="#7dcea0">live</text>')
+    if not points:
+        parts.append('</svg>')
+        return ''.join(parts)
+    amounts = [observation.value for observation, _kind in points]
+    low = min(amounts)
+    high = max(amounts)
+    span = high - low
+    if span == 0:
+        span = Decimal(1)
+    start = min(observation.observation_time for observation, _kind in points)
+    end = max(observation.observation_time for observation, _kind in points)
+    day_span = max(end.toordinal() - start.toordinal(), 1)
+    located = []
+    for observation, kind in points:
+        ratio = (observation.value - low) / span
+        slot = Decimal(observation.observation_time.toordinal() - start.toordinal()) / Decimal(day_span)
+        x = Decimal(40) + slot * Decimal(640)
+        if kind == 'live':
+            x += Decimal(8)
+        y = Decimal(220) - (ratio * Decimal(160))
+        located.append((observation, kind, x, y))
+    last_of_kind = {}
+    for observation, kind, x, y in located:
+        previous = last_of_kind.get(kind)
+        if previous is not None:
+            previous_observation, previous_x, previous_y = previous
+            gap = (observation.observation_time - previous_observation.observation_time).days
+            if gap == 1:
+                parts.append(
+                    '<line'
+                    f' data-segment="{escape(previous_observation.observation_time.isoformat())}/'
+                    f'{escape(observation.observation_time.isoformat())}"'
+                    f' x1="{_px(previous_x)}" y1="{_px(previous_y)}"'
+                    f' x2="{_px(x)}" y2="{_px(y)}"'
+                    ' stroke="#2a3140" stroke-width="1"></line>'
+                )
+        last_of_kind[kind] = (observation, x, y)
+    for observation, kind, x, y in located:
+        shown = format(observation.value, 'f')
+        day = observation.observation_time.isoformat()
+        parts.append(
+            '<g'
+            f' data-kind="{escape(kind)}"'
+            f' data-date="{escape(day)}"'
+            f' data-value="{escape(shown)}"'
+            '>'
+            f'<title>{escape(day)} {escape(shown)} {escape(kind)}</title>'
+        )
+        if kind == 'recorded':
+            parts.append(
+                f'<circle cx="{_px(x)}" cy="{_px(y)}" r="5" fill="#d7b58a"></circle>'
+            )
+        else:
+            parts.append(
+                '<rect'
+                f' x="{_px(x - Decimal(5))}"'
+                f' y="{_px(y - Decimal(5))}"'
+                ' width="10" height="10" fill="#7dcea0"></rect>'
+            )
+        parts.append('</g>')
+    parts.append('</svg>')
+    return ''.join(parts)
+
+
 def render_evidence(state, on_date):
-    """Server-rendered registry and recorded fixture. Ledger.value is not called."""
+    """Server-rendered registry and stored observations. This does not fetch."""
     parsed = date.fromisoformat(on_date)
-    store = open_evidence(state.fixture_path.parent.parent)
+    root = state.fixture_path.parent.parent
+    store = open_evidence(root)
+    cache_dir = getattr(state, 'ingest_cache_dir', None)
+    if cache_dir is None:
+        cache_dir = root / 'var' / 'ingest-cache'
+    cached = read_desk_cache(cache_dir)
+    for row in cached.observations:
+        store.ingest(row)
     assessment = assess(store, parsed, MAX_AGE_DAYS)
     source_rows = []
     for source in store.sources():
         fetch = 'live_fetch false' if source.get('live_fetch') is False else 'live_fetch true'
+        posture = source_posture(source)
         cadence = source.get('cadence') or ''
+        source_id = str(source.get('source_id', ''))
         source_rows.append(
-            '<tr>'
-            f'<td>{escape(str(source.get("source_id", "")))}</td>'
+            '<tr'
+            f' data-source="{escape(source_id)}"'
+            f' data-posture="{escape(posture)}"'
+            '>'
+            f'<td>{escape(source_id)}</td>'
             f'<td>{escape(str(source.get("publisher", "")))}</td>'
             f'<td>{escape(str(source.get("category", "")))}</td>'
             f'<td>{escape(str(cadence))}</td>'
+            f'<td>{escape(posture)}</td>'
             f'<td>{escape(fetch)}</td>'
             f'<td>{escape(_source_limitation(source))}</td>'
             '</tr>'
         )
+    shown_observations = visible_observations(store)
     observation_rows = []
     match_notes = []
-    for observation in store.observations():
+    for observation in shown_observations:
         flags = freshness_flags(observation, parsed, MAX_AGE_DAYS)
         shown = ' '.join(flags)
         observation_rows.append(
@@ -988,32 +1111,79 @@ def render_evidence(state, on_date):
             'missing' if value is None else format(value, 'f')
             for value in conflict.values
         )
+        dates = ', '.join(item.isoformat() for item in conflict.observation_times)
         conflict_notes.append(
             f'<p>Conflict on {escape(conflict.observation_id)}. '
             f'Both amounts stay visible: {escape(visible)}. '
+            f'Both observation dates stay visible: {escape(dates)}. '
             'Neither amount was copied into the ledger.</p>'
         )
     if not conflict_notes:
         conflict_notes.append('<p>No conflicting observation is stored.</p>')
+    if cached.retrieved_at:
+        refresh_note = f'<p>Last refresh {escape(cached.retrieved_at)}.</p>'
+    else:
+        refresh_note = '<p>No live refresh has been stored.</p>'
+    live_rows = any(
+        'live_retrieval' in observation.quality for observation in shown_observations
+    )
+    synthetic_rows = any(
+        'synthetic_fixture' in observation.quality for observation in shown_observations
+    )
+    if live_rows and synthetic_rows:
+        evidence_note = (
+            'Rows marked live_retrieval were read from the public source. '
+            'Rows marked synthetic_fixture were not. '
+            'Neither kind supports a recommendation.'
+        )
+    elif live_rows:
+        evidence_note = (
+            'Rows marked live_retrieval were read from the public source. '
+            'They do not support a recommendation.'
+        )
+    else:
+        evidence_note = (
+            'Loaded evidence is a recorded synthetic fixture. '
+            'It does not support a recommendation.'
+        )
+    error_notes = []
+    for error in cached.errors:
+        reason = error.get('reason') or ''
+        if reason == '':
+            continue
+        error_notes.append(
+            f'<p data-stored-error="{escape(str(reason))}">'
+            f'Stored error: {escape(str(reason))}.</p>'
+        )
+    if not error_notes:
+        error_notes.append('<p>No stored error.</p>')
     limitations = ', '.join(assessment.limitations)
     inner = (
         '<section><h2>Evidence</h2>'
-        '<p>The desk is in research mode. No source is connected. '
-        'This page is not a recommendation.</p>'
+        '<p>The desk is in research mode. This page is not a recommendation.</p>'
         f'<p>Freshness against {escape(on_date)}. '
         f'The maximum age is {MAX_AGE_DAYS} days. '
         'The page does not read the wall clock.</p>'
         f'<p>Limitations: {escape(limitations)}.</p>'
-        '<p>Loaded evidence is a recorded synthetic fixture. '
-        'It does not support a recommendation.</p>'
+        f'<p>{escape(evidence_note)}</p>'
+        + refresh_note
+        + ''.join(error_notes)
+        + '<p>Refresh is manual. It is not a scheduler.</p>'
         '</section>'
         '<section><h2>Sources</h2>'
         '<div class="table-wrap"><table><thead><tr>'
         '<th>Source</th><th>Publisher</th><th>Category</th><th>Cadence</th>'
-        '<th>Live fetch</th><th>Limitation</th>'
+        '<th>Posture</th><th>Live fetch</th><th>Limitation</th>'
         '</tr></thead><tbody>'
         + ''.join(source_rows)
         + '</tbody></table></div></section>'
+        '<section><h2>USD/NOK observations</h2>'
+        '<figure>'
+        + _usd_nok_svg(shown_observations)
+        + '<figcaption>The synthetic 10.25 fixture is labeled synthetic and is not '
+        'drawn as a Norges Bank point. Stored dates only. Missing dates are not '
+        'interpolated.</figcaption>'
+        '</figure></section>'
         '<section><h2>Recorded observations</h2>'
         '<div class="table-wrap"><table><thead><tr>'
         '<th>Observation</th><th>Source</th><th>Subject</th><th>Unit</th>'
@@ -1032,8 +1202,26 @@ def render_evidence(state, on_date):
         '</label>'
         '<button type="submit">Show this date</button>'
         '</form></section>'
+        '<section><h2>Refresh</h2>'
+        '<form method="post" action="/evidence/refresh">'
+        '<label for="start_period">Start'
+        '<input id="start_period" name="start_period" value="2026-10-01">'
+        '</label>'
+        '<label for="end_period">End'
+        '<input id="end_period" name="end_period" value="2026-10-09">'
+        '</label>'
+        '<button type="submit">Refresh public sources</button>'
+        '</form></section>'
     )
-    return _shell(state, inner)
+    return _shell(
+        state,
+        inner,
+        note=(
+            'The ledger remains the synthetic book. '
+            'Evidence rows are labeled live_retrieval, recorded_fixture, or synthetic_fixture. '
+            'This page is not a recommendation.'
+        ),
+    )
 
 
 def render_message(state, message):

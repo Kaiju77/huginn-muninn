@@ -337,6 +337,8 @@ class PrototypeState:
     def __init__(self, fixture_path, overlay_path):
         self.fixture_path = Path(fixture_path)
         self.overlay_path = Path(overlay_path)
+        self.ingest_cache_dir = self.fixture_path.parent.parent / 'var' / 'ingest-cache'
+        self.ingest_transport = None
         self.document = None
         self.ledger = None
         self.event_postings = []
@@ -1100,6 +1102,28 @@ def _conversation(state):
     return Response(200, _CONTENT_TYPE, render_conversation(state))
 
 
+def _post_evidence_refresh(state, form):
+    start = _field(form, 'start_period')
+    end = _field(form, 'end_period')
+    if _iso(start) is None or _iso(end) is None or start > end:
+        return Response(
+            400,
+            _CONTENT_TYPE,
+            render_message(state, 'An explicit start_period and end_period are required.'),
+        )
+    from src.huginn_muninn.ingest.refresh import refresh_public
+
+    transport = state.ingest_transport
+    refresh_public(
+        state.ingest_cache_dir,
+        start,
+        end,
+        transport=transport,
+        explicit_live=transport is None,
+    )
+    return _evidence(state, {})
+
+
 def _post_conversation(state, form):
     text = _field(form, 'text')
     state.turns.append(('question', text))
@@ -1127,6 +1151,8 @@ def dispatch(state, method, path, form):
         return _api_desk(state, query)
     if verb == 'GET' and route == '/evidence':
         return _evidence(state, query)
+    if verb == 'POST' and route == '/evidence/refresh':
+        return _post_evidence_refresh(state, form)
     if verb == 'GET' and route == '/conversation':
         return _conversation(state)
     if verb == 'POST' and route == '/conversation':
@@ -1162,6 +1188,7 @@ def dispatch(state, method, path, form):
         '/reconcile',
         '/chart',
         '/evidence',
+        '/evidence/refresh',
         '/reset',
     }
     if route in known:

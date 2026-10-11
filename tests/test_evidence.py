@@ -13,6 +13,8 @@ from src.huginn_muninn.evidence import (
     freshness_flags,
     load_registry,
     open_evidence,
+    source_posture,
+    visible_observations,
 )
 from src.huginn_muninn.prototype import dispatch, open_state
 
@@ -36,13 +38,25 @@ def _store():
 
 
 class EvidenceContractTest(unittest.TestCase):
-    def test_registry_records_live_fetch_off_and_the_assessed_limits(self):
+    def test_registry_records_posture_and_the_assessed_limits(self):
         document = json.loads(REGISTRY.read_text(encoding='utf-8'))
         sources = {row['source_id']: row for row in document['sources']}
         self.assertEqual(len(sources), 6)
         for source in sources.values():
-            self.assertIs(source['live_fetch'], False)
+            self.assertIn(source['live_fetch'], (True, False))
             self.assertNotIn('api_key', source)
+        self.assertEqual(source_posture(sources['norges-bank-open-data']), 'connected')
+        self.assertEqual(source_posture(sources['ecb-sdw']), 'connected')
+        self.assertEqual(source_posture(sources['ssb-statbank']), 'prepared')
+        self.assertEqual(source_posture(sources['sec-edgar-public']), 'prepared')
+        self.assertEqual(source_posture(sources['fred']), 'blocked')
+        self.assertEqual(source_posture(sources['social-unverified']), 'excluded')
+        self.assertIs(sources['norges-bank-open-data']['live_fetch'], True)
+        self.assertIs(sources['ecb-sdw']['live_fetch'], True)
+        self.assertIs(sources['ssb-statbank']['live_fetch'], False)
+        self.assertIs(sources['fred']['live_fetch'], False)
+        self.assertIs(sources['sec-edgar-public']['live_fetch'], False)
+        self.assertIs(sources['social-unverified']['live_fetch'], False)
         self.assertEqual(sources['norges-bank-open-data']['publisher'], 'Norges Bank')
         self.assertEqual(sources['norges-bank-open-data']['category'], 'official_statistics')
         self.assertEqual(sources['norges-bank-open-data']['cadence'], 'periodic')
@@ -62,8 +76,12 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertEqual(sources['sec-edgar-public']['category'], 'filings')
         self.assertIn('10 requests per second', sources['sec-edgar-public']['description'])
         self.assertIn('Filings are not live prices.', sources['sec-edgar-public']['description'])
-        self.assertEqual(sources['ecb-sdw']['license_status'], 'not_verified_this_increment')
-        self.assertIn('did not verify the license text', sources['ecb-sdw']['description'])
+        self.assertEqual(sources['ecb-sdw']['license_status'], 'verified_free_reuse_with_citation')
+        self.assertIn(
+            'https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.en.html',
+            sources['ecb-sdw']['references'],
+        )
+        self.assertIn('figures are not modified', sources['ecb-sdw']['description'])
         self.assertEqual(sources['social-unverified']['publisher'], 'none')
         self.assertEqual(sources['social-unverified']['category'], 'excluded')
         self.assertEqual(sources['social-unverified']['status'], 'excluded')
@@ -106,6 +124,38 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertTrue(bare.ingest(spelled).duplicate)
         self.assertEqual(len(bare.observations()), 1)
         self.assertEqual(bare.observations()[0].value, Decimal('10.25'))
+
+    def test_same_value_different_observation_time_is_a_conflict(self):
+        store = open_evidence(ROOT)
+        row = _first()
+        row['observation_time'] = '2026-04-01'
+        result = store.ingest(row)
+        self.assertTrue(result.conflict)
+        self.assertFalse(result.stored)
+        self.assertFalse(result.duplicate)
+        conflict = store.conflicts()[0]
+        self.assertEqual(
+            conflict.observation_times,
+            (date(2026, 3, 31), date(2026, 4, 1)),
+        )
+        self.assertEqual(conflict.values, (Decimal('10.25'), Decimal('10.25')))
+        stored = [
+            item for item in store.observations()
+            if item.observation_id == 'obs-usd-nok-2026-03-31'
+        ]
+        self.assertEqual(len(stored), 1)
+        self.assertEqual(stored[0].observation_time, date(2026, 3, 31))
+        self.assertEqual(stored[0].value, Decimal('10.25'))
+        visible = [
+            item for item in visible_observations(store)
+            if item.observation_id == 'obs-usd-nok-2026-03-31'
+        ]
+        self.assertEqual(
+            [item.observation_time for item in visible],
+            [date(2026, 3, 31), date(2026, 4, 1)],
+        )
+        self.assertTrue(store.ingest(dict(row)).duplicate)
+        self.assertEqual(len(store.conflicts()[0].observation_times), 2)
 
     def test_conflicting_value_keeps_both_amounts_and_the_ledger_rate(self):
         temporary = tempfile.TemporaryDirectory()
@@ -303,6 +353,7 @@ class EvidencePageTest(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.overlay = Path(self._tmp.name) / 'synthetic-book.json'
         self.state = open_state(ROOT, self.overlay)
+        self.state.ingest_cache_dir = Path(self._tmp.name) / 'ingest-cache'
 
     def tearDown(self):
         self._tmp.cleanup()
@@ -315,12 +366,28 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('text/html', response.content_type)
         body = response.body
         self.assertIn('The desk is in research mode.', body)
-        self.assertIn('No source is connected.', body)
+        self.assertNotIn('No source is connected.', body)
         self.assertIn('This page is not a recommendation.', body)
+        self.assertIn('No live refresh has been stored.', body)
+        self.assertIn('No stored error.', body)
+        self.assertIn('Refresh is manual. It is not a scheduler.', body)
+        self.assertIn(
+            'Loaded evidence is a recorded synthetic fixture. '
+            'It does not support a recommendation.',
+            body,
+        )
         self.assertIn('href="/evidence"', body)
-        self.assertEqual(body.count('live_fetch false'), 6)
+        self.assertIn('data-source="norges-bank-open-data" data-posture="connected"', body)
+        self.assertIn('data-source="ecb-sdw" data-posture="connected"', body)
+        self.assertIn('data-source="ssb-statbank" data-posture="prepared"', body)
+        self.assertIn('data-source="sec-edgar-public" data-posture="prepared"', body)
+        self.assertIn('data-source="fred" data-posture="blocked"', body)
+        self.assertIn('data-source="social-unverified" data-posture="excluded"', body)
+        self.assertEqual(body.count('live_fetch false'), 4)
+        self.assertEqual(body.count('live_fetch true'), 2)
         self.assertIn('api_key_and_terms', body)
-        self.assertIn('not_verified_this_increment', body)
+        self.assertIn('verified_free_reuse_with_citation', body)
+        self.assertNotIn('not_verified_this_increment', body)
         self.assertIn('unverified social-media sentiment is not market evidence', body)
         self.assertIn('They are not equity prices and not executable quotes.', body)
         self.assertIn('not security prices', body)
@@ -329,6 +396,14 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-observation="obs-usd-nok-2026-03-31" data-freshness="fresh"', body)
         self.assertIn('data-observation="obs-stale-policy" data-freshness="stale"', body)
         self.assertIn('synthetic-fixture-not-a-live-norges-bank-retrieval', body)
+        self.assertIn(
+            'The synthetic 10.25 fixture is labeled synthetic and is not drawn as a Norges Bank point.',
+            body,
+        )
+        svg = body.split('id="usd-nok-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertNotIn('10.25', svg)
+        self.assertNotIn('2026-03-31', svg)
+        self.assertNotIn('9.5623', svg)
         self.assertIn(
             "The number matches the ledger's supplied 10.25 rate. "
             'The match is not a live source confirmation.',

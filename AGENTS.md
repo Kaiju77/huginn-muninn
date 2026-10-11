@@ -8,7 +8,7 @@
 
 ## Current checkout
 
-This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. The evidence-register commit is `1f6f26750c0b196aaea57d2f70c9edb2833628d7`, described in `docs/EVIDENCE.md`. Independent review on 2026-10-11 approved it. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120`. Live fetch stays off. The night-desk commit is `83750c9c6ec98a48fd24c864ee2cea184a37cf15`.
+This worktree is `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01` on branch `cursor/hm-01`. INGEST-01 is the reviewed read-only ingestion layer, described in `docs/INGEST.md`. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it on 2026-10-11. Norges Bank and the ECB can be refreshed explicitly. Statistics Norway and SEC EDGAR are prepared. FRED stays blocked. The evidence-register commit is `1f6f26750c0b196aaea57d2f70c9edb2833628d7`, described in `docs/EVIDENCE.md`. Independent review on 2026-10-11 approved that register. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120`. The night-desk commit is `83750c9c6ec98a48fd24c864ee2cea184a37cf15`.
 
 The paper-ledger commit is `afcd004c1a04f93711b4dac1163bf3d8a4c61996`, described in `docs/LOCAL_PROTOTYPE.md` and `docs/DECIMAL_RULES.md`. The accounting ledger commit remains `66a3e7644a2d74ebc749667fa88f94b27b721280`. The snapshot commit remains `a6c692fb9af18794c1acf7bd038847e8bd7d726a`. Independent review on 2026-10-10 approved the paper ledger. Reviewer `55bf7095-d00c-40fd-a475-d7d8b1b5932c`. The canonical handoff remains read-only at `C:/Users/kaiar/Documents/projects/huginn-muninn/docs/DIRECT_PROJECT_HANDOFF.md`.
 

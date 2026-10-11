@@ -1,8 +1,18 @@
 # Next Steps
 
-EVIDENCE-01 is a reviewed local evidence register on branch `cursor/hm-01` at `1f6f26750c0b196aaea57d2f70c9edb2833628d7`. The baseline before the edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` approved it. A further phase is not authorized.
+INGEST-01 is a reviewed read-only ingestion layer on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `578c23c7f08059f5bf53acb4bced9e8441a52ae2`. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it. This implementation does not authorize a further phase, a merge, or a push.
 
-Live fetch stays off. The evidence page reads `fixtures/source_registry.json` and `fixtures/evidence_observations.json`. No source is connected. The desk remains in research mode. See `docs/EVIDENCE.md`. The recommended next phase, when separately approved, is a reviewed egress profile for one public source, still read-only, with recorded responses in tests. No recommendations follow from connecting a source.
+Norges Bank USD/NOK and ECB NOK/EUR can be refreshed by an explicit `POST /evidence/refresh`. Statistics Norway is not called, because a bounded live query was not locked. SEC EDGAR waits for a User-Agent contact string. FRED stays blocked. The desk remains in research mode. See `docs/INGEST.md`. No recommendation follows from a stored public observation. The synthetic ledger rate remains 10.25 until a separate decision says otherwise.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this implementation.
+
+## Historical
+
+The following pointer was current before INGEST-01. It is not the current next step.
+
+EVIDENCE-01 is a reviewed local evidence register on branch `cursor/hm-01` at `1f6f26750c0b196aaea57d2f70c9edb2833628d7`. The baseline before the edits was `3079c1b69d19f9512691d4fb244f5cdf834b16a2`. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120` approved it. A further phase was not authorized by that review.
+
+At EVIDENCE-01, live fetch stayed off. The evidence page read `fixtures/source_registry.json` and `fixtures/evidence_observations.json`. No source was connected. The desk remained in research mode. See `docs/EVIDENCE.md`. The recommended next phase, when separately approved, was a reviewed egress profile for one public source, still read-only, with recorded responses in tests. INGEST-01 is that later explicit increment. No recommendations follow from connecting a source.
 
 The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this implementation.
 
