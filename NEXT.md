@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. These tasks do not depend on the open human decisions in `HUMAN_TASKS.md`.
 
-1. INGEST-02 is reviewed. It adds Norges Bank EUR/NOK, the verified policy-rate key `IR/B.KPRA.SD.R`, and the NOWA rate to the explicit manual refresh, keeps revision records, caps stored observations at 500, prints connected sources as current or due, and draws stored policy-rate points. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff` approved it. The next executable task is item 2.
+1. INGEST-02 is reviewed at `6b2e10e7d33eb762a2f9b2734729777475e8fe7d`. It adds Norges Bank EUR/NOK, the verified policy-rate key `IR/B.KPRA.SD.R`, and the NOWA rate to the explicit manual refresh, keeps revision records, caps stored observations at 500, prints connected sources as current or due, and draws stored policy-rate points. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff` approved it. The next executable task is item 2.
 2. Show NOWA beside the policy rate with its own stored-point chart, still without a scheduler.
 3. A read-only comparison on the evidence page between the Norges Bank EUR/NOK observation and the ECB NOK/EUR observation for the same date, labeled as two sources, with no recommendation and no ledger write.
 

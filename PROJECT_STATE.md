@@ -2,7 +2,7 @@
 
 ## Status
 
-INGEST-02 is a reviewed extension of the manual refresh on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `e5f702a4230d48a92f3c14a8d898ed7c457c643b`, and the worktree was clean. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff` approved it. This status is not canonical integration, deployment, or production financial readiness.
+INGEST-02 is a reviewed extension of the manual refresh on branch `cursor/hm-01` at `6b2e10e7d33eb762a2f9b2734729777475e8fe7d` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `e5f702a4230d48a92f3c14a8d898ed7c457c643b`, and the worktree was clean. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff` approved it. This status is not canonical integration, deployment, or production financial readiness.
 
 The explicit refresh now requests Norges Bank USD/NOK, Norges Bank EUR/NOK, the verified policy rate `IR/B.KPRA.SD.R`, the NOWA rate, and ECB NOK/EUR. `IR/K.POL.NOK` remains the rejected key that returned HTTP 404. A repeated identical observation stays one stored row. A changed field keeps both rows and one revision record. Stored observations are capped at 500 by dropping the oldest dates that are not in the new batch. Connected sources are current or due from stored rows only. The policy-rate chart uses stored points. The synthetic 4.50 policy fixture is not drawn as a live Norges Bank point, and NOWA is not drawn on the USD/NOK chart. Ingested observations are not copied into the ledger. The synthetic USD/NOK rate remains 10.25. `accounting.py`, `snapshot.py`, `ledger.py`, and `allocation.py` were not edited. Open human decisions are in `HUMAN_TASKS.md`. The rules are in `docs/INGEST.md`.
 
