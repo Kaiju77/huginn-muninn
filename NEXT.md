@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. ONBOARD-01 is reviewed in this commit. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3` approved the entered accounts, instruments, activities, and manual balances. The next executable task is item 2.
+1. ONBOARD-01 is reviewed at `d27d8bf986d4d76c48cc2de31b4ed96c45e7dca9`. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3` approved the entered accounts, instruments, activities, and manual balances. The next executable task is item 2.
 2. After it: value an entered holding as quantity times one supplied price on the valuation date, or show the manual balance on its as-of date. A missing price stays unknown. Do not invent a price. Do not convert currency in this task.
 3. After that: separate contributions and withdrawals from the change in value between two dates when every required price and the holding path are known. If a manual balance is the only figure, say attribution is unavailable.
 

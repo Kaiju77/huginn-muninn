@@ -2,7 +2,7 @@
 
 ## Status
 
-ONBOARD-01 is an entered-portfolio slice on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `184dfe96b78b2e46622970e44677c1e5bd188157`, and the worktree was clean. Independent review on 2026-10-11 approved ONBOARD-01. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3`.
+ONBOARD-01 is a reviewed entered-portfolio slice on branch `cursor/hm-01` at `d27d8bf986d4d76c48cc2de31b4ed96c45e7dca9` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `184dfe96b78b2e46622970e44677c1e5bd188157`, and the worktree was clean. Independent review on 2026-10-11 approved ONBOARD-01. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3`.
 
 A person adds accounts, instruments, activities, and manual balances through `GET /portfolio` and `POST /portfolio`. Domain logic is in `src/huginn_muninn/onboarding.py`. The page is standard-library HTML in the existing prototype. The entered store is a JSON file chosen by the caller. The running default is `var/entered-portfolio/book.json`. An empty store is a valid book: reporting currency NOK, and no accounts, instruments, activities, or manual balances. Every saved row has origin `entered`. The synthetic fixture is not loaded into that store. The page says: "This is your entered portfolio. Northline and Harbor on the other pages are a synthetic demo."
 
