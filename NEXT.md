@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. VALUE-01 is reviewed. Reviewer `8e1b27f5-d9e5-48d4-afad-f638572be7c4` approved the two-date split of contributions, withdrawals, fees, and dividends from the price change. The commit id is recorded in the following note. The next executable task is item 2.
+1. VALUE-01 is reviewed at `17b9eaee8bdd36de0f7d3cf4d42f94f4f108b7ba`. Reviewer `8e1b27f5-d9e5-48d4-afad-f638572be7c4` approved the two-date split of contributions, withdrawals, fees, and dividends from the price change. The next executable task is item 2.
 2. Let a person record one explicit accept of a stored public observation as an entered price. The accept stores provenance that names the observation id. It does not run by itself and it does not call add_rate on the synthetic ledger. An observation that is not a price in the holding's listing currency is refused.
 3. After that: keep the accept on the entered book. Do not copy the accepted price into the synthetic ledger.
 
