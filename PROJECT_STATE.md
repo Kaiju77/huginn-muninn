@@ -2,7 +2,7 @@
 
 ## Status
 
-INGEST-01 is a reviewed read-only ingestion layer on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `578c23c7f08059f5bf53acb4bced9e8441a52ae2`, and the worktree was clean. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it. This status is not canonical integration, deployment, or production financial readiness.
+INGEST-01 is a reviewed read-only ingestion layer on branch `cursor/hm-01` at `d9cad72ab052ca6d1e2517c4d7ebef918e783a3c` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `578c23c7f08059f5bf53acb4bced9e8441a52ae2`, and the worktree was clean. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it. This status is not canonical integration, deployment, or production financial readiness.
 
 Norges Bank and the ECB are connected for one explicit manual refresh. Statistics Norway and SEC EDGAR are prepared. FRED stays blocked, and it is not on the allowlist. Unverified social sentiment stays excluded. A repeated observation is a duplicate only when every identity field matches, including the observation date. The same id with a different date is a conflict, and both dates stay visible. Ingested observations are not copied into the ledger. The synthetic USD/NOK rate remains 10.25. `accounting.py`, `snapshot.py`, `ledger.py`, and `allocation.py` were not edited. The rules are in `docs/INGEST.md`.
 

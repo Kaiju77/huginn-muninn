@@ -1,6 +1,6 @@
 # Next Steps
 
-INGEST-01 is a reviewed read-only ingestion layer on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `578c23c7f08059f5bf53acb4bced9e8441a52ae2`. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it. This implementation does not authorize a further phase, a merge, or a push.
+INGEST-01 is a reviewed read-only ingestion layer on branch `cursor/hm-01` at `d9cad72ab052ca6d1e2517c4d7ebef918e783a3c` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before the edits was `578c23c7f08059f5bf53acb4bced9e8441a52ae2`. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30` approved it. This implementation does not authorize a further phase, a merge, or a push.
 
 Norges Bank USD/NOK and ECB NOK/EUR can be refreshed by an explicit `POST /evidence/refresh`. Statistics Norway is not called, because a bounded live query was not locked. SEC EDGAR waits for a User-Agent contact string. FRED stays blocked. The desk remains in research mode. See `docs/INGEST.md`. No recommendation follows from a stored public observation. The synthetic ledger rate remains 10.25 until a separate decision says otherwise.
 
