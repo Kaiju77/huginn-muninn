@@ -1082,6 +1082,9 @@ _CPI_MONTHLY_SENTENCE = (
 )
 _LEDGER_USD_NOK = Decimal('10.25')
 _LEDGER_GAP_SENTENCE = 'A match and a gap are not a ledger update.'
+_USD_NOK_GAP_SENTENCE = (
+    'The USD/NOK gap is not a recommendation and is not copied into the ledger.'
+)
 _FUTURE_ROW_SENTENCE = (
     'A row later than the selected date stays on the page. It was not dropped.'
 )
@@ -1225,6 +1228,18 @@ def _usd_nok_ledger_section(observations):
     if shared:
         shared_attr = ' data-multiple="true"'
         shared_text = ' The date has more than one row.'
+    gap_attr = ''
+    gap_text = ''
+    if chosen.value is None:
+        gap_text = ' The stored value is missing.'
+    else:
+        difference = chosen.value - _LEDGER_USD_NOK
+        if difference == 0:
+            shown_gap = format(Decimal(0), 'f')
+        else:
+            shown_gap = format(difference, 'f')
+        gap_attr = f' data-gap="{escape(shown_gap)}"'
+        gap_text = f' Gap {escape(shown_gap)}. {_USD_NOK_GAP_SENTENCE}'
     return (
         '<section id="usd-nok-ledger"><h2>USD/NOK beside the ledger rate</h2>'
         '<p'
@@ -1234,6 +1249,7 @@ def _usd_nok_ledger_section(observations):
         f' data-observation-date="{escape(chosen.observation_time.isoformat())}"'
         f' data-quality="{escape(" ".join(chosen.quality))}"'
         f' data-equals="{"true" if equals else "false"}"'
+        f'{gap_attr}'
         f'{shared_attr}'
         '>'
         f'Newest stored observation {escape(shown)}. '
@@ -1241,7 +1257,7 @@ def _usd_nok_ledger_section(observations):
         f'Quality {escape(quality)}. '
         f'Ledger rate {escape(rate)}. '
         f'{escape(equality)} '
-        f'{_LEDGER_GAP_SENTENCE}{shared_text}</p></section>'
+        f'{_LEDGER_GAP_SENTENCE}{gap_text}{shared_text}</p></section>'
     )
 
 
@@ -1334,8 +1350,8 @@ def _allowlist_section():
     )
 
 
-def _series_inventory_section(observations):
-    """Stored subjects only. A shared latest date keeps every value and retrieval date."""
+def _series_inventory_section(observations, on_date):
+    """Stored subjects only. Latest-date rows keep their freshness labels."""
     lines = series_inventory(observations)
     if not lines:
         return (
@@ -1360,6 +1376,13 @@ def _series_inventory_section(observations):
         retrieval_text = '. '.join(
             f'Retrieved {escape(day)}' for day in retrieved
         )
+        labels = tuple(
+            ' '.join(freshness_flags(row, on_date, MAX_AGE_DAYS))
+            for row in line.rows
+        )
+        freshness_text = '. '.join(
+            f'Freshness {escape(label)}' for label in labels
+        )
         multiple = ''
         trailing = ''
         if len(line.values) > 1:
@@ -1372,13 +1395,15 @@ def _series_inventory_section(observations):
             f' data-latest="{escape(line.latest_date.isoformat())}"'
             f' data-values="{escape(" ".join(shown_values))}"'
             f' data-retrieval-dates="{escape(" ".join(retrieved))}"'
+            f' data-freshness="{escape(", ".join(labels))}"'
             f'{multiple}'
             '>'
             f'{escape(line.subject)}. '
             f'{source_text}. '
             f'Latest observation date {escape(line.latest_date.isoformat())}. '
             f'{value_text}. '
-            f'{retrieval_text}.{trailing}</p>'
+            f'{retrieval_text}. '
+            f'{freshness_text}.{trailing}</p>'
         )
     return (
         '<section id="series-inventory"><h2>Stored series</h2>'
@@ -1573,7 +1598,7 @@ def render_evidence(state, on_date):
         + ''.join(conflict_notes)
         + _cpi_monthly_note(shown_observations)
         + '</section>'
-        + _series_inventory_section(shown_observations)
+        + _series_inventory_section(shown_observations, parsed)
         + _revision_section(cached.revisions)
         + '<section><h2>Date</h2>'
         '<form method="get" action="/evidence">'

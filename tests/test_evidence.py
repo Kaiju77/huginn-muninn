@@ -451,6 +451,11 @@ class EvidenceContractTest(unittest.TestCase):
             line.retrieval_dates,
             (date(2026, 10, 11), date(2026, 10, 12)),
         )
+        self.assertEqual(tuple(item.value for item in line.rows), line.values)
+        self.assertEqual(
+            tuple(item.retrieval_time for item in line.rows),
+            line.retrieval_dates,
+        )
         self.assertEqual(len(line.retrieval_dates), len(line.values))
         self.assertNotIn(date(2026, 10, 10), line.retrieval_dates)
         self.assertNotIn(Decimal('10.700'), line.values)
@@ -539,12 +544,17 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('Latest observation date 2026-03-31.', usd_series)
         self.assertIn('Value 10.25.', usd_series)
         self.assertIn('Retrieved 2026-03-31.', usd_series)
+        self.assertIn('data-freshness="fresh"', usd_series)
+        self.assertIn('Freshness fresh.', usd_series)
         self.assertNotIn('The date has more than one row.', usd_series)
         policy_series = body.split('data-series-subject="policy-rate"', 1)[1].split('</p>', 1)[0]
         self.assertIn('data-latest="2026-01-02"', policy_series)
         self.assertIn('data-values="4.50"', policy_series)
         self.assertIn('data-retrieval-dates="2026-01-02"', policy_series)
         self.assertIn('Retrieved 2026-01-02.', policy_series)
+        self.assertIn('data-freshness="stale"', policy_series)
+        self.assertIn('Freshness stale.', policy_series)
+        self.assertNotIn('Freshness fresh', policy_series)
         self.assertNotIn('The date has more than one row.', policy_series)
         self.assertEqual(body.count('data-series-subject='), 2)
         self.assertIn('Computed from stored rows.', body)
@@ -655,6 +665,15 @@ class EvidencePageTest(unittest.TestCase):
         selected_usd = selected.body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
         self.assertIn('data-latest="2026-03-31"', selected_usd)
         self.assertIn(
+            'data-freshness="future_observation future_retrieval"',
+            selected_usd,
+        )
+        self.assertIn(
+            'Freshness future_observation future_retrieval.',
+            selected_usd,
+        )
+        self.assertNotIn('Freshness fresh', selected_usd)
+        self.assertIn(
             'data-observation="obs-stale-policy" data-freshness="fresh"',
             selected.body,
         )
@@ -689,7 +708,14 @@ class EvidencePageTest(unittest.TestCase):
         )
         later_note = later.body.split('id="usd-nok-ledger"', 1)[1].split('</section>', 1)[0]
         self.assertIn('data-stored-value="10.25"', later_note)
+        self.assertIn('data-gap="0"', later_note)
+        self.assertIn('Gap 0. The USD/NOK gap is not a recommendation and is not copied into the ledger.', later_note)
+        self.assertNotIn('Gap 0.000', later_note)
         self.assertIn('A match and a gap are not a ledger update.', later_note)
+        later_usd = later.body.split('data-series-subject="USD/NOK"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-freshness="stale"', later_usd)
+        self.assertIn('Freshness stale.', later_usd)
+        self.assertNotIn('Freshness fresh', later_usd)
         rejected = dispatch(self.state, 'GET', '/evidence?date=2026-02-31', None)
         self.assertEqual(rejected.status, 400)
         blocked = dispatch(self.state, 'POST', '/evidence', {})
@@ -757,6 +783,9 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-retrieval-dates="2026-10-11"', cpi)
         self.assertIn('Value 103.8.', cpi)
         self.assertIn('Retrieved 2026-10-11.', cpi)
+        self.assertIn('data-freshness="stale"', cpi)
+        self.assertIn('Freshness stale.', cpi)
+        self.assertNotIn('Freshness fresh', cpi)
         self.assertNotIn('Retrieved 2026-07-01.', cpi)
         self.assertNotIn('data-multiple', cpi)
         self.assertNotIn('The date has more than one row.', cpi)
@@ -809,6 +838,15 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('Value 10.7155.', line)
         self.assertIn('Retrieved 2026-10-11.', line)
         self.assertIn('Retrieved 2026-10-12.', line)
+        self.assertIn('data-freshness="fresh, future_retrieval"', line)
+        self.assertIn('Freshness fresh. Freshness future_retrieval.', line)
+        self.assertNotIn('Freshness fresh. Freshness fresh.', line)
+        self.assertLess(line.index('Value 10.717.'), line.index('Value 10.7155.'))
+        self.assertLess(line.index('Value 10.7155.'), line.index('Freshness fresh.'))
+        self.assertLess(
+            line.index('Freshness fresh.'),
+            line.index('Freshness future_retrieval.'),
+        )
         self.assertLess(line.index('Value 10.717.'), line.index('Retrieved 2026-10-11.'))
         self.assertLess(line.index('Retrieved 2026-10-11.'), line.index('Retrieved 2026-10-12.'))
         self.assertIn('The date has more than one row.', line)
@@ -870,6 +908,19 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('Quality live_retrieval.', note)
         self.assertIn('Ledger rate 10.25.', note)
         self.assertIn('The stored value does not equal 10.25.', note)
+        self.assertIn('data-gap="-0.6877"', note)
+        self.assertIn('Gap -0.6877.', note)
+        self.assertNotIn('data-gap="0"', note)
+        self.assertIn(
+            'The USD/NOK gap is not a recommendation and is not copied into the ledger.',
+            note,
+        )
+        self.assertEqual(
+            response.body.count(
+                'The USD/NOK gap is not a recommendation and is not copied into the ledger.'
+            ),
+            1,
+        )
         self.assertIn('A match and a gap are not a ledger update.', note)
         self.assertEqual(response.body.count('A match and a gap are not a ledger update.'), 1)
         self.assertIn('The match is not a live source confirmation.', response.body)
@@ -918,6 +969,9 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-multiple="true"', note)
         self.assertIn('data-equals="false"', note)
         self.assertIn('Newest stored observation 9.10.', note)
+        self.assertIn('data-gap="-1.15"', note)
+        self.assertIn('Gap -1.15.', note)
+        self.assertNotIn('data-gap="-0.55"', note)
         self.assertNotIn('Newest stored observation 9.70.', note)
         self.assertNotIn('Newest stored observation 10.25.', note)
         self.assertIn('The date has more than one row.', note)
@@ -960,6 +1014,9 @@ class EvidencePageTest(unittest.TestCase):
         self.assertNotIn('data-multiple', note)
         self.assertNotIn('Newest stored observation 9.50.', note)
         self.assertNotIn('Newest stored observation 10.25.', note)
+        self.assertIn('data-gap="-1.05"', note)
+        self.assertIn('Gap -1.05.', note)
+        self.assertNotIn('data-gap="0"', note)
         self.assertIn('A match and a gap are not a ledger update.', note)
         self.assertIn('Both observation dates stay visible: 2026-10-08, 2026-10-10.', response.body)
         self.assertEqual(
@@ -987,6 +1044,13 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-equals="true"', note)
         self.assertIn('Newest stored observation 10.250.', note)
         self.assertIn('The stored value equals 10.25.', note)
+        self.assertIn('data-gap="0"', note)
+        self.assertIn(
+            'Gap 0. The USD/NOK gap is not a recommendation and is not copied into the ledger.',
+            note,
+        )
+        self.assertNotIn('data-gap="0.000"', note)
+        self.assertNotIn('Gap 0.000', note)
         self.assertIn('A match and a gap are not a ledger update.', note)
         self.assertEqual(response.body.count('A match and a gap are not a ledger update.'), 1)
         rates = [row['rate'] for row, _posting in self.state.rate_postings]
@@ -1013,7 +1077,14 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('data-equals="false"', note)
         self.assertIn('Newest stored observation missing.', note)
         self.assertIn('The stored value does not equal 10.25.', note)
+        self.assertIn('The stored value is missing.', note)
         self.assertIn('Ledger rate 10.25.', note)
+        self.assertNotIn('data-gap', note)
+        self.assertNotIn('Gap ', note)
+        self.assertNotIn(
+            'The USD/NOK gap is not a recommendation and is not copied into the ledger.',
+            note,
+        )
         self.assertIn('A match and a gap are not a ledger update.', note)
         self.assertEqual(
             [row['rate'] for row, _posting in self.state.rate_postings],
@@ -1028,6 +1099,13 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('A match and a gap are not a ledger update.', note)
         self.assertNotIn('Newest stored observation', note)
         self.assertNotIn('data-stored-value', note)
+        self.assertNotIn('data-gap', note)
+        self.assertNotIn('Gap ', note)
+        self.assertNotIn('The stored value is missing.', note)
+        self.assertNotIn(
+            'The USD/NOK gap is not a recommendation and is not copied into the ledger.',
+            note,
+        )
         policy = Observation(
             'obs-stale-policy',
             'norges-bank-open-data',
@@ -1195,6 +1273,10 @@ class EvidencePageTest(unittest.TestCase):
         self.assertNotIn('add_rate', source)
         self.assertIn('The match is not a live source confirmation.', source)
         self.assertIn('A match and a gap are not a ledger update.', source)
+        self.assertIn(
+            'The USD/NOK gap is not a recommendation and is not copied into the ledger.',
+            source,
+        )
         self.assertIn(
             'A row later than the selected date stays on the page. It was not dropped.',
             source,

@@ -2,6 +2,22 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
+1. INGEST-08 is reviewed in this commit. Reviewer `05ef935a-e39b-4b92-990a-0807c762b6bc` approved the labeled USD/NOK gap and the freshness flags on the stored-series lines. The next executable task is item 2.
+2. After it: beside the static six-series list, show the existing due or current label for the source that owns each series. Map Norges Bank USD/NOK, Norges Bank EUR/NOK, the policy rate, and NOWA to norges-bank-open-data. Map ECB NOK/EUR to ecb-sdw. Map the CPI cell to ssb-statbank. Use due_status. Do not fetch. A source with no fresh non-synthetic row stays due.
+3. After that: on the evidence page, repeat the last stored refresh timestamp that is already in the cache, and say that a later calendar day is not a scheduled refresh. Do not add a scheduler.
+
+Leave EDGAR, FRED, other SSB tables, vendors, and ledger acceptance in `HUMAN_TASKS.md`.
+
+The synthetic ledger rate remains 10.25. The desk remains in research mode. See `docs/INGEST.md`.
+
+The hosted FastAPI, React, and PostgreSQL target remains deferred. No merge, push, deployment, financial connection, or purchase follows from this queue.
+
+## Historical
+
+The following pointer was current before INGEST-08. It is not the current next step.
+
+Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
+
 1. INGEST-07 is reviewed at `a29e6ad0d562739f3823d7fde537c8f376b13db3`. Reviewer `93b4999a-71c0-4cca-9ca6-522a66b33861` approved the separate policy-rate and NOWA note and the allowlist hosts. The next executable task is item 2.
 2. After it: for the newest stored USD/NOK observation, show stored value minus Decimal('10.25') as a labeled difference. Exact zero renders as 0. Include this exact sentence: "The USD/NOK gap is not a recommendation and is not copied into the ledger." Do not call add_rate. If no USD/NOK row is visible, omit the difference and keep the existing empty-state sentence.
 3. After that: on each stored-series inventory line, state the freshness flag of the latest row against the selected page date, using the existing freshness_flags function. Do not change that function. A line with two rows on the latest date states both flags.

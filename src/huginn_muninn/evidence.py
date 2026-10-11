@@ -67,6 +67,7 @@ class SeriesLine(NamedTuple):
     latest_date: date
     values: tuple
     retrieval_dates: tuple
+    rows: tuple
 
 
 def _ordered(reasons):
@@ -246,6 +247,7 @@ def series_inventory(observations):
     The latest date is the newest observation date among those rows.
     Values are the amounts on that date. Retrieval dates are the
     retrieval dates of those same rows, in the same order as the values.
+    The rows on that date stay in that same order.
     This does not fetch and does not write the ledger.
     """
     grouped = {}
@@ -275,6 +277,7 @@ def series_inventory(observations):
             latest,
             values,
             retrieval_dates,
+            tuple(on_latest),
         ))
     return tuple(lines)
 
