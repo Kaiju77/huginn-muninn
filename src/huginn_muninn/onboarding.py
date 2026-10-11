@@ -3,7 +3,7 @@
 People record accounts, instruments, activities, manual balances, and prices.
 This module does not fetch and does not load the synthetic fixture.
 Currency rates are not recorded here. Valuation reads this book only.
-HTTP stays in the prototype.
+Attribution reads this book only. HTTP stays in the prototype.
 """
 
 from copy import deepcopy
@@ -51,6 +51,14 @@ SNAPSHOT_VALUE_SENTENCE = (
     'it is not a full performance record.'
 )
 ALLOCATION_INCOMPLETE = 'Allocation is incomplete.'
+ATTRIBUTION_UNAVAILABLE = 'Attribution is unavailable.'
+ATTRIBUTION_SENTENCE = 'This attribution is not a recommendation.'
+FEE_SENTENCE = 'A fee is cash leaving, not a market gain.'
+DIVIDEND_SENTENCE = (
+    'A dividend is cash received. It is not a contribution and it is not '
+    'a price change.'
+)
+START_AFTER_END = 'The start date is after the end date.'
 CASH_SNAPSHOT_NOT_ADDED = 'A cash snapshot is not added to ledger cash.'
 NO_SNAPSHOT = 'No snapshot on this date'
 PRICE_CURRENCY_MISMATCH = (
@@ -128,6 +136,20 @@ class ValueReport(NamedTuple):
     history: tuple
     error: str
     note: str = ''
+
+
+class AttributionReport(NamedTuple):
+    start_date: str
+    end_date: str
+    start_value: object
+    end_value: object
+    contributions: object
+    withdrawals: object
+    fees: object
+    dividends: object
+    price_change: object
+    error: str
+    unavailable: bool
 
 
 def default_book_path(checkout):
@@ -238,6 +260,93 @@ def _cash_snapshot_overlaps(line, ledger_cash):
         and line.amount is not None
         and (line.account, line.currency) in ledger_cash
     )
+
+
+def _blank_attribution(message, start='', end=''):
+    return AttributionReport(
+        start,
+        end,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        message,
+        False,
+    )
+
+
+def _unavailable_attribution(start, end):
+    return AttributionReport(
+        start,
+        end,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        '',
+        True,
+    )
+
+
+def _boundary_date(value, label):
+    day, message = _clean_date(value)
+    if message == 'Enter the date.':
+        return None, f'Enter the {label} date.'
+    if message is not None:
+        return None, message
+    return date.fromisoformat(day), None
+
+
+def _in_window(event_date, start_on, end_on):
+    """Activities strictly after the start date and on or before the end."""
+    return start_on < date.fromisoformat(event_date) <= end_on
+
+
+def _flow_is_nok(row):
+    activity = row['activity']
+    if activity in {'contribution', 'withdrawal', 'fee', 'dividend'}:
+        return row.get('currency') == REPORTING_CURRENCY
+    if activity in {'purchase', 'sale'}:
+        return row.get('cash_currency') == REPORTING_CURRENCY
+    return False
+
+
+def _report_is_attributed(report):
+    """Both dates must be known NOK cash or quantity times one price."""
+    if report.error or report.note == CASH_SNAPSHOT_NOT_ADDED:
+        return False
+    for line in report.lines:
+        if line.kind == 'snapshot':
+            return False
+        if not line.known or line.amount is None:
+            return False
+        if line.currency != REPORTING_CURRENCY:
+            return False
+    return True
+
+
+def _attributed_change(
+    end_value,
+    start_value,
+    contributions,
+    withdrawals,
+    fees,
+    dividends,
+):
+    """end - start - contributions + withdrawals + fees - dividends."""
+    with localcontext(_valuation_context()):
+        change = end_value - start_value
+        change = change - contributions
+        change = change + withdrawals
+        change = change + fees
+        change = change - dividends
+        return change
 
 
 def price_freshness(valuation_date, evidence_date, selected_date):
@@ -975,6 +1084,100 @@ class EnteredPortfolio:
             tuple(history),
             '',
             note,
+        )
+
+    def attribute(self, start, end):
+        """Separate flows from the change in value between two dates.
+
+        Flows are activities strictly after the start date and on or
+        before the end date. A contribution, withdrawal, fee, or dividend
+        uses its own amount. A purchase or a sale stays inside the two
+        valuations; only its fee is a fee. A fee is cash leaving. A
+        dividend is cash received. Nothing here converts currencies or
+        fills in a missing price.
+        """
+        if self.load_error:
+            return _blank_attribution(self.load_error)
+        start_on, start_message = _boundary_date(start, 'start')
+        end_on, end_message = _boundary_date(end, 'end')
+        if start_message is not None or end_message is not None:
+            return _blank_attribution(
+                ' '.join(
+                    message
+                    for message in (start_message, end_message)
+                    if message is not None
+                )
+            )
+        start_day = start_on.isoformat()
+        end_day = end_on.isoformat()
+        if start_on > end_on:
+            return _blank_attribution(START_AFTER_END, start_day, end_day)
+        start_report = self.value_on(start_day)
+        end_report = self.value_on(end_day)
+        if not self._can_attribute(start_on, end_on, start_report, end_report):
+            return _unavailable_attribution(start_day, end_day)
+        contributions, withdrawals, fees, dividends = self._window_totals(
+            start_on,
+            end_on,
+        )
+        return AttributionReport(
+            start_day,
+            end_day,
+            start_report.known_nok_subtotal,
+            end_report.known_nok_subtotal,
+            contributions,
+            withdrawals,
+            fees,
+            dividends,
+            _attributed_change(
+                end_report.known_nok_subtotal,
+                start_report.known_nok_subtotal,
+                contributions,
+                withdrawals,
+                fees,
+                dividends,
+            ),
+            '',
+            False,
+        )
+
+    def _can_attribute(self, start_on, end_on, start_report, end_report):
+        if self.manual_balances:
+            return False
+        if (
+            not _report_is_attributed(start_report)
+            or not _report_is_attributed(end_report)
+        ):
+            return False
+        for row in self.activities:
+            if _in_window(row['event_date'], start_on, end_on) and not _flow_is_nok(row):
+                return False
+        return True
+
+    def _window_totals(self, start_on, end_on):
+        contributions = []
+        withdrawals = []
+        fees = []
+        dividends = []
+        for row in self.activities:
+            if not _in_window(row['event_date'], start_on, end_on):
+                continue
+            activity = row['activity']
+            if activity == 'contribution':
+                contributions.append(Decimal(row['amount']))
+            elif activity == 'withdrawal':
+                withdrawals.append(Decimal(row['amount']))
+            elif activity == 'fee':
+                fees.append(Decimal(row['amount']))
+            elif activity == 'dividend':
+                dividends.append(Decimal(row['amount']))
+            elif activity in {'purchase', 'sale'}:
+                fees.append(Decimal(row['fee']))
+        return (
+            _sum_decimals(contributions),
+            _sum_decimals(withdrawals),
+            _sum_decimals(fees),
+            _sum_decimals(dividends),
         )
 
     def _history_dates(self, selected):

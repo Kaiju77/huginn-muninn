@@ -38,8 +38,12 @@ from src.huginn_muninn.ledger import (
 from src.huginn_muninn.onboarding import (
     ACTIVITY_WORDS,
     ALLOCATION_INCOMPLETE,
+    ATTRIBUTION_SENTENCE,
+    ATTRIBUTION_UNAVAILABLE,
     CASH_SNAPSHOT_NOT_ADDED,
+    DIVIDEND_SENTENCE,
     ENTERED_SENTENCE,
+    FEE_SENTENCE,
     INCOMPLETE_IDENTIFICATION,
     KINDS,
     MISSING_PRICE_SENTENCE,
@@ -1523,6 +1527,7 @@ def _entered_valuation(state, source, result=None, status=200):
         f'<p>{escape(MISSING_PRICE_SENTENCE)}</p>',
         f'<p>{escape(SNAPSHOT_VALUE_SENTENCE)}</p>',
         '<p><a href="/portfolio">Entered portfolio</a></p>',
+        '<p><a href="/portfolio/performance">Performance</a></p>',
         _result_banner(result),
     ]
     if book.load_error:
@@ -1723,6 +1728,70 @@ def _entered_price_form(book, selected):
     )
 
 
+def _performance_form(start, end):
+    return (
+        '<form method="get" action="/portfolio/performance">'
+        '<label for="start">Start'
+        f'<input id="start" name="start" value="{escape(start)}">'
+        '</label>'
+        '<label for="end">End'
+        f'<input id="end" name="end" value="{escape(end)}">'
+        '</label>'
+        '<button type="submit">Show this window</button>'
+        '</form>'
+    )
+
+
+def _labeled_figure(label, amount):
+    shown = _figure(amount)
+    slug = label.replace(' ', '-')
+    return (
+        f'<p data-{slug}="{shown}">{escape(label)} '
+        f'<span class="figure">{shown}</span></p>'
+    )
+
+
+def _entered_performance(state, source):
+    book = state.entered
+    start = _field(source, 'start')
+    end = _field(source, 'end')
+    parts = [
+        f'<p>{escape(ATTRIBUTION_SENTENCE)}</p>',
+        '<p><a href="/portfolio/valuation">Entered valuation</a></p>',
+    ]
+    status = 200
+    if book.load_error:
+        parts.append(f'<p class="break">{escape(book.load_error)}</p>')
+    elif start == '' or end == '':
+        if start == '':
+            parts.append('<p>Enter the start date.</p>')
+        if end == '':
+            parts.append('<p>Enter the end date.</p>')
+    else:
+        report = book.attribute(start, end)
+        if report.start_date:
+            start = report.start_date
+        if report.end_date:
+            end = report.end_date
+        if report.error:
+            status = 400
+            parts.append(f'<p class="break">{escape(report.error)}</p>')
+        elif report.unavailable:
+            parts.append(f'<p>{escape(ATTRIBUTION_UNAVAILABLE)}</p>')
+        else:
+            parts.append(f'<p>{escape(FEE_SENTENCE)}</p>')
+            parts.append(f'<p>{escape(DIVIDEND_SENTENCE)}</p>')
+            parts.append(_labeled_figure('start value', report.start_value))
+            parts.append(_labeled_figure('end value', report.end_value))
+            parts.append(_labeled_figure('contributions', report.contributions))
+            parts.append(_labeled_figure('withdrawals', report.withdrawals))
+            parts.append(_labeled_figure('fees', report.fees))
+            parts.append(_labeled_figure('dividends', report.dividends))
+            parts.append(_labeled_figure('price change', report.price_change))
+    parts.append(_performance_form(start, end))
+    return _page(state, 'Entered performance', ''.join(parts), status, footer='')
+
+
 def _post_entered_valuation(state, form):
     book = state.entered
     action = _field(form, 'action')
@@ -1769,6 +1838,8 @@ def dispatch(state, method, path, form):
         return _entered_valuation(state, query)
     if verb == 'POST' and route == '/portfolio/valuation':
         return _post_entered_valuation(state, form)
+    if verb == 'GET' and route == '/portfolio/performance':
+        return _entered_performance(state, query)
     if verb == 'GET' and route == '/api/desk':
         return _api_desk(state, query)
     if verb == 'GET' and route == '/evidence':
@@ -1803,6 +1874,7 @@ def dispatch(state, method, path, form):
         '/ledger',
         '/portfolio',
         '/portfolio/valuation',
+        '/portfolio/performance',
         '/api/desk',
         '/conversation',
         '/transactions',

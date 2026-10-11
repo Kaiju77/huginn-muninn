@@ -1178,3 +1178,411 @@ class EnteredValuationTest(unittest.TestCase):
         self.assertEqual(empty.status, 200)
         self.assertIn('Enter the date.', empty.body)
         self.assertEqual(empty.body.count(VALUATION_SENTENCE), 1)
+
+
+ATTRIBUTION_UNAVAILABLE = 'Attribution is unavailable.'
+ATTRIBUTION_SENTENCE = 'This attribution is not a recommendation.'
+FEE_SENTENCE = 'A fee is cash leaving, not a market gain.'
+DIVIDEND_SENTENCE = (
+    'A dividend is cash received. It is not a contribution and it is not '
+    'a price change.'
+)
+START_AFTER_END = 'The start date is after the end date.'
+
+
+class EnteredPerformanceTest(unittest.TestCase):
+    def setUp(self):
+        self._before_fixture = FIXTURE.read_bytes()
+        self._tmp = tempfile.TemporaryDirectory()
+        root = Path(self._tmp.name)
+        self.overlay = root / 'synthetic-book.json'
+        self.entered_path = root / 'book.json'
+        self.state = open_state(ROOT, self.overlay, self.entered_path)
+        self.book = self.state.entered
+        self._price_postings = list(self.state.price_postings)
+        self._rate_postings = list(self.state.rate_postings)
+
+    def tearDown(self):
+        self.assertEqual(FIXTURE.read_bytes(), self._before_fixture)
+        self._tmp.cleanup()
+
+    def _account(self):
+        saved = self.book.add_account('Bank', 'Main')
+        self.assertTrue(saved.accepted)
+        return saved.identity
+
+    def _fund(self):
+        saved = self.book.add_instrument('Local fund', 'fund', 'NOK')
+        self.assertTrue(saved.accepted)
+        return saved.identity
+
+    def _activity(self, activity, account, day, **values):
+        saved = self.book.add_activity(
+            activity,
+            account,
+            day,
+            'statement',
+            **values,
+        )
+        self.assertTrue(saved.accepted, saved.message)
+        return saved
+
+    def _contribute(self, account, day, amount, currency='NOK'):
+        self._activity(
+            'contribution',
+            account,
+            day,
+            currency=currency,
+            amount=amount,
+        )
+
+    def _buy(self, account, instrument, day, quantity, cash, fee):
+        self._activity(
+            'purchase',
+            account,
+            day,
+            instrument=instrument,
+            quantity=quantity,
+            cash_currency='NOK',
+            cash_amount=cash,
+            fee=fee,
+        )
+
+    def _sell(self, account, instrument, day, quantity, cash, fee):
+        self._activity(
+            'sale',
+            account,
+            day,
+            instrument=instrument,
+            quantity=quantity,
+            cash_currency='NOK',
+            cash_amount=cash,
+            fee=fee,
+        )
+
+    def _price(self, instrument, amount, day):
+        saved = self.book.record_price(
+            instrument,
+            amount,
+            'NOK',
+            day,
+            day,
+            'statement',
+        )
+        self.assertTrue(saved.accepted, saved.message)
+
+    def _page(self, start, end):
+        return dispatch(
+            self.state,
+            'GET',
+            f'/portfolio/performance?start={start}&end={end}',
+            None,
+        )
+
+    def _assert_decimal(self, amount, expected):
+        self.assertIsInstance(amount, Decimal)
+        self.assertNotIsInstance(amount, float)
+        self.assertEqual(amount, Decimal(expected))
+
+    def _assert_figures(self, report, **expected):
+        for name, value in expected.items():
+            self._assert_decimal(getattr(report, name), value)
+
+    def _locked_book(self):
+        account = self._account()
+        self._contribute(account, '2026-05-01', '1000')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-05-02', '10', '500', '10')
+        self._price(instrument, '50', '2026-05-02')
+        self._price(instrument, '60', '2026-05-03')
+        self.assertEqual(self.book.books().cash[0].amount, Decimal('490'))
+        self.assertEqual(self.book.books().positions[0].quantity, Decimal('10'))
+        return account, instrument
+
+    def test_locked_window_separates_the_fee_from_the_price_change(self):
+        self._locked_book()
+        with localcontext(Context(prec=2)):
+            first = self.book.attribute('2026-05-01', '2026-05-02')
+            second = self.book.attribute('2026-05-01', '2026-05-03')
+        self.assertEqual(first.error, '')
+        self.assertFalse(first.unavailable)
+        self._assert_figures(
+            first,
+            start_value='1000',
+            end_value='990',
+            contributions='0',
+            withdrawals='0',
+            fees='10',
+            dividends='0',
+            price_change='0',
+        )
+        self._assert_figures(
+            second,
+            start_value='1000',
+            end_value='1090',
+            contributions='0',
+            withdrawals='0',
+            fees='10',
+            dividends='0',
+            price_change='100',
+        )
+        early = self._page('2026-05-01', '2026-05-02')
+        self.assertEqual(early.status, 200)
+        self.assertEqual(early.body.count(ATTRIBUTION_SENTENCE), 1)
+        self.assertEqual(early.body.count(FEE_SENTENCE), 1)
+        self.assertEqual(early.body.count(DIVIDEND_SENTENCE), 1)
+        self.assertNotIn(ATTRIBUTION_UNAVAILABLE, early.body)
+        self.assertIn('data-start-value="1000"', early.body)
+        self.assertIn('>start value <span class="figure">1000</span>', early.body)
+        self.assertIn('data-end-value="990"', early.body)
+        self.assertIn('>end value <span class="figure">990</span>', early.body)
+        self.assertIn('data-contributions="0"', early.body)
+        self.assertIn('>contributions <span class="figure">0</span>', early.body)
+        self.assertIn('data-withdrawals="0"', early.body)
+        self.assertIn('>withdrawals <span class="figure">0</span>', early.body)
+        self.assertIn('data-fees="10"', early.body)
+        self.assertIn('>fees <span class="figure">10</span>', early.body)
+        self.assertIn('data-dividends="0"', early.body)
+        self.assertIn('>dividends <span class="figure">0</span>', early.body)
+        self.assertEqual(early.body.count('data-price-change="0"'), 1)
+        self.assertIn('>price change <span class="figure">0</span>', early.body)
+        self.assertIn('name="start"', early.body)
+        self.assertIn('name="end"', early.body)
+        later = self._page('2026-05-01', '2026-05-03')
+        self.assertIn('data-end-value="1090"', later.body)
+        self.assertIn('data-fees="10"', later.body)
+        self.assertEqual(later.body.count('data-price-change="100"'), 1)
+        self.assertIn('>price change <span class="figure">100</span>', later.body)
+        valuation = dispatch(
+            self.state,
+            'GET',
+            '/portfolio/valuation?date=2026-05-02',
+            None,
+        )
+        self.assertIn('href="/portfolio/performance"', valuation.body)
+        reversed_dates = self._page('2026-05-03', '2026-05-01')
+        self.assertIn(START_AFTER_END, reversed_dates.body)
+        self.assertNotIn('price change', reversed_dates.body)
+        self.assertNotIn('data-price-change', reversed_dates.body)
+        self.assertNotIn(ATTRIBUTION_UNAVAILABLE, reversed_dates.body)
+        ledger = dispatch(self.state, 'GET', '/ledger', None)
+        self.assertIn('15050', ledger.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+        self.assertEqual(list(self.state.price_postings), self._price_postings)
+        self.assertEqual(list(self.state.rate_postings), self._rate_postings)
+        self.assertNotIn('10.25', early.body)
+        self.assertNotIn('15050', early.body)
+        source = (
+            ROOT / 'src' / 'huginn_muninn' / 'onboarding.py'
+        ).read_text(encoding='utf-8')
+        self.assertNotIn('add_price', source)
+        self.assertNotIn('add_rate', source)
+
+    def test_any_manual_balance_makes_attribution_unavailable(self):
+        account = self._account()
+        saved = self.book.add_manual_balance(
+            account,
+            'cash',
+            '100',
+            'NOK',
+            '2026-05-01',
+            'statement',
+        )
+        self.assertTrue(saved.accepted, saved.message)
+        valued = self.book.value_on('2026-05-01')
+        snapshot = [line for line in valued.lines if line.kind == 'snapshot'][0]
+        self.assertTrue(snapshot.known)
+        self.assertEqual(snapshot.amount, Decimal('100'))
+        report = self.book.attribute('2026-05-01', '2026-05-01')
+        self.assertTrue(report.unavailable)
+        self.assertIsNone(report.price_change)
+        self.assertEqual(report.error, '')
+        page = self._page('2026-05-01', '2026-05-01')
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.body.count(ATTRIBUTION_UNAVAILABLE), 1)
+        self.assertNotIn('price change', page.body)
+        self.assertNotIn('data-price-change', page.body)
+        self.assertNotIn('data-start-value', page.body)
+
+    def test_a_missing_price_makes_attribution_unavailable(self):
+        account = self._account()
+        self._contribute(account, '2026-05-01', '1000')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-05-02', '10', '500', '0')
+        report = self.book.attribute('2026-05-01', '2026-05-02')
+        self.assertTrue(report.unavailable)
+        self.assertIsNone(report.price_change)
+        page = self._page('2026-05-01', '2026-05-02')
+        self.assertEqual(page.body.count(ATTRIBUTION_UNAVAILABLE), 1)
+        self.assertNotIn('price change', page.body)
+        self.assertNotIn('data-price-change', page.body)
+        self.assertNotIn('data-end-value', page.body)
+
+    def test_usd_cash_makes_attribution_unavailable(self):
+        account = self._account()
+        self._contribute(account, '2026-02-01', '40', 'USD')
+        report = self.book.attribute('2026-02-01', '2026-02-01')
+        self.assertTrue(report.unavailable)
+        self.assertIsNone(report.price_change)
+        page = self._page('2026-02-01', '2026-02-01')
+        self.assertEqual(page.body.count(ATTRIBUTION_UNAVAILABLE), 1)
+        self.assertNotIn('price change', page.body)
+        self.assertNotIn('data-price-change', page.body)
+        self.assertNotIn('10.25', page.body)
+        self.assertNotIn('410', page.body)
+
+    def test_a_flow_that_is_not_nok_makes_attribution_unavailable(self):
+        account = self._account()
+        self._contribute(account, '2026-06-01', '1000')
+        self._contribute(account, '2026-06-02', '10', 'USD')
+        self._activity(
+            'fee',
+            account,
+            '2026-06-02',
+            currency='USD',
+            amount='10',
+        )
+        start = self.book.value_on('2026-06-01')
+        end = self.book.value_on('2026-06-02')
+        self.assertTrue(all(
+            line.known and line.currency == 'NOK' for line in start.lines
+        ))
+        self.assertTrue(all(
+            line.known and line.currency == 'NOK' for line in end.lines
+        ))
+        self.assertEqual(start.known_nok_subtotal, Decimal('1000'))
+        self.assertEqual(end.known_nok_subtotal, Decimal('1000'))
+        report = self.book.attribute('2026-06-01', '2026-06-02')
+        self.assertTrue(report.unavailable)
+        self.assertIsNone(report.price_change)
+        page = self._page('2026-06-01', '2026-06-02')
+        self.assertEqual(page.body.count(ATTRIBUTION_UNAVAILABLE), 1)
+        self.assertNotIn('price change', page.body)
+        self.assertNotIn('data-price-change', page.body)
+
+    def test_a_nok_dividend_is_not_inside_the_price_change(self):
+        account = self._account()
+        self._contribute(account, '2026-05-01', '1000')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-05-02', '10', '500', '0')
+        self._price(instrument, '50', '2026-05-02')
+        self._price(instrument, '50', '2026-05-03')
+        self._activity(
+            'dividend',
+            account,
+            '2026-05-03',
+            instrument=instrument,
+            currency='NOK',
+            amount='40',
+        )
+        report = self.book.attribute('2026-05-01', '2026-05-03')
+        self.assertFalse(report.unavailable)
+        self._assert_figures(
+            report,
+            start_value='1000',
+            end_value='1040',
+            contributions='0',
+            withdrawals='0',
+            fees='0',
+            dividends='40',
+            price_change='0',
+        )
+        self.assertNotEqual(report.price_change, report.dividends)
+        page = self._page('2026-05-01', '2026-05-03')
+        self.assertIn(DIVIDEND_SENTENCE, page.body)
+        self.assertIn('data-dividends="40"', page.body)
+        self.assertIn('>dividends <span class="figure">40</span>', page.body)
+        self.assertEqual(page.body.count('data-price-change="0"'), 1)
+        self.assertIn('data-contributions="0"', page.body)
+
+    def test_a_later_contribution_withdrawal_fee_and_sale_fee(self):
+        account = self._account()
+        self._contribute(account, '2026-07-01', '1000')
+        instrument = self._fund()
+        self._buy(account, instrument, '2026-07-02', '10', '500', '0')
+        self._price(instrument, '50', '2026-07-02')
+        self._contribute(account, '2026-07-03', '125')
+        self._activity(
+            'withdrawal',
+            account,
+            '2026-07-03',
+            currency='NOK',
+            amount='40',
+        )
+        self._activity(
+            'fee',
+            account,
+            '2026-07-03',
+            currency='NOK',
+            amount='25',
+        )
+        self._price(instrument, '50', '2026-07-03')
+        self._sell(account, instrument, '2026-07-04', '10', '500', '12')
+        held = self.book.attribute('2026-07-01', '2026-07-03')
+        # Cash 1000 - 500 + 125 - 40 - 25 = 560. Position 10 * 50 = 500.
+        self._assert_figures(
+            held,
+            start_value='1000',
+            end_value='1060',
+            contributions='125',
+            withdrawals='40',
+            fees='25',
+            dividends='0',
+            price_change='0',
+        )
+        closed = self.book.attribute('2026-07-01', '2026-07-04')
+        # Sale returns 500 and pays fee 12. Position is gone. Cash 1048.
+        self._assert_figures(
+            closed,
+            start_value='1000',
+            end_value='1048',
+            contributions='125',
+            withdrawals='40',
+            fees='37',
+            dividends='0',
+            price_change='0',
+        )
+        page = self._page('2026-07-01', '2026-07-04')
+        self.assertIn('data-contributions="125"', page.body)
+        self.assertIn('data-withdrawals="40"', page.body)
+        self.assertIn('data-fees="37"', page.body)
+        self.assertEqual(page.body.count('data-price-change="0"'), 1)
+
+    def test_get_performance_does_not_fetch(self):
+        import socket
+        import urllib.request
+
+        self._locked_book()
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            empty = dispatch(self.state, 'GET', '/portfolio/performance', None)
+            page = self._page('2026-05-01', '2026-05-03')
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(empty.status, 200)
+        self.assertIn('Enter the start date.', empty.body)
+        self.assertIn('Enter the end date.', empty.body)
+        self.assertIn('name="start"', empty.body)
+        self.assertIn('name="end"', empty.body)
+        self.assertNotIn('price change', empty.body)
+        self.assertNotIn(ATTRIBUTION_UNAVAILABLE, empty.body)
+        self.assertEqual(empty.body.count(ATTRIBUTION_SENTENCE), 1)
+        self.assertEqual(page.status, 200)
+        self.assertIn('data-price-change="100"', page.body)
+        self.assertIn('text/html', page.content_type)
+        ledger = dispatch(self.state, 'GET', '/ledger', None)
+        self.assertIn('15050', ledger.body)
