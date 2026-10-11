@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-05 is reviewed in this commit. Reviewer `a3090eaf-710a-40ca-8a86-d26c3075a5c4` approved the newest USD/NOK note beside 10.25 and the future-date sentence. The next executable task is item 2.
+1. INGEST-05 is reviewed at `ffdb4096b83fc9417a95a78f1b4833d7ad717732`. Reviewer `a3090eaf-710a-40ca-8a86-d26c3075a5c4` approved the newest USD/NOK note beside 10.25 and the future-date sentence. The next executable task is item 2.
 2. After it: add the retrieval date of the latest row to each stored-series inventory line. Still computed from stored rows. No fetch and no scheduler.
 3. After that: on the evidence page, name the six series a manual refresh requests, as a static list, without calling the network on GET. The list is USD/NOK, EUR/NOK, policy rate, NOWA, ECB NOK/EUR, and the one CPI cell.
 
