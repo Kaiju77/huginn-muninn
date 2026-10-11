@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-06 is reviewed in this commit. Reviewer `836d93f4-c13a-499b-879f-5a9daf50a79f` approved the retrieval dates on the stored-series inventory and the static six-series list. The next executable task is item 2.
+1. INGEST-06 is reviewed at `3fbb139ec9eae87a6cc797ac25db3910ed384ca8`. Reviewer `836d93f4-c13a-499b-879f-5a9daf50a79f` approved the retrieval dates on the stored-series inventory and the static six-series list. The next executable task is item 2.
 2. After it: a read-only note that the policy rate and NOWA are different series. Show each latest stored value when that subject is visible. Do not add them, average them, or treat a shared percent unit as one rate. Say they are not combined.
 3. After that: state the allowlist hosts on the evidence page as text taken from the existing client allowlist constant, still without opening a socket on GET.
 
