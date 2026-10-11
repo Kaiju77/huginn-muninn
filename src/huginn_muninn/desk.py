@@ -1062,6 +1062,81 @@ def _policy_rate_svg(observations):
     )
 
 
+def _nowa_svg(observations):
+    return _series_svg(observations, 'nowa', 'nowa-ingested', 'Ingested NOWA')
+
+
+_NB_EUR_NOK = 'nb-exr-EUR-NOK-'
+_ECB_NOK_EUR = 'ecb-exr-NOK-EUR-'
+_DIFFERENCE_SENTENCE = (
+    'This difference is not a recommendation and is not copied into the ledger.'
+)
+
+
+def _pair_day(observation_id, prefix):
+    if not isinstance(observation_id, str) or not observation_id.startswith(prefix):
+        return None
+    suffix = observation_id[len(prefix):]
+    try:
+        date.fromisoformat(suffix)
+    except ValueError:
+        return None
+    return suffix
+
+
+def _first_pair_side(observations, prefix):
+    found = {}
+    for observation in observations:
+        day = _pair_day(observation.observation_id, prefix)
+        if day is None or day in found:
+            continue
+        found[day] = observation
+    return found
+
+
+def _eur_nok_comparison(observations):
+    """Norges Bank minus ECB for a shared date. Neither rate is inverted."""
+    norges = _first_pair_side(observations, _NB_EUR_NOK)
+    ecb = _first_pair_side(observations, _ECB_NOK_EUR)
+    days = sorted(set(norges) | set(ecb))
+    if not days:
+        return (
+            '<section><h2>EUR/NOK sources</h2>'
+            '<p>No stored date has both a Norges Bank EUR/NOK observation '
+            'and an ECB NOK/EUR observation.</p></section>'
+        )
+    notes = []
+    for day in days:
+        left = norges.get(day)
+        right = ecb.get(day)
+        if left is None or right is None or left.value is None or right.value is None:
+            notes.append(
+                f'<p data-eur-nok-pair="{escape(day)}" data-pair-status="incomplete">'
+                f'The pair for {escape(day)} is incomplete.</p>'
+            )
+            continue
+        difference = left.value - right.value
+        shown_left = format(left.value, 'f')
+        shown_right = format(right.value, 'f')
+        if difference == 0:
+            shown_difference = format(Decimal(0), 'f')
+        else:
+            shown_difference = format(difference, 'f')
+        notes.append(
+            '<p'
+            f' data-eur-nok-pair="{escape(day)}"'
+            f' data-norges-bank="{escape(shown_left)}"'
+            f' data-ecb="{escape(shown_right)}"'
+            f' data-difference="{escape(shown_difference)}"'
+            '>'
+            f'{escape(day)}. Norges Bank {escape(shown_left)}. '
+            f'ECB {escape(shown_right)}. '
+            f'Difference {escape(shown_difference)}. '
+            f'{_DIFFERENCE_SENTENCE}</p>'
+        )
+    return '<section><h2>EUR/NOK sources</h2>' + ''.join(notes) + '</section>'
+
+
 def _revision_section(revisions):
     if not revisions:
         return (
@@ -1246,7 +1321,15 @@ def render_evidence(state, on_date):
         'drawn as a live Norges Bank point. Stored dates only. Missing dates are not '
         'interpolated.</figcaption>'
         '</figure></section>'
-        '<section><h2>Recorded observations</h2>'
+        '<section><h2>NOWA observations</h2>'
+        '<figure>'
+        + _nowa_svg(shown_observations)
+        + '<figcaption>Stored dates only. Missing dates are not interpolated. '
+        'The synthetic policy fixture, USD/NOK points, and EUR/NOK points are not '
+        'drawn on this chart.</figcaption>'
+        '</figure></section>'
+        + _eur_nok_comparison(shown_observations)
+        + '<section><h2>Recorded observations</h2>'
         '<div class="table-wrap"><table><thead><tr>'
         '<th>Observation</th><th>Source</th><th>Subject</th><th>Unit</th>'
         '<th class="figure">Value</th><th>Observed</th><th>Retrieved</th>'

@@ -36,7 +36,7 @@ The same result returns listing-currency exposure from qualified valuation lines
 - `GET /api/desk?date=YYYY-MM-DD` returns JSON from `json.dumps`. Decimal amounts are strings. The known subtotal equals `Ledger.value` for that date. A missing reporting amount is `null`, not `"0"`. An invalid date returns status 400.
 - `GET /conversation` shows a text form and a still waveform.
 - `POST /conversation` appends a deterministic reply. It does not call a model.
-- `GET /evidence` renders the source registry, the recorded synthetic fixture, and any stored public refresh. `POST /evidence/refresh` is a manual refresh for Norges Bank USD/NOK, Norges Bank EUR/NOK, the policy rate, NOWA, and ECB NOK/EUR. It is not a scheduler. See `docs/EVIDENCE.md` and `docs/INGEST.md`.
+- `GET /evidence` renders the source registry, the recorded synthetic fixture, and any stored public refresh. `POST /evidence/refresh` is a manual refresh for Norges Bank USD/NOK, Norges Bank EUR/NOK, the policy rate, NOWA, ECB NOK/EUR, and one Statistics Norway CPI cell. It is not a scheduler. See `docs/EVIDENCE.md` and `docs/INGEST.md`.
 
 The desk links to the journal pages. The HTML for `GET /` contains the live cash and known subtotal because the server built them from the engine, along with the words synthetic and the phrase not a recommendation. A script may refresh those figures from `/api/desk`; this page does not need one, because the server already wrote them.
 

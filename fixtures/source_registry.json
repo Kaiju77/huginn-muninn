@@ -17,8 +17,8 @@
       "publisher": "Statistics Norway",
       "category": "official_statistics",
       "cadence": "periodic",
-      "description": "The Statbank API is open, requires no registration, and uses CC BY 4.0. PxWebApi v2 limits an extract to 800000 data cells and 30 queries per minute per IP address. It publishes statistics, not security prices. Around the 08:00 publication, revised figures can appear as 0 or a dot between 05:00 and 08:00. A bounded live query was not locked in this increment, so refresh does not call this source.",
-      "live_fetch": false,
+      "description": "The Statbank API is open, requires no registration, and uses CC BY 4.0. PxWebApi v2 limits an extract to 800000 data cells and 30 queries per minute per IP address. It publishes statistics, not security prices. Around the 08:00 publication, revised figures can appear as 0 or a dot between 05:00 and 08:00. Table 03013 is discontinued through 2025M12 and is not called. Table 14700 replaces it. Table 14700 cell 2026M07 total is the one connected extract. Other SSB tables remain unconnected.",
+      "live_fetch": true,
       "references": [
         "https://www.ssb.no/en/api",
         "https://www.ssb.no/en/api/pxwebapiv2"

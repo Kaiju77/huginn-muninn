@@ -6,4 +6,4 @@ These decisions are open. This checkout does not implement them.
 - FRED stays blocked unless a key is supplied outside the repo and the 2024 terms are accepted.
 - A stored public rate is not copied into the ledger unless a later explicit accept step is authorized.
 - Market-data vendors and issuer announcement feeds stay unconnected until access is verified.
-- Statistics Norway table 03013 is discontinued through 2025M12. Do not call it. A current table id is still open.
+- Statistics Norway table 03013 is discontinued through 2025M12. Do not call it. Table 14700 replaces it. Table 14700 cell 2026M07 total is now the one connected extract, and other SSB tables remain unconnected.

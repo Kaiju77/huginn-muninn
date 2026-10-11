@@ -48,13 +48,13 @@ class EvidenceContractTest(unittest.TestCase):
             self.assertNotIn('api_key', source)
         self.assertEqual(source_posture(sources['norges-bank-open-data']), 'connected')
         self.assertEqual(source_posture(sources['ecb-sdw']), 'connected')
-        self.assertEqual(source_posture(sources['ssb-statbank']), 'prepared')
+        self.assertEqual(source_posture(sources['ssb-statbank']), 'connected')
         self.assertEqual(source_posture(sources['sec-edgar-public']), 'prepared')
         self.assertEqual(source_posture(sources['fred']), 'blocked')
         self.assertEqual(source_posture(sources['social-unverified']), 'excluded')
         self.assertIs(sources['norges-bank-open-data']['live_fetch'], True)
         self.assertIs(sources['ecb-sdw']['live_fetch'], True)
-        self.assertIs(sources['ssb-statbank']['live_fetch'], False)
+        self.assertIs(sources['ssb-statbank']['live_fetch'], True)
         self.assertIs(sources['fred']['live_fetch'], False)
         self.assertIs(sources['sec-edgar-public']['live_fetch'], False)
         self.assertIs(sources['social-unverified']['live_fetch'], False)
@@ -71,6 +71,9 @@ class EvidenceContractTest(unittest.TestCase):
         self.assertIn('800000', sources['ssb-statbank']['description'])
         self.assertIn('30 queries per minute', sources['ssb-statbank']['description'])
         self.assertIn('not security prices', sources['ssb-statbank']['description'])
+        self.assertIn('14700', sources['ssb-statbank']['description'])
+        self.assertIn('2026M07', sources['ssb-statbank']['description'])
+        self.assertIn('Other SSB tables remain unconnected', sources['ssb-statbank']['description'])
         self.assertEqual(sources['fred']['blocked_reason'], 'api_key_and_terms')
         self.assertIn('training machine-learning models', sources['fred']['description'])
         self.assertIn('not a real-time trading feed', sources['fred']['description'])
@@ -307,7 +310,7 @@ class EvidenceContractTest(unittest.TestCase):
         statuses = dict(due_status(store.sources(), store.observations(), AS_OF))
         self.assertEqual(statuses['norges-bank-open-data'], 'due')
         self.assertEqual(statuses['ecb-sdw'], 'due')
-        self.assertNotIn('ssb-statbank', statuses)
+        self.assertEqual(statuses['ssb-statbank'], 'due')
         self.assertNotIn('fred', statuses)
         row = _first()
         row['observation_id'] = 'nb-exr-USD-NOK-2026-03-31'
@@ -320,6 +323,7 @@ class EvidenceContractTest(unittest.TestCase):
         statuses = dict(due_status(store.sources(), store.observations(), AS_OF))
         self.assertEqual(statuses['norges-bank-open-data'], 'current')
         self.assertEqual(statuses['ecb-sdw'], 'due')
+        self.assertEqual(statuses['ssb-statbank'], 'due')
 
     def test_assess_returns_limitations_only(self):
         store = open_evidence(ROOT)
@@ -399,12 +403,15 @@ class EvidencePageTest(unittest.TestCase):
         self.assertIn('href="/evidence"', body)
         self.assertIn('data-source="norges-bank-open-data" data-posture="connected"', body)
         self.assertIn('data-source="ecb-sdw" data-posture="connected"', body)
-        self.assertIn('data-source="ssb-statbank" data-posture="prepared"', body)
+        self.assertIn(
+            'data-source="ssb-statbank" data-posture="connected" data-due="due"',
+            body,
+        )
         self.assertIn('data-source="sec-edgar-public" data-posture="prepared"', body)
         self.assertIn('data-source="fred" data-posture="blocked"', body)
         self.assertIn('data-source="social-unverified" data-posture="excluded"', body)
-        self.assertEqual(body.count('live_fetch false'), 4)
-        self.assertEqual(body.count('live_fetch true'), 2)
+        self.assertEqual(body.count('live_fetch false'), 3)
+        self.assertEqual(body.count('live_fetch true'), 3)
         self.assertIn('api_key_and_terms', body)
         self.assertIn('verified_free_reuse_with_citation', body)
         self.assertNotIn('not_verified_this_increment', body)
@@ -429,6 +436,17 @@ class EvidencePageTest(unittest.TestCase):
         self.assertNotIn('4.50', policy)
         self.assertNotIn('2026-01-02', policy)
         self.assertNotIn('data-value="4.5"', policy)
+        nowa = body.split('id="nowa-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertNotIn('4.50', nowa)
+        self.assertNotIn('2026-01-02', nowa)
+        self.assertNotIn('10.25', nowa)
+        self.assertNotIn('9.5623', nowa)
+        self.assertNotIn('10.717', nowa)
+        self.assertIn(
+            'No stored date has both a Norges Bank EUR/NOK observation '
+            'and an ECB NOK/EUR observation.',
+            body,
+        )
         self.assertIn(
             'data-source="norges-bank-open-data" data-posture="connected" data-due="due"',
             body,

@@ -2,10 +2,12 @@
 
 When the caller passes a transport or explicit_live, the requests are
 Norges Bank USD/NOK, Norges Bank EUR/NOK, the verified policy rate
-IR/B.KPRA.SD.R, the NOWA rate SHORT_RATES/B.NOWA.ON.R, and ECB NOK/EUR.
+IR/B.KPRA.SD.R, the NOWA rate SHORT_RATES/B.NOWA.ON.R, ECB NOK/EUR,
+and then one Statistics Norway cell.
 IR/K.POL.NOK returned HTTP 404 and is not requested.
-Statistics Norway is not called: a bounded live query was not locked.
 Table 03013 is discontinued through 2025M12 and is not called.
+The Statistics Norway request is table 14700, time 2026M07, group 00,
+contents KpiIndMnd. No other Statistics Norway URL is requested.
 SEC EDGAR is not called. FRED is not allowlisted.
 """
 
@@ -22,6 +24,7 @@ from src.huginn_muninn.ingest.norges import (
     fetch_policy_rate,
     fetch_usd_nok,
 )
+from src.huginn_muninn.ingest.ssb import fetch_cpi_total
 
 
 class RefreshResult(NamedTuple):
@@ -121,5 +124,9 @@ async def _refresh_async(
         observations.extend(fetched.observations)
         if fetched.error is not None:
             errors.append(fetched.error)
+    cpi = await fetch_cpi_total(client)
+    observations.extend(cpi.observations)
+    if cpi.error is not None:
+        errors.append(cpi.error)
     write_refresh(cache_dir, stamp, observations, errors)
     return RefreshResult(tuple(observations), tuple(errors), stamp)

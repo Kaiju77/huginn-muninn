@@ -32,7 +32,7 @@ from src.huginn_muninn.ingest.norges import (
     usd_nok_url,
 )
 from src.huginn_muninn.ingest.refresh import refresh_public
-from src.huginn_muninn.ingest.ssb import parse_fixture
+from src.huginn_muninn.ingest.ssb import CPI_URL, parse_cpi_total, parse_fixture
 from src.huginn_muninn.prototype import dispatch, open_state
 
 
@@ -465,6 +465,44 @@ class AdapterContractTest(unittest.TestCase):
         self.assertIn('CC BY 4.0', row['provenance'])
         self.assertIn('not security prices', row['provenance'])
 
+    def test_cpi_cell_keeps_the_value_text_and_rejects_a_longer_list(self):
+        path = FIXTURES / 'ssb-cpi-total-2026m07.json'
+        text = path.read_text(encoding='utf-8')
+        self.assertEqual(path.stat().st_size, 3303)
+        self.assertIn('[103.8]', text)
+        self.assertNotIn('"103.8"', text)
+        parsed = parse_cpi_total(text, CPI_URL, '2026-10-11', 'recorded')
+        self.assertIsNone(parsed.error)
+        self.assertEqual(len(parsed.observations), 1)
+        row = parsed.observations[0]
+        self.assertIsInstance(row['value'], str)
+        self.assertEqual(row['value'], '103.8')
+        self.assertEqual(row['observation_id'], 'ssb-cpi-total-2026M07')
+        self.assertEqual(row['source_id'], 'ssb-statbank')
+        self.assertEqual(row['subject'], 'cpi-total')
+        self.assertEqual(row['unit'], 'index 2025=100')
+        self.assertEqual(row['observation_time'], '2026-07-01')
+        self.assertEqual(row['quality'], ['recorded_fixture'])
+        self.assertIn('Statistics Norway', row['provenance'])
+        self.assertIn('CC BY 4.0', row['provenance'])
+        self.assertIn('14700', row['provenance'])
+        self.assertIn('price index', row['provenance'])
+        self.assertIn('not a security price', row['provenance'])
+        self.assertNotIn('@', row['provenance'])
+        self.assertEqual(Decimal(row['value']), Decimal('103.8'))
+        document = json.loads(text, parse_float=str)
+        self.assertEqual(document['value'], ['103.8'])
+        document['value'].append('104.0')
+        rejected = parse_cpi_total(json.dumps(document), CPI_URL, '2026-10-11', 'recorded')
+        self.assertEqual(rejected.observations, ())
+        self.assertEqual(rejected.error.reason, 'parse_error')
+        source = (ROOT / 'src' / 'huginn_muninn' / 'ingest' / 'ssb.py').read_text(encoding='utf-8')
+        self.assertIn('parse_float=str', source)
+        self.assertEqual(source.count('https://data.ssb.no'), 1)
+        self.assertIn(CPI_URL, source)
+        self.assertNotIn('add_rate', source)
+        self.assertNotIn('ledger', source)
+
     def test_edgar_refuses_without_a_contact_string(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -520,6 +558,7 @@ class RefreshDeskTest(unittest.TestCase):
             'SHORT_RATES/B.NOWA.ON.R': (FIXTURES / 'norges-bank-nowa.csv').read_bytes(),
         }
         ecb = (FIXTURES / 'ecb-nok-eur.csv').read_bytes()
+        cpi = (FIXTURES / 'ssb-cpi-total-2026m07.json').read_bytes()
 
         class Transport:
             def __init__(self):
@@ -537,6 +576,8 @@ class RefreshDeskTest(unittest.TestCase):
                 if host == 'data-api.ecb.europa.eu':
                     body = ecb if ecb_status == 200 else b'missing'
                     return TransportResponse(ecb_status, body, 'recorded')
+                if request.url == CPI_URL:
+                    return TransportResponse(200, cpi, 'recorded')
                 raise AssertionError(request.url)
 
         return Transport()
@@ -547,6 +588,8 @@ class RefreshDeskTest(unittest.TestCase):
         self.state.ingest_transport = transport
         before_value = self.state.ledger.value('2026-03-31')
         before_books = self.state.ledger.books('2026-03-31')
+        self.assertTrue(before_value.complete)
+        self.assertEqual(before_value.known_subtotal, Decimal('24932.50'))
         result = refresh_public(
             self.cache,
             *WINDOW,
@@ -557,7 +600,7 @@ class RefreshDeskTest(unittest.TestCase):
         )
         self.assertEqual(result.errors, ())
         self.assertEqual(clock.sleeps, [2.0, 2.0, 2.0])
-        self.assertEqual(len(transport.urls), 5)
+        self.assertEqual(len(transport.urls), 6)
         self.assertIn('/api/data/EXR/B.USD.NOK.SP?', transport.urls[0])
         self.assertIn('/api/data/EXR/B.EUR.NOK.SP?', transport.urls[1])
         self.assertIn('/api/data/IR/B.KPRA.SD.R?', transport.urls[2])
@@ -572,7 +615,9 @@ class RefreshDeskTest(unittest.TestCase):
         self.assertIn('EXR/B.EUR.NOK.SP', joined)
         self.assertIn(POLICY_RATE_SERIES, joined)
         self.assertIn('SHORT_RATES/B.NOWA.ON.R', joined)
-        self.assertNotIn('data.ssb.no', joined)
+        self.assertEqual(transport.urls[5], CPI_URL)
+        self.assertEqual([url for url in transport.urls if 'data.ssb.no' in url], [CPI_URL])
+        self.assertNotIn('03013', joined)
         self.assertNotIn('data.sec.gov', joined)
         self.assertNotIn('stlouisfed.org', joined)
         values = [row['value'] for row in result.observations]
@@ -583,9 +628,26 @@ class RefreshDeskTest(unittest.TestCase):
         self.assertIn('10.717', values)
         self.assertIn('10.7155', values)
         self.assertIn('4.50', values)
+        self.assertIn('103.8', values)
+        cpi_rows = [
+            row for row in result.observations
+            if row['observation_id'] == 'ssb-cpi-total-2026M07'
+        ]
+        self.assertEqual(len(cpi_rows), 1)
+        self.assertIsInstance(cpi_rows[0]['value'], str)
+        self.assertEqual(cpi_rows[0]['value'], '103.8')
+        self.assertEqual(cpi_rows[0]['subject'], 'cpi-total')
+        self.assertEqual(cpi_rows[0]['unit'], 'index 2025=100')
+        self.assertEqual(cpi_rows[0]['observation_time'], '2026-07-01')
+        self.assertIn('not a security price', cpi_rows[0]['provenance'])
         nok = [row for row in result.observations if row['observation_id'] == 'nb-exr-USD-NOK-2026-10-09']
         self.assertEqual(nok[0]['quality'], ['recorded_fixture'])
-        self.assertIn(CITATION, result.observations[-1]['provenance'])
+        ecb_last = [
+            row for row in result.observations
+            if row['observation_id'] == 'ecb-exr-NOK-EUR-2026-10-09'
+        ]
+        self.assertEqual(len(ecb_last), 1)
+        self.assertIn(CITATION, ecb_last[0]['provenance'])
         store = open_evidence(ROOT)
         for row in result.observations:
             self.assertTrue(store.ingest(row).stored)
@@ -595,6 +657,11 @@ class RefreshDeskTest(unittest.TestCase):
         }
         self.assertEqual(stored['nb-exr-USD-NOK-2026-10-09'].value, Decimal('9.5623'))
         self.assertEqual(stored['ecb-exr-NOK-EUR-2026-10-08'].value, Decimal('10.717'))
+        self.assertEqual(stored['ssb-cpi-total-2026M07'].value, Decimal('103.8'))
+        booked = self.state.ledger.value('2026-03-31')
+        self.assertEqual(booked, before_value)
+        self.assertTrue(booked.complete)
+        self.assertEqual(booked.known_subtotal, Decimal('24932.50'))
         response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
         self.assertEqual(response.status, 200)
         body = response.body
@@ -621,6 +688,36 @@ class RefreshDeskTest(unittest.TestCase):
         self.assertNotIn('data-value="4.50"', policy)
         self.assertNotIn('data-date="2026-01-02"', policy)
         self.assertNotIn('>live<', policy)
+        nowa = body.split('id="nowa-ingested"', 1)[1].split('</svg>', 1)[0]
+        self.assertIn('data-value="4.50"', nowa)
+        self.assertIn('data-kind="recorded"', nowa)
+        self.assertIn('data-date="2026-10-06"', nowa)
+        self.assertIn('data-date="2026-10-07"', nowa)
+        self.assertIn('data-date="2026-10-08"', nowa)
+        self.assertIn('data-segment="2026-10-06/2026-10-07"', nowa)
+        self.assertIn('data-segment="2026-10-07/2026-10-08"', nowa)
+        self.assertNotIn('data-date="2026-01-02"', nowa)
+        self.assertNotIn('data-value="4.5"', nowa.replace('data-value="4.50"', ''))
+        self.assertNotIn('data-value="9.5623"', nowa)
+        self.assertNotIn('data-value="10.717"', nowa)
+        self.assertNotIn('data-value="10.7155"', nowa)
+        self.assertNotIn('10.25', nowa)
+        self.assertNotIn('2026-03-31', nowa)
+        self.assertNotIn('103.8', nowa)
+        for day, amount in (('2026-10-08', '10.717'), ('2026-10-09', '10.7155')):
+            pair = body.split(f'data-eur-nok-pair="{day}"', 1)[1].split('</p>', 1)[0]
+            self.assertIn(f'data-norges-bank="{amount}"', pair)
+            self.assertIn(f'data-ecb="{amount}"', pair)
+            self.assertIn('data-difference="0"', pair)
+            self.assertIn(
+                'This difference is not a recommendation and is not copied into the ledger.',
+                pair,
+            )
+            self.assertNotIn('incomplete', pair)
+        self.assertIn('data-observation="ssb-cpi-total-2026M07"', body)
+        self.assertIn('index 2025=100', body)
+        self.assertIn('2026-07-01', body)
+        self.assertIn('price index, not a security price', body)
         self.assertIn('data-due="due"', body)
         self.assertNotIn('data-due="current"', body)
         self.assertIn('No revision is stored.', body)
@@ -654,7 +751,7 @@ class RefreshDeskTest(unittest.TestCase):
             'end_period': '2026-10-09',
         })
         self.assertEqual(posted.status, 200)
-        self.assertEqual(len(transport.urls), calls + 5)
+        self.assertEqual(len(transport.urls), calls + 6)
         self.assertIn('data-value="9.5623"', posted.body)
         self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
         self.assertEqual(
@@ -798,6 +895,41 @@ class RefreshDeskTest(unittest.TestCase):
             response.body,
         )
 
+    def test_one_eur_nok_side_is_incomplete_and_prints_no_difference(self):
+        write_refresh(
+            self.cache,
+            STAMP,
+            (
+                {
+                    'observation_id': 'ecb-exr-NOK-EUR-2026-10-08',
+                    'source_id': 'ecb-sdw',
+                    'subject': 'EUR/NOK',
+                    'unit': 'NOK per 1 EUR',
+                    'value': '10.717',
+                    'observation_time': '2026-10-08',
+                    'retrieval_time': '2026-10-11',
+                    'provenance': 'Source: ECB statistics.',
+                    'quality': ['recorded_fixture'],
+                },
+            ),
+            (),
+        )
+        before_value = self.state.ledger.value('2026-03-31')
+        response = dispatch(self.state, 'GET', '/evidence?date=2026-03-31', None)
+        self.assertEqual(response.status, 200)
+        pair = response.body.split('data-eur-nok-pair="2026-10-08"', 1)[1].split('</p>', 1)[0]
+        self.assertIn('data-pair-status="incomplete"', pair)
+        self.assertIn('The pair for 2026-10-08 is incomplete.', pair)
+        self.assertNotIn('Difference', pair)
+        self.assertNotIn('data-difference', pair)
+        self.assertNotIn('10.717', pair)
+        self.assertEqual(self.state.ledger.value('2026-03-31'), before_value)
+        self.assertTrue(self.state.ledger.value('2026-03-31').complete)
+        self.assertEqual(
+            self.state.ledger.value('2026-03-31').known_subtotal,
+            Decimal('24932.50'),
+        )
+
     def test_stored_http_error_is_shown_and_not_retried_as_a_loop(self):
         transport = self._transport(ecb_status=404)
         result = refresh_public(
@@ -806,7 +938,7 @@ class RefreshDeskTest(unittest.TestCase):
             transport=transport,
             retrieved_at=STAMP,
         )
-        self.assertEqual(len(transport.urls), 5)
+        self.assertEqual(len(transport.urls), 6)
         self.assertEqual(result.errors[0].reason, 'http_status')
         self.assertEqual(result.errors[0].status, 404)
         self.assertEqual(result.errors[0].attempts, 1)
@@ -848,6 +980,10 @@ class RefreshDeskTest(unittest.TestCase):
             'IR/K.POL.NOK',
             '404',
             'bounded live query was not locked',
+            'table 14700',
+            '2026M07',
+            '103.8',
+            CPI_URL,
             'configuration_required',
             'api_key_and_terms',
             'Refresh is manual',
