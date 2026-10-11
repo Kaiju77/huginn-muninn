@@ -2,7 +2,7 @@
 
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
-1. INGEST-10 is reviewed in this commit. Reviewer `8a53642d-f76a-4fcd-985c-3f1fd545f043` approved the stored observation count beside the 500 cap and the quality flag of the newest stored row for each of the six series. The next executable task is item 2.
+1. INGEST-10 is reviewed at `9552b0b2a8e523b20430f6725e69e82cabd5df5c`. Reviewer `8a53642d-f76a-4fcd-985c-3f1fd545f043` approved the stored observation count beside the 500 cap and the quality flag of the newest stored row for each of the six series. The next executable task is item 2.
 2. State how many of the six series are not stored. That count is computed from the same rows as the quality section. Include the exact sentence "A missing series is not a zero." Do not fetch.
 3. State that the cache count does not include the synthetic fixture rows. Include the exact sentence "The synthetic fixture is not part of the cache count." Do not fetch.
 
