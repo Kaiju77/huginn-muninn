@@ -2,7 +2,7 @@
 
 ## Status
 
-PRICE-01 accepts one stored observation as an entered price on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `442307be341e8b903af0d97505676900a49822fd`, and the worktree was clean. Independent review on 2026-10-11 approved PRICE-01. Reviewer `205dc4e4-7f9f-48cc-a38e-8a79d0059c51`.
+PRICE-01 is a reviewed price-accept slice on branch `cursor/hm-01` at `5237ad76643887bef8994a0b69985c90fc14758f` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`. The baseline before these edits was `442307be341e8b903af0d97505676900a49822fd`, and the worktree was clean. Independent review on 2026-10-11 approved PRICE-01. Reviewer `205dc4e4-7f9f-48cc-a38e-8a79d0059c51`.
 
 A person can accept one already-stored observation as an entered price. The page is `GET /portfolio/price` and `POST /portfolio/price`, linked from the entered valuation page. GET only shows the form and the stored observations. POST is the only accept. The amount is the observation value as a Decimal, the currency is the observation unit, the valuation date is the observation date, the evidence date is the retrieval date, and the provenance includes the observation id. The accept does not run by itself and it does not copy the price into the synthetic ledger. A missing observation, a synthetic fixture row, USD/NOK, EUR/NOK, the policy rate, NOWA, CPI, a unit that is not the listing currency, or a missing or non-finite value is refused with "This observation is not a price for this holding." and nothing is stored. The page says "This accept is not a recommendation." and "A stored rate is not copied unless you accept it."
 
