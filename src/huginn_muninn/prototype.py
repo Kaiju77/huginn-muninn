@@ -15,11 +15,13 @@ import json
 from src.huginn_muninn.desk import (
     answer,
     build_payload,
+    open_recorded_store,
     render_conversation,
     render_desk,
     render_evidence,
     render_message,
 )
+from src.huginn_muninn.evidence import Observation, visible_observations
 from src.huginn_muninn.ledger import (
     Account,
     Buy,
@@ -51,6 +53,7 @@ from src.huginn_muninn.onboarding import (
     SNAPSHOT_VALUE_SENTENCE,
     VALUATION_SENTENCE,
     EnteredPortfolio,
+    EntryResult,
     default_book_path,
     display_activity,
     price_freshness,
@@ -1528,6 +1531,7 @@ def _entered_valuation(state, source, result=None, status=200):
         f'<p>{escape(SNAPSHOT_VALUE_SENTENCE)}</p>',
         '<p><a href="/portfolio">Entered portfolio</a></p>',
         '<p><a href="/portfolio/performance">Performance</a></p>',
+        '<p><a href="/portfolio/price">Accept a stored price</a></p>',
         _result_banner(result),
     ]
     if book.load_error:
@@ -1814,6 +1818,178 @@ def _post_entered_valuation(state, form):
     return _entered_valuation(state, source, result, status)
 
 
+ACCEPT_NOT_RECOMMENDATION = 'This accept is not a recommendation.'
+STORED_RATE_NOT_COPIED = 'A stored rate is not copied unless you accept it.'
+NOT_A_HOLDING_PRICE = 'This observation is not a price for this holding.'
+_NOT_HOLDING_SUBJECTS = frozenset({
+    'USD/NOK',
+    'EUR/NOK',
+    'policy-rate',
+    'nowa',
+    'cpi-total',
+})
+
+
+def _listing_currency(book, identity):
+    for instrument in book.instruments:
+        if instrument.get('identity') == identity:
+            return instrument.get('listing_currency')
+    return None
+
+
+def _chosen_observation(rows, observation_id):
+    """One visible row with this id. A missing or repeated id is not chosen."""
+    if not isinstance(observation_id, str) or observation_id == '':
+        return None
+    matches = [
+        row for row in rows
+        if row.observation_id == observation_id
+    ]
+    if len(matches) != 1:
+        return None
+    return matches[0]
+
+
+def _holding_price_refusal(observation, listing_currency):
+    """None when this stored row may be accepted as an entered price."""
+    if not isinstance(observation, Observation):
+        return NOT_A_HOLDING_PRICE
+    if 'synthetic_fixture' in observation.quality:
+        return NOT_A_HOLDING_PRICE
+    if observation.subject in _NOT_HOLDING_SUBJECTS:
+        return NOT_A_HOLDING_PRICE
+    if listing_currency is None or observation.unit != listing_currency:
+        return NOT_A_HOLDING_PRICE
+    value = observation.value
+    if not isinstance(value, Decimal) or not value.is_finite():
+        return NOT_A_HOLDING_PRICE
+    return None
+
+
+def _accept_stored_observation(book, rows, instrument_id, observation_id):
+    """Store one entered price, or refuse without writing."""
+    observation = _chosen_observation(rows, observation_id)
+    listing = _listing_currency(book, instrument_id)
+    refusal = _holding_price_refusal(observation, listing)
+    if refusal is not None:
+        return EntryResult(False, refusal, (), '')
+    return book.record_price(
+        instrument_id,
+        observation.value,
+        observation.unit,
+        observation.observation_time.isoformat(),
+        observation.retrieval_time.isoformat(),
+        observation.observation_id,
+    )
+
+
+def _observation_amount(value):
+    if value is None:
+        return 'missing'
+    if isinstance(value, Decimal):
+        return format(value, 'f')
+    return str(value)
+
+
+def _stored_observation_table(rows):
+    if not rows:
+        return '<p>No stored observations.</p>'
+    body = []
+    for observation in rows:
+        quality = ', '.join(observation.quality)
+        body.append(
+            '<tr'
+            f' data-observation="{escape(observation.observation_id)}"'
+            f' data-subject="{escape(observation.subject)}"'
+            f' data-unit="{escape(observation.unit)}"'
+            '>'
+            f'<td>{escape(observation.observation_id)}</td>'
+            f'<td>{escape(observation.subject)}</td>'
+            f'<td>{escape(observation.unit)}</td>'
+            f'<td class="figure">{escape(_observation_amount(observation.value))}</td>'
+            f'<td>{escape(observation.observation_time.isoformat())}</td>'
+            f'<td>{escape(observation.retrieval_time.isoformat())}</td>'
+            f'<td>{escape(quality)}</td>'
+            '</tr>'
+        )
+    return (
+        '<table><thead><tr><th>Observation</th><th>Subject</th><th>Unit</th>'
+        '<th class="figure">Value</th><th>Observed</th><th>Retrieved</th>'
+        '<th>Quality</th></tr></thead><tbody>'
+        + ''.join(body)
+        + '</tbody></table>'
+    )
+
+
+def _observation_choices(rows):
+    choices = [('', 'Choose an observation')]
+    for observation in rows:
+        label = (
+            f'{observation.observation_id} {observation.subject} '
+            f'{observation.unit}'
+        )
+        choices.append((observation.observation_id, label))
+    return choices
+
+
+def _accept_price_form(book, rows):
+    return (
+        '<h2>Accept one observation</h2>'
+        '<form method="post" action="/portfolio/price" '
+        'enctype="application/x-www-form-urlencoded">'
+        + _portfolio_select(
+            'accept',
+            'instrument',
+            'Instrument',
+            _instrument_choices(book),
+        )
+        + _portfolio_select(
+            'accept',
+            'observation_id',
+            'Observation',
+            _observation_choices(rows),
+        )
+        + '<button type="submit">Accept observation</button></form>'
+    )
+
+
+def _entered_price_accept(state, result=None, status=200):
+    book = state.entered
+    parts = [
+        f'<p>{escape(ACCEPT_NOT_RECOMMENDATION)}</p>',
+        f'<p>{escape(STORED_RATE_NOT_COPIED)}</p>',
+        '<p><a href="/portfolio/valuation">Entered valuation</a></p>',
+        _result_banner(result),
+    ]
+    try:
+        store, _cached = open_recorded_store(state)
+        rows = visible_observations(store)
+    except ValueError as exc:
+        parts.append(f'<p class="break">{escape(str(exc))}</p>')
+        rows = ()
+    parts.append('<h2>Stored observations</h2>')
+    parts.append(_stored_observation_table(rows))
+    parts.append(_accept_price_form(book, rows))
+    return _page(state, 'Accept a stored price', ''.join(parts), status, footer='')
+
+
+def _post_entered_price(state, form):
+    try:
+        store, _cached = open_recorded_store(state)
+        rows = visible_observations(store)
+    except ValueError as exc:
+        result = EntryResult(False, str(exc), (), '')
+        return _entered_price_accept(state, result, 400)
+    result = _accept_stored_observation(
+        state.entered,
+        rows,
+        _field(form, 'instrument'),
+        _field(form, 'observation_id'),
+    )
+    status = 200 if result.accepted else 400
+    return _entered_price_accept(state, result, status)
+
+
 def dispatch(state, method, path, form):
     verb = str(method or '').upper()
     parsed = urlsplit(path or '/')
@@ -1838,6 +2014,10 @@ def dispatch(state, method, path, form):
         return _entered_valuation(state, query)
     if verb == 'POST' and route == '/portfolio/valuation':
         return _post_entered_valuation(state, form)
+    if verb == 'GET' and route == '/portfolio/price':
+        return _entered_price_accept(state)
+    if verb == 'POST' and route == '/portfolio/price':
+        return _post_entered_price(state, form)
     if verb == 'GET' and route == '/portfolio/performance':
         return _entered_performance(state, query)
     if verb == 'GET' and route == '/api/desk':
@@ -1874,6 +2054,7 @@ def dispatch(state, method, path, form):
         '/ledger',
         '/portfolio',
         '/portfolio/valuation',
+        '/portfolio/price',
         '/portfolio/performance',
         '/api/desk',
         '/conversation',

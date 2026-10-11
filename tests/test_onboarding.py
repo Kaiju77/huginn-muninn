@@ -1586,3 +1586,408 @@ class EnteredPerformanceTest(unittest.TestCase):
         self.assertIn('text/html', page.content_type)
         ledger = dispatch(self.state, 'GET', '/ledger', None)
         self.assertIn('15050', ledger.body)
+
+
+NOT_A_HOLDING_PRICE = 'This observation is not a price for this holding.'
+ACCEPT_NOT_RECOMMENDATION = 'This accept is not a recommendation.'
+STORED_RATE_NOT_COPIED = 'A stored rate is not copied unless you accept it.'
+
+
+class EnteredPriceAcceptTest(unittest.TestCase):
+    def setUp(self):
+        self._before_fixture = FIXTURE.read_bytes()
+        self._tmp = tempfile.TemporaryDirectory()
+        root = Path(self._tmp.name)
+        self.overlay = root / 'synthetic-book.json'
+        self.entered_path = root / 'book.json'
+        self.state = open_state(ROOT, self.overlay, self.entered_path)
+        self.state.ingest_cache_dir = root / 'ingest-cache'
+        self.book = self.state.entered
+        self._price_postings = list(self.state.price_postings)
+        self._rate_postings = list(self.state.rate_postings)
+
+    def tearDown(self):
+        self.assertEqual(FIXTURE.read_bytes(), self._before_fixture)
+        self._tmp.cleanup()
+
+    def _instrument(self, name, currency):
+        saved = self.book.add_instrument(name, 'fund', currency)
+        self.assertTrue(saved.accepted, saved.message)
+        return saved.identity
+
+    def _store(self, rows):
+        from src.huginn_muninn.ingest.cache import write_refresh
+
+        write_refresh(
+            self.state.ingest_cache_dir,
+            '2026-05-04T12:00:00+00:00',
+            tuple(rows),
+            (),
+        )
+
+    def _row(
+        self,
+        observation_id,
+        subject,
+        unit,
+        value,
+        quality,
+        observed='2026-05-02',
+        retrieved='2026-05-04',
+    ):
+        return {
+            'observation_id': observation_id,
+            'source_id': 'norges-bank-open-data',
+            'subject': subject,
+            'unit': unit,
+            'value': value,
+            'observation_time': observed,
+            'retrieval_time': retrieved,
+            'provenance': 'recorded for an explicit accept',
+            'quality': list(quality),
+        }
+
+    def _post(self, instrument, observation_id):
+        return dispatch(
+            self.state,
+            'POST',
+            '/portfolio/price',
+            {
+                'instrument': instrument,
+                'observation_id': observation_id,
+            },
+        )
+
+    def _assert_books_unchanged(self):
+        self.assertEqual(self.book.prices, ())
+        self.assertEqual(self.book.ledger()._prices, [])
+        self.assertEqual(self.book.ledger()._rates, [])
+        if self.entered_path.exists():
+            self.assertNotIn('10.25', self.entered_path.read_text(encoding='utf-8'))
+        ledger = dispatch(self.state, 'GET', '/ledger', None)
+        self.assertIn('15050', ledger.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+        self.assertEqual(list(self.state.price_postings), self._price_postings)
+        self.assertEqual(list(self.state.rate_postings), self._rate_postings)
+
+    def test_get_shows_stored_observations_and_does_not_accept(self):
+        import socket
+        import urllib.request
+
+        instrument = self._instrument('Local fund', 'NOK')
+        observation_id = 'obs-local-price'
+        self._store((
+            self._row(
+                observation_id,
+                'price',
+                'NOK',
+                '12.345',
+                ('recorded_fixture',),
+            ),
+        ))
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            page = dispatch(
+                self.state,
+                'GET',
+                (
+                    '/portfolio/price?instrument='
+                    + instrument
+                    + '&observation_id='
+                    + observation_id
+                ),
+                None,
+            )
+            valuation = dispatch(
+                self.state,
+                'GET',
+                '/portfolio/valuation',
+                None,
+            )
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(page.status, 200)
+        self.assertEqual(page.body.count(ACCEPT_NOT_RECOMMENDATION), 1)
+        self.assertEqual(page.body.count(STORED_RATE_NOT_COPIED), 1)
+        self.assertNotIn(NOT_A_HOLDING_PRICE, page.body)
+        self.assertNotIn('Saved.', page.body)
+        self.assertIn('method="post" action="/portfolio/price"', page.body)
+        self.assertIn('name="instrument"', page.body)
+        self.assertIn('name="observation_id"', page.body)
+        self.assertIn('data-observation="obs-usd-nok-2026-03-31"', page.body)
+        self.assertIn('data-observation="obs-stale-policy"', page.body)
+        self.assertIn('data-observation="obs-local-price"', page.body)
+        self.assertIn('data-subject="price"', page.body)
+        self.assertIn('href="/portfolio/price"', valuation.body)
+        self.assertNotIn('These figures are synthetic', page.body)
+        self._assert_books_unchanged()
+        prototype = (
+            ROOT / 'src' / 'huginn_muninn' / 'prototype.py'
+        ).read_text(encoding='utf-8')
+        accept = prototype.split('def _accept_stored_observation', 1)[1].split(
+            '\ndef ',
+            1,
+        )[0]
+        getter = prototype.split('def _entered_price_accept', 1)[1].split(
+            '\ndef ',
+            1,
+        )[0]
+        poster = prototype.split('def _post_entered_price', 1)[1].split(
+            '\ndef ',
+            1,
+        )[0]
+        self.assertIn('record_price', accept)
+        self.assertNotIn('add_rate', accept)
+        self.assertNotIn('add_price', accept)
+        self.assertNotIn('requests', accept)
+        self.assertNotIn('urlopen', accept)
+        self.assertNotIn('socket', accept)
+        self.assertNotIn('record_price', getter)
+        self.assertNotIn('_accept_stored_observation', getter)
+        self.assertIn('_accept_stored_observation', poster)
+        desk = (ROOT / 'src' / 'huginn_muninn' / 'desk.py').read_text(encoding='utf-8')
+        loader = desk.split('def open_recorded_store', 1)[1].split(
+            '\ndef render_evidence',
+            1,
+        )[0]
+        self.assertIn('open_evidence', loader)
+        self.assertIn('read_desk_cache', loader)
+        self.assertNotIn('urllib', loader)
+        self.assertNotIn('requests', loader)
+        self.assertNotIn('socket', loader)
+        self.assertIn('store, cached = open_recorded_store(state)', desk)
+
+    def test_rates_indexes_and_the_synthetic_row_are_refused(self):
+        nok = self._instrument('Local fund', 'NOK')
+        usd = self._instrument('Dollar rate', 'NOK per 1 USD')
+        eur = self._instrument('Euro rate', 'NOK per 1 EUR')
+        percent = self._instrument('Percent series', 'percent')
+        index = self._instrument('Price index', 'index 2025=100')
+        self._store((
+            self._row(
+                'nb-usd-nok-live',
+                'USD/NOK',
+                'NOK per 1 USD',
+                '9.5623',
+                ('live_retrieval',),
+                '2026-10-09',
+                '2026-10-11',
+            ),
+            self._row(
+                'nb-eur-nok-live',
+                'EUR/NOK',
+                'NOK per 1 EUR',
+                '11.20',
+                ('live_retrieval',),
+                '2026-10-09',
+                '2026-10-11',
+            ),
+            self._row(
+                'nb-policy-live',
+                'policy-rate',
+                'percent',
+                '4.25',
+                ('live_retrieval',),
+            ),
+            self._row(
+                'nb-nowa-live',
+                'nowa',
+                'percent',
+                '4.40',
+                ('live_retrieval',),
+            ),
+            self._row(
+                'ssb-cpi-live',
+                'cpi-total',
+                'index 2025=100',
+                '103.1',
+                ('live_retrieval',),
+            ),
+            self._row(
+                'obs-synthetic-price',
+                'price',
+                'NOK',
+                '9',
+                ('synthetic_fixture',),
+            ),
+            self._row(
+                'obs-missing-price',
+                'price',
+                'NOK',
+                None,
+                ('recorded_fixture',),
+            ),
+            self._row(
+                'obs-usd-price',
+                'price',
+                'USD',
+                '8',
+                ('recorded_fixture',),
+            ),
+            self._row(
+                'obs-negative-price',
+                'price',
+                'NOK',
+                '-2',
+                ('recorded_fixture',),
+            ),
+        ))
+        attempts = (
+            (nok, 'obs-usd-nok-2026-03-31'),
+            (usd, 'obs-usd-nok-2026-03-31'),
+            (percent, 'obs-stale-policy'),
+            (usd, 'nb-usd-nok-live'),
+            (eur, 'nb-eur-nok-live'),
+            (percent, 'nb-policy-live'),
+            (percent, 'nb-nowa-live'),
+            (index, 'ssb-cpi-live'),
+            (nok, 'obs-synthetic-price'),
+            (nok, 'obs-missing-price'),
+            (nok, 'obs-usd-price'),
+            (nok, ''),
+            (nok, 'not-stored'),
+            ('', 'obs-local-absent'),
+        )
+        for instrument, observation_id in attempts:
+            page = self._post(instrument, observation_id)
+            self.assertEqual(page.status, 400)
+            self.assertEqual(page.body.count(NOT_A_HOLDING_PRICE), 1)
+            self.assertEqual(page.body.count(ACCEPT_NOT_RECOMMENDATION), 1)
+            self.assertEqual(page.body.count(STORED_RATE_NOT_COPIED), 1)
+            self.assertNotIn('Saved.', page.body)
+        negative = self._post(nok, 'obs-negative-price')
+        self.assertEqual(negative.status, 400)
+        self.assertIn('The amount cannot be negative.', negative.body)
+        self.assertNotIn(NOT_A_HOLDING_PRICE, negative.body)
+        self._assert_books_unchanged()
+
+    def test_accepting_one_price_observation_stores_one_entered_price(self):
+        import socket
+        import urllib.request
+
+        instrument = self._instrument('Local fund', 'NOK')
+        observation_id = 'obs-local-price'
+        self._store((
+            self._row(
+                observation_id,
+                'price',
+                'NOK',
+                '12.345',
+                ('recorded_fixture',),
+            ),
+        ))
+        opener = urllib.request.build_opener
+        urlopen = urllib.request.urlopen
+        socket_type = socket.socket
+
+        def blocked(*args, **kwargs):
+            raise AssertionError('network')
+
+        urllib.request.build_opener = blocked
+        urllib.request.urlopen = blocked
+        socket.socket = blocked
+        try:
+            with localcontext(Context(prec=2)):
+                accepted = self._post(instrument, observation_id)
+                again = dispatch(self.state, 'GET', '/portfolio/price', None)
+        finally:
+            urllib.request.build_opener = opener
+            urllib.request.urlopen = urlopen
+            socket.socket = socket_type
+        self.assertEqual(accepted.status, 200)
+        self.assertIn('Saved.', accepted.body)
+        self.assertNotIn(NOT_A_HOLDING_PRICE, accepted.body)
+        self.assertEqual(accepted.body.count(ACCEPT_NOT_RECOMMENDATION), 1)
+        self.assertEqual(accepted.body.count(STORED_RATE_NOT_COPIED), 1)
+        self.assertEqual(len(self.book.prices), 1)
+        price = self.book.prices[0]
+        self.assertEqual(price['origin'], 'entered')
+        self.assertEqual(price['instrument'], instrument)
+        self.assertEqual(price['amount'], '12.345')
+        self.assertEqual(price['currency'], 'NOK')
+        self.assertEqual(price['valuation_date'], '2026-05-02')
+        self.assertEqual(price['evidence_date'], '2026-05-04')
+        self.assertIn(observation_id, price['provenance'])
+        self.assertEqual(again.status, 200)
+        self.assertEqual(len(self.book.prices), 1)
+        self.assertNotIn('Saved.', again.body)
+        self.assertEqual(self.book.ledger()._prices, [])
+        self.assertEqual(self.book.ledger()._rates, [])
+        ledger = dispatch(self.state, 'GET', '/ledger', None)
+        self.assertIn('15050', ledger.body)
+        self.assertEqual(
+            [row['rate'] for row, _posting in self.state.rate_postings],
+            ['10', '10.25'],
+        )
+        self.assertEqual(list(self.state.price_postings), self._price_postings)
+        self.assertEqual(list(self.state.rate_postings), self._rate_postings)
+
+    def test_non_finite_values_are_refused_before_they_are_stored(self):
+        from datetime import date
+
+        from src.huginn_muninn.evidence import Observation
+        from src.huginn_muninn.prototype import _holding_price_refusal
+
+        def row(value):
+            return Observation(
+                'obs-finite',
+                'norges-bank-open-data',
+                'price',
+                'NOK',
+                value,
+                date(2026, 5, 2),
+                date(2026, 5, 4),
+                'recorded',
+                ('recorded_fixture',),
+            )
+
+        self.assertIsNone(_holding_price_refusal(row(Decimal('12.345')), 'NOK'))
+        self.assertEqual(
+            _holding_price_refusal(row(Decimal('12.345')), None),
+            NOT_A_HOLDING_PRICE,
+        )
+        self.assertEqual(
+            _holding_price_refusal(None, 'NOK'),
+            NOT_A_HOLDING_PRICE,
+        )
+        for value in (
+            None,
+            Decimal('NaN'),
+            Decimal('Infinity'),
+            Decimal('-Infinity'),
+        ):
+            self.assertEqual(
+                _holding_price_refusal(row(value), 'NOK'),
+                NOT_A_HOLDING_PRICE,
+            )
+        self.assertEqual(
+            _holding_price_refusal(row(Decimal('1')), 'nok'),
+            NOT_A_HOLDING_PRICE,
+        )
+        synthetic = row(Decimal('1'))._replace(
+            quality=('live_retrieval', 'synthetic_fixture'),
+        )
+        self.assertEqual(
+            _holding_price_refusal(synthetic, 'NOK'),
+            NOT_A_HOLDING_PRICE,
+        )
+        for subject in ('USD/NOK', 'EUR/NOK', 'policy-rate', 'nowa', 'cpi-total'):
+            observed = row(Decimal('1'))._replace(subject=subject, unit='NOK')
+            self.assertEqual(
+                _holding_price_refusal(observed, 'NOK'),
+                NOT_A_HOLDING_PRICE,
+            )

@@ -1579,9 +1579,11 @@ def _series_inventory_section(observations, on_date):
     )
 
 
-def render_evidence(state, on_date):
-    """Server-rendered registry and stored observations. This does not fetch."""
-    parsed = date.fromisoformat(on_date)
+def open_recorded_store(state):
+    """Load the observations the evidence page already shows.
+
+    Fixture rows and the stored refresh cache. This does not fetch.
+    """
     root = state.fixture_path.parent.parent
     store = open_evidence(root)
     cache_dir = getattr(state, 'ingest_cache_dir', None)
@@ -1590,6 +1592,13 @@ def render_evidence(state, on_date):
     cached = read_desk_cache(cache_dir)
     for row in cached.observations:
         store.ingest(row)
+    return store, cached
+
+
+def render_evidence(state, on_date):
+    """Server-rendered registry and stored observations. This does not fetch."""
+    parsed = date.fromisoformat(on_date)
+    store, cached = open_recorded_store(state)
     assessment = assess(store, parsed, MAX_AGE_DAYS)
     shown_observations = visible_observations(store)
     status_by_source = dict(due_status(
