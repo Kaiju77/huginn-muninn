@@ -6,5 +6,5 @@
  "candidates": [],
  "notes": [],
  "rejected": 0,
- "error": "openai/gpt-4o-mini: JSONDecodeError"
+ "error": "openai/gpt-4.1-mini: ValueError '' | openai/gpt-4.1-mini: ValueError '' | openai/gpt-4o-mini: ValueError '' | openai/gpt-4o-mini: ValueError ''"
 }
