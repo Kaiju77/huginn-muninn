@@ -10,7 +10,8 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 4. Done: Codex review, 5 findings fixed (see `REVIEW.md`). 24 study tests, 220 total.
 5. Done: entry rule, `after_news` default.
 6. Done 2026-11-11: repo pushed to github.com/Kaiju77/huginn-muninn (`main`). Workflows: `tests` (every push) and `fetch-brent` (weekdays 06:23 UTC, plus manual runs).
-7. Next: first real run of `fetch-brent`, then read the base rates, then Codex review round 2 (`docs/REVIEW_REQUEST.md`).
+7. Done: first `fetch-brent` run, 10,013 daily rows from 1987-05-20 to 2026-11-03. First real result: conflicts tend to see a jump at the news (`before_news`, 5 days: 17/22 rose), then Brent drifts down (`after_news`, 20 days: 7/22 rose vs baseline 53%). n=22, so the intervals are wide.
+7b. Kai: Codex review round 2 (`docs/REVIEW_REQUEST.md`).
 8. Then: Streamlit page (v1 step 4).
 
 No merge, push or deploy without Kai's OK. Kai approved the initial push of `main` on 2026-11-11.
