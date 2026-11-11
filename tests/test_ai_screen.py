@@ -129,6 +129,39 @@ class ScreenTest(unittest.TestCase):
         self.assertIn(f'{MODELS[1]}: HTTP 403', status['error'])
 
 
+class CurlCallTest(unittest.TestCase):
+    def fake_run(self, stdout, code=0):
+        seen = {}
+
+        def run(args, **kw):
+            seen['args'] = args
+            headers = Path(args[args.index('-H') + 1][1:]).read_text()
+            seen['headers'] = headers
+            import subprocess
+            return subprocess.CompletedProcess(args, code, stdout, 'err')
+        return run, seen
+
+    def test_token_only_in_header_file_and_reply_parsed(self):
+        from scripts.ai_screen import call
+        reply = json.dumps({'choices': [{'message': {'content': '{"events": []}'}}]})
+        run, seen = self.fake_run(reply + '\n200')
+        self.assertEqual(call('m', [], 'SECRET', run=run), '{"events": []}')
+        self.assertNotIn('SECRET', ' '.join(seen['args']))
+        self.assertIn('Authorization: Bearer SECRET', seen['headers'])
+        self.assertIn('X-GitHub-Api-Version: 2022-11-28', seen['headers'])
+
+    def test_bad_status_or_body_raises_with_detail(self):
+        from scripts.ai_screen import call
+        for out, msg in (('OK\n200', 'non-JSON'), ('{"error":"x"}\n401', 'HTTP 401')):
+            run, _ = self.fake_run(out)
+            with self.assertRaises(ValueError) as caught:
+                call('m', [], 't', run=run)
+            self.assertIn(msg, str(caught.exception))
+        run, _ = self.fake_run('', code=6)
+        with self.assertRaises(ValueError):
+            call('m', [], 't', run=run)
+
+
 class FlowTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

@@ -10,7 +10,9 @@ can say the AI screen was unavailable.
 
 import json
 import os
+import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -31,22 +33,39 @@ ENDPOINT = 'https://models.github.ai/inference/chat/completions'
 MODELS = ('openai/gpt-4.1-mini', 'openai/gpt-4o-mini')
 
 
-def call(model, msgs, token, opener=urllib.request.urlopen):
+def call(model, msgs, token, run=subprocess.run):
+    """POST to GitHub Models with curl, exactly as GitHub's quickstart does.
+
+    Python's urllib turns a redirected POST into a GET, which got a bare "OK"
+    back; curl keeps the request as documented. The token goes in a temporary
+    header file (mode 600), never on the command line.
+    """
     body = json.dumps({'model': model, 'messages': msgs, 'temperature': 0,
-                       'response_format': {'type': 'json_object'}}).encode()
-    # Headers as in GitHub's GitHub Models quickstart.
-    req = urllib.request.Request(ENDPOINT, data=body, method='POST', headers={
-        'Authorization': f'Bearer {token}',
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'Content-Type': 'application/json',
-        'User-Agent': 'huginn-muninn-ai-screen'})
-    with opener(req, timeout=120) as resp:
-        raw = resp.read().decode('utf-8-sig', errors='replace').strip()
+                       'response_format': {'type': 'json_object'}})
+    with tempfile.TemporaryDirectory() as tmp:
+        headers = Path(tmp) / 'h'
+        headers.write_text(
+            f'Authorization: Bearer {token}\n'
+            'Accept: application/vnd.github+json\n'
+            'X-GitHub-Api-Version: 2022-11-28\n'
+            'Content-Type: application/json\n'
+            'User-Agent: huginn-muninn-ai-screen\n', encoding='utf-8')
+        headers.chmod(0o600)
+        data = Path(tmp) / 'd'
+        data.write_text(body, encoding='utf-8')
+        done = run(['curl', '-sS', '-L', '--max-time', '120', '-X', 'POST',
+                    '-H', f'@{headers}', '--data-binary', f'@{data}',
+                    '-w', '\n%{http_code}', ENDPOINT],
+                   capture_output=True, text=True, timeout=150)
+    if done.returncode != 0:
+        raise ValueError(f'curl exit {done.returncode}: {done.stderr[:160]}')
+    raw, _, status = done.stdout.rpartition('\n')
+    if not status.startswith('2'):
+        raise ValueError(f'HTTP {status}: {raw[:160]!r}')
     try:
-        payload = json.loads(raw)
+        payload = json.loads(raw.strip().lstrip('\ufeff'))
     except ValueError:
-        raise ValueError(f'non-JSON API response: {raw[:160]!r}') from None
+        raise ValueError(f'HTTP {status} non-JSON response: {raw[:160]!r}') from None
     return payload['choices'][0]['message']['content']
 
 
