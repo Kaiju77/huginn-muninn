@@ -254,3 +254,14 @@ class CodexReviewRegressionTest(unittest.TestCase):
                 run_study([Event('e', closes[0].on)], closes, horizons=(1,))
         with self.assertRaises(ValueError):
             summarize([0.1] * 7 + [float('nan')])
+
+
+class NonPositiveExitTest(unittest.TestCase):
+    def test_negative_exit_skipped_in_events_and_baseline(self):
+        closes = series([20, 18, -37, 10, 12, 14])
+        result, reason = event_return(closes, Event('e', closes[1].on), 1)
+        self.assertIsNone(result)
+        self.assertIn('exit close is not positive', reason)
+        changes = baseline_changes(closes, 1)
+        self.assertTrue(all(c > -1 for c in changes))
+        self.assertEqual(len(changes), 3)  # 20->18, 10->12, 12->14

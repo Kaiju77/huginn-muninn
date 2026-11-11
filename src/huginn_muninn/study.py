@@ -148,6 +148,10 @@ def event_return(
     entry, exit_ = closes[entry_index], closes[exit_index]
     if entry.value <= 0:
         return None, 'entry close is not positive'
+    if exit_.value <= 0:
+        # WTI settled at -36.98 on 2020-04-20; a percentage change to or from a
+        # non-positive price is not meaningful.
+        return None, 'exit close is not positive'
     change = exit_.value / entry.value - 1
     return EventReturn(event.event_id, entry.on, exit_.on, change), None
 
@@ -164,7 +168,7 @@ def baseline_changes(closes: Sequence[Close], horizon: int, last_start=None) -> 
         start = closes[i]
         if last_start is not None and start.on > last_start:
             break
-        if start.value <= 0:
+        if start.value <= 0 or closes[i + horizon].value <= 0:
             continue
         changes.append(closes[i + horizon].value / start.value - 1)
     return changes
