@@ -34,9 +34,13 @@ MODELS = ('openai/gpt-4.1-mini', 'openai/gpt-4o-mini')
 def call(model, msgs, token, opener=urllib.request.urlopen):
     body = json.dumps({'model': model, 'messages': msgs, 'temperature': 0,
                        'response_format': {'type': 'json_object'}}).encode()
+    # Headers as in GitHub's GitHub Models quickstart.
     req = urllib.request.Request(ENDPOINT, data=body, method='POST', headers={
-        'Authorization': f'Bearer {token}', 'Content-Type': 'application/json',
-        'Accept': 'application/json'})
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+        'User-Agent': 'huginn-muninn-ai-screen'})
     with opener(req, timeout=120) as resp:
         raw = resp.read().decode('utf-8-sig', errors='replace').strip()
     try:
