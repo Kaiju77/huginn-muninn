@@ -38,7 +38,7 @@ def call(model, msgs, token, opener=urllib.request.urlopen):
         'Authorization': f'Bearer {token}', 'Content-Type': 'application/json',
         'Accept': 'application/json'})
     with opener(req, timeout=120) as resp:
-        raw = resp.read().decode('utf-8')
+        raw = resp.read().decode('utf-8-sig', errors='replace').strip()
     try:
         payload = json.loads(raw)
     except ValueError:
@@ -71,7 +71,7 @@ def screen(news, token, catalog, call=call):
                 # A short start of the model's own reply helps debugging; it never
                 # contains the token.
                 snippet = (text or '')[:160].replace('\n', ' ')
-                errors.append(f'{model}: {type(err).__name__} {snippet!r}')
+                errors.append(f'{model}: {type(err).__name__}: {str(err)[:200]} {snippet!r}')
                 time.sleep(5)
                 continue
             status.update(ok=True, model=model, rejected=rejected, notes=notes,
