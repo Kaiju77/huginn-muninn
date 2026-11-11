@@ -22,7 +22,7 @@ from src.huginn_muninn.assets import ASSETS, BY_ID  # noqa: E402
 from src.huginn_muninn.catalog import first_per_episode, load_catalog  # noqa: E402
 from src.huginn_muninn.prices import load_closes  # noqa: E402
 from src.huginn_muninn.study import format_result  # noqa: E402
-from scripts.suggest_events import CANDIDATES, read_candidates  # noqa: E402
+from scripts.suggest_events import AI, CANDIDATES, ai_status, read_candidates  # noqa: E402
 
 EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 NEWS = ROOT / 'data' / 'news' / 'latest.json'
@@ -69,26 +69,42 @@ def news_lines(today, news_path):
     return out
 
 
-def candidate_lines(today, path):
+def candidate_lines(today, path, ai_path=AI):
     rows = [r for r in read_candidates(path)
             if r['status'] == 'pending' and r['date_public'] == today.isoformat()]
-    if not rows:
-        return []
-    out = ['## Possible new events (need your approval)', '',
-           'Several news sites reported escalation in the same region today. '
-           'This is a keyword screen, not a judgment.', '']
-    for r in rows:
-        hint = f', may belong to episode `{r["episode_hint"]}`' if r['episode_hint'] else ''
-        out.append(f'- `{r["candidate_id"]}`: [{r["title"]}]({r["source_url"]}) '
-                   f'({r["n_sites"]} sites{hint})')
-    out += ['', 'To add one: GitHub, then Actions, then **approve-event**, then Run workflow, '
-            'and paste the id.', '']
+    ai = ai_status(today, ai_path)
+    out = ['## Event screen', '']
+    if ai is not None:
+        out.append(f'AI screen ({ai["model"]}) read {ai["headlines"]} relevant headlines; '
+                   f'every result is checked by code (region, cited headlines, 2+ sites).')
+    else:
+        out.append('AI screen unavailable today; the keyword screen was used '
+                   '(an escalation word plus a region, 3+ sites).')
+    out.append('')
+    if rows:
+        out += ['**Possible new events (need your approval):**', '']
+        for r in rows:
+            hint = f', may belong to episode `{r["episode_hint"]}`' if r['episode_hint'] else ''
+            kind = f'{r.get("event_type")}, ' if r.get('event_type') else ''
+            out.append(f'- `{r["candidate_id"]}`: [{r["title"]}]({r["source_url"]}) '
+                       f'({kind}{r["n_sites"]} sites{hint})')
+        out += ['', 'To add one: GitHub, then Actions, then **approve-event**, then Run '
+                'workflow, and paste the id.', '']
+    else:
+        out += ['No new conflict escalation found today.', '']
+    if ai is not None and ai.get('notes'):
+        out += ['**Also noted** (not conflict escalations, so no base rates yet):', '']
+        for n in ai['notes']:
+            out.append(f'- {n["title"]} ({n["event_type"].replace("_", "-")}, {n["region"]}, '
+                       f'[source]({n["url"]}))')
+        out.append('')
     return out
 
 
 def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_days=90,
-          candidates_path=None):
+          candidates_path=None, ai_path=None):
     candidates_path = candidates_path or CANDIDATES
+    ai_path = ai_path or AI
     lines = [f'# Daily market brief, {today.isoformat()}', '', DISCLAIMER, '']
     loaded = {}
     lines += ['## Moves', '',
@@ -133,7 +149,7 @@ def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_day
             lines += [f'- {format_result(r, asset.label)}' for r in ctx.results]
             lines.append('')
 
-    lines += candidate_lines(today, candidates_path)
+    lines += candidate_lines(today, candidates_path, ai_path)
     lines += ['## Headlines (GDELT)', '']
     lines += news_lines(today, news_path)
     lines += ['', 'Headlines from the same day are context. They do not prove why a price moved.', '']

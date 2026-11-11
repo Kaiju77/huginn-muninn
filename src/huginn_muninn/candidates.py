@@ -30,7 +30,7 @@ REGIONS = {
 }
 
 COLUMNS = ('candidate_id', 'date_public', 'title', 'region', 'episode_hint',
-           'source_url', 'n_sites', 'status')
+           'source_url', 'n_sites', 'status', 'method', 'event_type')
 
 
 class Candidate(NamedTuple):

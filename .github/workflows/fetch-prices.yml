@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  models: read      # GitHub Models (free) for the AI headline screen
 
 concurrency:
   group: fetch-prices
@@ -44,6 +45,11 @@ jobs:
         id: news
         continue-on-error: true   # the brief says "news unavailable" instead
         run: python scripts/fetch_news.py
+      - name: AI screen of headlines (GitHub Models)
+        if: steps.news.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/ai_screen.py
       - name: Suggest new events from headlines
         if: steps.news.outcome == 'success'
         run: python scripts/suggest_events.py

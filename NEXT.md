@@ -19,6 +19,7 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 12. Done: Codex round 4, 4 findings fixed.
 13. Done 2026-11-11: event suggestions. `candidates.py` screens headlines (an escalation word plus a region, reported by 3 or more sites) and writes `data/events/candidates.csv`. The brief lists pending candidates. The `approve-event` workflow (one input: the candidate id) validates and adds the event, runs the tests, and rewrites the brief. Free; no paid API.
 13b. Done: first full daily run 2026-11-11 on GitHub (all four assets, news, brief). The brief now keeps only headlines whose title is about energy or a monitored region.
+13c. Done: AI headline screen through GitHub Models (free; `models: read` on GITHUB_TOKEN). `src/huginn_muninn/ai_screen.py` validates every model result (region, cited headlines, 2 or more sites; escalations only). De-escalation and sanctions appear as notes. Falls back to the keyword screen if the model is unavailable.
 14. Kai: Codex round 5 (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 

@@ -3,7 +3,8 @@
 
     python scripts/suggest_events.py [--today YYYY-MM-DD]
 
-Reads data/news/latest.json; only uses it if it was fetched on --today.
+Uses the AI screen (data/news/ai_screen.json) when it ran successfully for
+--today; otherwise falls back to the keyword screen on data/news/latest.json.
 Existing candidate ids are not duplicated.
 """
 
@@ -22,6 +23,7 @@ from src.huginn_muninn.candidates import COLUMNS, suggest  # noqa: E402
 from src.huginn_muninn.catalog import load_catalog  # noqa: E402
 
 NEWS = ROOT / 'data' / 'news' / 'latest.json'
+AI = ROOT / 'data' / 'news' / 'ai_screen.json'
 EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 CANDIDATES = ROOT / 'data' / 'events' / 'candidates.csv'
 
@@ -36,12 +38,23 @@ def read_candidates(path=CANDIDATES):
 def write_candidates(rows, path=CANDIDATES):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('w', encoding='utf-8', newline='') as handle:
-        writer = csv.DictWriter(handle, fieldnames=COLUMNS)
+        writer = csv.DictWriter(handle, fieldnames=COLUMNS, restval='')
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows({k: r.get(k, '') for k in COLUMNS} for r in rows)
 
 
-def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES):
+def ai_status(today, path=AI):
+    """The AI screen result for ``today``, or None if it did not run ok today."""
+    try:
+        status = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    if status.get('ok') and status.get('date') == today.isoformat():
+        return status
+    return None
+
+
+def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
     try:
         news = json.loads(news_path.read_text(encoding='utf-8'))
         fetched = datetime.fromisoformat(news['fetched_at']).astimezone(timezone.utc).date()
@@ -49,14 +62,19 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES):
         return []
     if fetched != today:
         return []
-    found = suggest(news['articles'], today, load_catalog(events_path))
+    ai = ai_status(today, ai_path)
+    if ai is not None:
+        found = [{**c, 'status': 'pending', 'method': 'ai'} for c in ai['candidates']]
+    else:
+        found = [{'candidate_id': c.candidate_id, 'date_public': c.date_public.isoformat(),
+                  'title': c.title, 'region': c.region, 'episode_hint': c.episode_hint,
+                  'source_url': c.source_url, 'n_sites': c.n_sites, 'status': 'pending',
+                  'method': 'keyword', 'event_type': ''}
+                 for c in suggest(news['articles'], today, load_catalog(events_path))]
     rows = read_candidates(out)
     known = {r['candidate_id'] for r in rows}
-    new = [c for c in found if c.candidate_id not in known]
-    for c in new:
-        rows.append({'candidate_id': c.candidate_id, 'date_public': c.date_public.isoformat(),
-                     'title': c.title, 'region': c.region, 'episode_hint': c.episode_hint,
-                     'source_url': c.source_url, 'n_sites': c.n_sites, 'status': c.status})
+    new = [c for c in found if c['candidate_id'] not in known]
+    rows.extend({k: c.get(k, '') for k in COLUMNS} for c in new)
     if new or not out.exists():
         write_candidates(rows, out)
     return new
