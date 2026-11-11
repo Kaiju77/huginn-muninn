@@ -5,7 +5,10 @@ history, which catalog events are recent and what history says after them,
 and which headlines appeared. Headlines are context, not proof of cause.
 """
 
-from bisect import bisect_left, bisect_right
+import re
+from bisect import bisect_left
+
+from src.huginn_muninn.candidates import regions_of
 from typing import NamedTuple, Optional
 
 from src.huginn_muninn.study import AFTER_NEWS, event_return, run_study
@@ -69,11 +72,24 @@ def event_context(event, comparable, closes, horizons=(5, 20, 60)):
     return EventContext(event, days_since, change_since, results)
 
 
+ENERGY = re.compile(r'\b(oil|crude|brent|wti|opec\+?|gas|lng|tankers?|refiner(y|ies)|'
+                    r'pipelines?|barrels?|energy|fuel|petroleum|krone|nok)\b', re.I)
+
+
+def relevant(title):
+    """A headline about energy or about a monitored region."""
+    return bool(ENERGY.search(title) or regions_of(title))
+
+
 def headlines(articles, limit=8):
-    """De-duplicated (title, domain, url, seen) tuples, newest first."""
+    """De-duplicated (title, domain, url, seen) tuples, newest first. Only
+    headlines whose own title is about energy or a monitored region; GDELT
+    matches article text, so many raw results are off-topic."""
     seen, out = set(), []
     for a in sorted(articles, key=lambda a: a.get('seendate', ''), reverse=True):
         title = (a.get('title') or '').strip()
+        if not relevant(title):
+            continue
         key = title.lower()
         if not title or key in seen:
             continue

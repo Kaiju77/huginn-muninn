@@ -21,13 +21,13 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 Fetched 2026-11-11 21:08 UTC, covering the previous 24 hours.
 
-- [Sensex zooms 1 , 100 pts , Nifty crosses 25 , 300 mark on positive global cues](https://www.businesstoday.in/markets/stocks/story/sensex-zooms-1100-pts-nifty-crosses-25300-mark-on-positive-global-cues-566767-2026-11-11) (businesstoday.in)
 - [Tanker involved in incident in Strait of Hormuz : united kingdom maritime agency](https://tribune.com.pk/story/2639736/tanker-involved-in-incident-in-strait-of-hormuz-uk-maritime-agency) (tribune.com.pk)
 - [Hussein Describes Possible Hormuz Route for Iraqi Oil Tankers](https://econotimes.com/Hussein-Describes-Possible-Hormuz-Route-for-Iraqi-Oil-Tankers-1775002) (econotimes.com)
-- [World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow](https://www.thehindubusinessline.com/news/world/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article71688233.ece) (thehindubusinessline.com)
-- [Asian shares mostly rise on AI chip demand despite Wall Street retreat on inflation data](http://www.cecildaily.com/ap/world/asian-shares-mostly-rise-on-ai-chip-demand-despite-wall-streets-retreat-on-inflation-data/article_522e22f1-f96b-5d57-9825-639aa30d192d.html) (cecildaily.com)
-- [Indian Benchmarks Hit Eight - Month Highs as Nifty 50 and Sensex Rise](https://econotimes.com/Indian-Benchmarks-Hit-Eight-Month-Highs-as-Nifty-50-and-Sensex-Rise-1775003) (econotimes.com)
-- [As Washington - Colombo ties strengthen , China exits Sri Lankan port project](https://www.wsws.org/en/articles/2026/11/11/jzel-n11.html) (wsws.org)
-- [Sensex Surges 1 , 350 Points , Nifty Tops 25 , 400 To Hit Eight - Month Highs](https://www.freepressjournal.in/business/sensex-surges-1350-points-nifty-tops-25400-to-hit-eight-month-highs) (freepressjournal.in)
+- [IndiGo extends flight suspensions to 4 Saudi cities amid security concerns](http://www.indiagazette.com/news/279425121/indigo-extends-flight-suspensions-to-4-saudi-cities-amid-security-concerns) (indiagazette.com)
+- [Crude oil price today : Brent futures rise as US industry data shows decline in inventories](https://www.thehindubusinessline.com/markets/commodities/crude-oil-futures-rise-as-us-industry-data-shows-decline-in-inventories/article71688277.ece) (thehindubusinessline.com)
+- [Oil Price Falls Below $90 First Time in 4 Months as Trump Signals Iran De - escalation – THISDAYLIVE](https://www.thisdaylive.com/2026/11/11/oil-price-falls-below-90-first-time-in-4-months-as-trump-signals-iran-de-escalation/) (thisdaylive.com)
+- [Bulls in action ! Sensex zooms 1 , 300 pts intraday ; oil , FII buying aid rally](https://www.business-standard.com/markets/news/bulls-in-action-sensex-zooms-1-300-pts-intraday-oil-fii-buying-aid-rally-126111100243_1.html) (business-standard.com)
+- [Nine Energy ( NINE ) Q3 2026 Earnings Call Transcript](https://www.fool.com/earnings/call-transcripts/2026/11/10/nine-energy-nine-q3-2026-earnings-call-transcript/?source=iedfolrf0000001) (fool.com)
+- [US Treasury chief Scott Bessent relocates to military base amid Iran threats : Report](https://aninews.in/news/world/us/us-treasury-chief-scott-bessent-relocates-to-military-base-amid-iran-threats-report20261111080506/) (aninews.in)
 
 Headlines from the same day are context. They do not prove why a price moved.

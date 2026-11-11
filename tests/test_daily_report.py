@@ -41,11 +41,19 @@ class MoveTest(unittest.TestCase):
 
 class HeadlinesTest(unittest.TestCase):
     def test_dedupe_and_order(self):
-        arts = [{'title': 'A', 'seendate': '20261110T100000Z', 'url': 'u1', 'domain': 'd'},
-                {'title': 'a', 'seendate': '20261110T090000Z', 'url': 'u2', 'domain': 'd'},
-                {'title': 'B', 'seendate': '20261110T110000Z', 'url': 'u3', 'domain': 'd'},
+        arts = [{'title': 'Oil A', 'seendate': '20261110T100000Z', 'url': 'u1', 'domain': 'd'},
+                {'title': 'oil a', 'seendate': '20261110T090000Z', 'url': 'u2', 'domain': 'd'},
+                {'title': 'Iran B', 'seendate': '20261110T110000Z', 'url': 'u3', 'domain': 'd'},
                 {'title': '', 'seendate': '20261110T120000Z', 'url': 'u4', 'domain': 'd'}]
-        self.assertEqual([h[0] for h in daily.headlines(arts)], ['B', 'A'])
+        self.assertEqual([h[0] for h in daily.headlines(arts)], ['Iran B', 'Oil A'])
+
+    def test_off_topic_headlines_dropped(self):
+        arts = [{'title': 'Sensex zooms 1,100 pts on global cues', 'seendate': '1', 'url': 'u', 'domain': 'd'},
+                {'title': 'Tanker involved in incident in Strait of Hormuz', 'seendate': '2',
+                 'url': 'u', 'domain': 'd'},
+                {'title': 'Asian shares rise on AI chip demand', 'seendate': '3', 'url': 'u', 'domain': 'd'}]
+        self.assertEqual([h[0] for h in daily.headlines(arts)],
+                         ['Tanker involved in incident in Strait of Hormuz'])
 
     def test_gdelt_parse_and_url(self):
         body = json.dumps({'articles': [{'title': 'T', 'url': 'https://x', 'domain': 'x',

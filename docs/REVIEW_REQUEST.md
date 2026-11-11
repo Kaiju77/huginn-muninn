@@ -14,6 +14,7 @@ Check, and report each finding with file:line, severity and a failing example:
 - **Round 4 fixes.** Are all four really closed? Any remaining path where old or future headlines appear as today's?
 - **Screening rule.** False positives and negatives in `ESCALATION` and `REGIONS` (word boundaries, words like "war" in "award", "mine" in "determine"). Give concrete headline examples.
 - **Approval safety.** Can `approve_event.py` corrupt the catalog, approve twice, or create a duplicate `event_id` (two candidates for one region and day)? Is the workflow input handled safely (shell injection through `title` or `episode`)?
+- **Headline filter.** `daily.relevant` keeps titles with an energy word or a monitored region. False positives and negatives with real examples (for example "gas" in "gaslighting", or "Nine Energy" earnings).
 - **Look-ahead.** Can an approved event leak into base rates for dates before it?
 - **Workflow.** Concurrency between `approve-event` and `fetch-prices`; what's committed; failure modes.
 
