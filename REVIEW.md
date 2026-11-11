@@ -1,5 +1,13 @@
 # Review log
 
+## 2026-11-11: Codex review round 3 (four assets, page, workflow)
+
+1. P2: the page showed a baseline share without n and range. `report.base_rate_rows` now includes `baseline n` and `baseline range %`.
+2. P2: a truncated response could overwrite good history. `validate` now rejects data that is stale (latest date over 21 days old), starts after the asset's `starts_by`, or would start later, end earlier or have under 99% of the rows already on disk.
+3. P2: `| tee` hid a failing study (no pipefail). The study step now runs in bash with `set -o pipefail`, so a failure stops the job before the commit.
+
+Regression tests: `CodexRound3Test` in `tests/test_prices_pipeline.py`. 261 tests OK. Codex couldn't check WTI, Henry Hub or USD/NOK data because the workflow hadn't run yet.
+
 ## 2026-11-11: Codex review round 2 (catalog and loader)
 
 1. P2: Desert Fox began about 22:00 GMT on 16 Dec 1998, after the Brent close. `date_public` changed to 1998-12-17, with the UK Parliament research paper as the source.

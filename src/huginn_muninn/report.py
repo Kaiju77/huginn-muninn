@@ -20,9 +20,11 @@ def base_rate_rows(results):
             '95% CI %': None if s.too_few else f'{_pct(s.ci_low)}-{_pct(s.ci_high)}',
             'median %': _pct(s.median),
             'range %': None if s.n == 0 else f'{_pct(s.low)} to {_pct(s.high)}',
+            'baseline n': b.n,
             'baseline share rose %': _pct(b.share),
             'baseline 95% CI %': None if b.share is None else f'{_pct(b.ci_low)}-{_pct(b.ci_high)}',
             'baseline median %': _pct(b.median),
+            'baseline range %': None if b.n == 0 else f'{_pct(b.low)} to {_pct(b.high)}',
             'skipped': len(r.skipped),
         })
     return rows

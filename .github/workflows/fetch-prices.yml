@@ -30,7 +30,10 @@ jobs:
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
         run: python scripts/fetch_prices.py
       - name: Run event study on the new data
-        run: python scripts/event_study.py | tee study.txt
+        shell: bash
+        run: |
+          set -o pipefail   # a failing study must fail the step, not hide behind tee
+          python scripts/event_study.py | tee study.txt
       - name: Add study to the run summary
         run: |
           echo '```' >> "$GITHUB_STEP_SUMMARY"

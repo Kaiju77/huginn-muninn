@@ -14,6 +14,7 @@ class Asset(NamedTuple):
     source: str        # 'eia' or 'norges-bank'
     route: str         # EIA route or Norges Bank series path
     series: str        # EIA series id ('' for Norges Bank)
+    starts_by: str = '2000-01-01'  # a full history must begin on or before this date
     allow_nonpositive: bool = False
 
     @property
@@ -22,12 +23,14 @@ class Asset(NamedTuple):
 
 
 ASSETS = (
-    Asset('brent', 'Brent', 'USD/barrel', 'eia', 'petroleum/pri/spt', 'RBRTE'),
+    Asset('brent', 'Brent', 'USD/barrel', 'eia', 'petroleum/pri/spt', 'RBRTE',
+          starts_by='1988-01-01'),
     # WTI settled at -36.98 on 2020-04-20. Kept as published; the study skips
     # any event whose entry close is not positive.
     Asset('wti', 'WTI', 'USD/barrel', 'eia', 'petroleum/pri/spt', 'RWTC',
-          allow_nonpositive=True),
-    Asset('henry_hub', 'Henry Hub gas', 'USD/MMBtu', 'eia', 'natural-gas/pri/fut', 'RNGWHHD'),
+          starts_by='1987-01-01', allow_nonpositive=True),
+    Asset('henry_hub', 'Henry Hub gas', 'USD/MMBtu', 'eia', 'natural-gas/pri/fut', 'RNGWHHD',
+          starts_by='1998-01-01'),
     Asset('usd_nok', 'USD/NOK', 'NOK per USD', 'norges-bank', 'EXR/B.USD.NOK.SP', ''),
 )
 

@@ -112,7 +112,23 @@ def fetch_norges(asset, today, get=http_get):
     return sorted(rows)
 
 
-def validate(rows, today):
+MAX_STALE_DAYS = 21
+
+
+def read_existing(path):
+    """[(date, price)] already on disk, or [] if there is no file."""
+    if not path.exists():
+        return []
+    with path.open(encoding='utf-8', newline='') as handle:
+        reader = csv.reader(handle)
+        next(reader, None)
+        return [(date.fromisoformat(r[0]), float(r[1])) for r in reader if r]
+
+
+def validate(rows, today, asset=None, existing=()):
+    """Reject a response that is short, stale, starts too late, or would
+    shrink the history already on disk (a truncated response must never
+    overwrite a good file)."""
     if len(rows) < MIN_ROWS:
         raise ValueError(f'only {len(rows)} rows; expected thousands')
     days = [d for d, _ in rows]
@@ -120,6 +136,17 @@ def validate(rows, today):
         raise ValueError('duplicate dates')
     if days[-1] > today:
         raise ValueError(f'future date {days[-1]}')
+    if (today - days[-1]).days > MAX_STALE_DAYS:
+        raise ValueError(f'latest date {days[-1]} is more than {MAX_STALE_DAYS} days old')
+    if asset is not None and days[0] > date.fromisoformat(asset.starts_by):
+        raise ValueError(f'history starts {days[0]}, expected by {asset.starts_by}')
+    if existing:
+        if days[0] > existing[0][0]:
+            raise ValueError(f'history would start later ({days[0]}) than the file ({existing[0][0]})')
+        if days[-1] < existing[-1][0]:
+            raise ValueError(f'history would end earlier ({days[-1]}) than the file ({existing[-1][0]})')
+        if len(rows) < len(existing) * 0.99:
+            raise ValueError(f'{len(rows)} rows would replace {len(existing)}')
 
 
 def write_csv(rows, out, unit):
@@ -140,7 +167,7 @@ def fetch_one(asset, api_key, today, get=http_get):
         rows = fetch_eia(asset, api_key, get)
     else:
         rows = fetch_norges(asset, today, get)
-    validate(rows, today)
+    validate(rows, today, asset, read_existing(asset.csv_path))
     return rows
 
 

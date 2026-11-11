@@ -98,15 +98,75 @@ class NorgesBankTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
-    def test_rules(self):
-        good = [(d, 20.0) for d in weekdays(date(1987, 5, 20), 2000)]
-        validate(good, date(2100, 1, 1))
+    def setUp(self):
+        self.good = [(d, 20.0) for d in weekdays(date(1987, 5, 20), 2000)]
+        self.today = self.good[-1][0] + timedelta(days=3)
+
+    def test_good_rows_pass(self):
+        validate(self.good, self.today, BRENT)
+
+    def test_basic_rules(self):
         with self.assertRaises(ValueError):
-            validate(good[:10], date(2100, 1, 1))
+            validate(self.good[:10], self.today)
         with self.assertRaises(ValueError):
-            validate(good + [good[0]], date(2100, 1, 1))
+            validate(self.good + [self.good[0]], self.today)
         with self.assertRaises(ValueError):
-            validate(good, date(1990, 1, 1))
+            validate(self.good, date(1990, 1, 1))
+
+
+class CodexRound3Test(unittest.TestCase):
+    """Regression tests for the 2026-11-11 Codex review, round 3."""
+
+    def setUp(self):
+        self.full = [(d, 20.0) for d in weekdays(date(1987, 5, 20), 10000)]
+        self.today = self.full[-1][0] + timedelta(days=3)
+
+    def test_2_codex_example_old_truncated_history_rejected(self):
+        rows = [(date(1980, 1, 1) + timedelta(days=i), 20.0) for i in range(1000)]
+        with self.assertRaises(ValueError) as caught:
+            validate(rows, date(2026, 11, 11))
+        self.assertIn('more than 21 days old', str(caught.exception))
+
+    def test_2_history_must_start_early_enough(self):
+        late = self.full[500:]
+        with self.assertRaises(ValueError) as caught:
+            validate(late, self.today, BRENT)
+        self.assertIn('expected by', str(caught.exception))
+
+    def test_2_response_may_not_shrink_existing_file(self):
+        with self.assertRaises(ValueError):  # starts later than the file
+            validate(self.full[100:], self.today, None, self.full)
+        with self.assertRaises(ValueError):  # ends earlier than the file
+            validate(self.full[:-10], self.full[-10][0] + timedelta(days=3), None, self.full)
+        thinned = self.full[:1] + self.full[1:-1:2] + self.full[-1:]
+        with self.assertRaises(ValueError):  # far fewer rows
+            validate(thinned, self.today, None, self.full)
+        grown = self.full + [(self.full[-1][0] + timedelta(days=1), 21.0)]
+        validate(grown, self.today + timedelta(days=1), BRENT, self.full)
+
+    def test_2_read_existing_round_trip(self):
+        from scripts.fetch_prices import read_existing
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'x.csv'
+            self.assertEqual(read_existing(path), [])
+            write_csv(self.full[:3], path, 'USD/barrel')
+            self.assertEqual(read_existing(path), self.full[:3])
+
+    def test_3_workflow_uses_pipefail_for_the_study(self):
+        text = (ROOT / '.github' / 'workflows' / 'fetch-prices.yml').read_text()
+        study = text[text.index('Run event study'):text.index('Add study to the run summary')]
+        self.assertIn('set -o pipefail', study)
+        self.assertIn('shell: bash', study)
+
+    def test_1_baseline_row_has_n_and_range(self):
+        from src.huginn_muninn import report
+        from src.huginn_muninn.study import run_study
+        closes = [Close(d, 50 + i * 0.01) for i, (d, _) in enumerate(self.full)]
+        events = [Event(f'e{i}', closes[100 + i * 300].on) for i in range(10)]
+        [row] = report.base_rate_rows(run_study(events, closes, horizons=(5,)))
+        self.assertEqual(row['baseline n'], 1999)
+        self.assertIsNotNone(row['baseline range %'])
+        self.assertIsNotNone(row['baseline 95% CI %'])
 
 
 class PathTest(unittest.TestCase):
