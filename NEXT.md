@@ -6,8 +6,9 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 
 1. Kai: get a free EIA API key (https://www.eia.gov/opendata/) and store it as the environment variable `EIA_API_KEY`. Don't commit it.
 2. Kai + Claude: draft `data/events/mideast-conflict.csv`, 20-30 events, each with its date and a source.
-3. Build `src/huginn_muninn/study.py` with tests on synthetic series first, before any real data.
-4. Then: EIA adapter, CLI script, Streamlit page.
+3. Done: `src/huginn_muninn/study.py` with 16 synthetic tests (Wilson CI, no look-ahead entry, skip rather than truncate, era filter, baseline). Full suite: 212 tests OK.
+4. Kai: run the Codex review in `docs/REVIEW_REQUEST.md`, then fix its findings.
+5. Then: EIA Brent adapter (add `api.eia.gov` to the allowlist), `scripts/event_study.py` CLI, Streamlit page.
 
 No merge, push or deploy has been done.
 
