@@ -2,6 +2,14 @@
 
 Event study and historical base rates for market-moving events. Example: "In 18 comparable conflicts, Brent rose within 20 days in 11 (61%, 95% CI 39-80%)." You make the decisions; the tool reports history. See `PROJECT_STATE.md` and `ROADMAP.md`.
 
+## Quick start
+
+    python scripts/event_study.py                 # base rates for every asset, printed
+    pip install -r requirements-app.txt
+    streamlit run app/streamlit_app.py            # the results page
+
+Prices are fetched daily by the `fetch-prices` GitHub workflow (EIA: Brent, WTI, Henry Hub; Norges Bank: USD/NOK).
+
 The sections below describe the parked ledger prototype, which is kept and tested.
 
 Local implementation repository for the ChatGPT project **HUGIIN & MUNIN**.

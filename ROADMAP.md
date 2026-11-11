@@ -2,7 +2,7 @@
 
 Updated 2026-11-11. The old ledger roadmap is in `docs/archive/ROADMAP_ledger_2026-10.md`.
 
-## v1: one category, one asset (current sprint)
+## v1: one category, one asset (done 2026-11-11, extended to four assets)
 
 Done means: `python scripts/event_study.py --category mideast-conflict --asset brent` prints a base-rate summary, and a Streamlit page shows the same summary with a chart of every event's path.
 

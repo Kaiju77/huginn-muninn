@@ -45,6 +45,7 @@ jobs:
             echo 'No new prices.'
           else
             git commit -m "Update prices $(date -u +%F)"
+            git pull --rebase origin main   # someone may have pushed meanwhile
             git push
           fi
       - name: Fail the run if any asset failed
