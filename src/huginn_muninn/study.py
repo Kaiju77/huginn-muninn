@@ -262,3 +262,28 @@ def format_result(result: HorizonResult, asset: str = 'the asset') -> str:
     else:
         line += f' Baseline: too few windows (n={b.n}).'
     return line
+
+
+def event_path(
+    closes: Sequence[Close],
+    event: Event,
+    days: int = 60,
+    entry: str = AFTER_NEWS,
+    max_gap_days: int = DEFAULT_MAX_GAP_DAYS,
+):
+    """Return [(trading_day, change)] from the entry close for up to ``days``
+    trading days, or None when there is no valid entry. Day 0 is the entry
+    (change 0.0). Uses the same entry rule as ``event_return``. For charts.
+    """
+    first, reason = event_return(closes, event, 1, entry, max_gap_days)
+    if first is None and 'not enough closes' not in reason:
+        return None
+    dates = [c.on for c in closes]
+    start = bisect_left(dates, event.date_public)
+    if entry == BEFORE_NEWS:
+        start -= 1
+    if start < 0 or start >= len(closes) or closes[start].value <= 0:
+        return None
+    base = closes[start].value
+    end = min(len(closes) - 1, start + days)
+    return [(i - start, closes[i].value / base - 1) for i in range(start, end + 1)]

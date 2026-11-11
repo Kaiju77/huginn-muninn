@@ -1,6 +1,6 @@
-name: fetch-brent
+name: fetch-prices
 
-# Daily Brent spot prices from EIA (series RBRTE) into data/prices/brent_daily.csv.
+# Daily prices (EIA: Brent, WTI, Henry Hub; Norges Bank: USD/NOK) into data/prices/.
 # EIA publishes with a lag of a few days; a daily run keeps the file current.
 
 on:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: fetch-brent
+  group: fetch-prices
   cancel-in-progress: false
 
 jobs:
@@ -23,10 +23,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Fetch Brent
+      - name: Fetch prices
+        id: fetch
+        continue-on-error: true   # keep the assets that did succeed
         env:
           EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
-        run: python scripts/fetch_eia_brent.py
+        run: python scripts/fetch_prices.py
       - name: Run event study on the new data
         run: python scripts/event_study.py | tee study.txt
       - name: Add study to the run summary
@@ -38,10 +40,15 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/prices/brent_daily.csv
+          git add data/prices/*.csv
           if git diff --cached --quiet; then
             echo 'No new prices.'
           else
-            git commit -m "Update Brent prices $(date -u +%F)"
+            git commit -m "Update prices $(date -u +%F)"
             git push
           fi
+      - name: Fail the run if any asset failed
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo 'At least one asset failed to fetch; see the Fetch prices step.'
+          exit 1
