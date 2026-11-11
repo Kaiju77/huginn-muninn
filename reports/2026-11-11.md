@@ -25,7 +25,7 @@ No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-11 22:12 UTC, covering the previous 24 hours.
+Fetched 2026-11-11 22:28 UTC, covering the previous 24 hours.
 
 - [Tanker involved in incident in Strait of Hormuz : united kingdom maritime agency](https://tribune.com.pk/story/2639736/tanker-involved-in-incident-in-strait-of-hormuz-uk-maritime-agency) (tribune.com.pk)
 - [Hussein Describes Possible Hormuz Route for Iraqi Oil Tankers](https://econotimes.com/Hussein-Describes-Possible-Hormuz-Route-for-Iraqi-Oil-Tankers-1775002) (econotimes.com)
