@@ -1,8 +1,10 @@
 # CLAUDE.md
 
-- Product here is the evidence-first personal finance system (see `docs/DIRECT_PROJECT_HANDOFF.md` on master and `ROADMAP.md`). Synthetic data only.
-- Standard-library Python. No dependencies are installed. Decimal for all money.
-- Tests: `python -m unittest discover -s tests`. End-to-end: `python scripts/e2e_portfolio.py` (`docs/E2E_PORTFOLIO.md`).
-- Never push, merge, deploy, restart services, fetch EDGAR/FRED, or connect live financial sources without Kai's explicit OK.
-- Work on branches. `master` holds uncommitted handoff edits; leave them alone.
+- Product: event study and historical base rates for market-moving events. Read `PROJECT_STATE.md` (method rules) and `ROADMAP.md` (current sprint = v1) first.
+- Current sprint: one category (`mideast-conflict`) and one asset (Brent). Don't widen it without Kai's OK. Put new ideas in `ideas.md`.
+- Python. The stdlib ingest client in `src/huginn_muninn/ingest/` is the only way to fetch anything. Keep its allowlist.
+- Every probability shown has n, a 95% CI and a range. No look-ahead.
+- Tests: `python -m unittest discover -s tests`.
+- The parked ledger code (`ledger.py`, `onboarding.py`, `prototype.py`, `desk.py`) stays and keeps its tests passing. Build no new features on it.
+- Never push, merge, deploy or use paid APIs without Kai's OK. Work on branches.
 - End each session by updating `NEXT.md`.

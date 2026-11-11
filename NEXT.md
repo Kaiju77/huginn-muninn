@@ -1,5 +1,19 @@
 # Next Steps
 
+Branch `claude/event-study-plan` (from `claude/e2e-portfolio`), 2026-11-11.
+
+Done: product redefined as event study and historical base rates. `PROJECT_STATE.md`, `ROADMAP.md` and `CLAUDE.md` rewritten. The old ledger docs are in `docs/archive/`.
+
+1. Kai: get a free EIA API key (https://www.eia.gov/opendata/) and store it as the environment variable `EIA_API_KEY`. Don't commit it.
+2. Kai + Claude: draft `data/events/mideast-conflict.csv`, 20-30 events, each with its date and a source.
+3. Build `src/huginn_muninn/study.py` with tests on synthetic series first, before any real data.
+4. Then: EIA adapter, CLI script, Streamlit page.
+
+No merge, push or deploy has been done.
+
+## Historical
+
+
 Branch `claude/e2e-portfolio` (from `cursor/hm-01` @ 67df1fc), 2026-11-11.
 
 Done: `scripts/e2e_portfolio.py` and `tests/test_e2e_portfolio.py` drive the entered-portfolio workflow over HTTP with synthetic data (12/12 steps). Full suite: 196 tests OK. See `docs/E2E_PORTFOLIO.md`.

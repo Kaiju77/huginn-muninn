@@ -1,5 +1,9 @@
 # Huginn & Muninn
 
+Event study and historical base rates for market-moving events. Example: "In 18 comparable conflicts, Brent rose within 20 days in 11 (61%, 95% CI 39-80%)." You make the decisions; the tool reports history. See `PROJECT_STATE.md` and `ROADMAP.md`.
+
+The sections below describe the parked ledger prototype, which is kept and tested.
+
 Local implementation repository for the ChatGPT project **HUGIIN & MUNIN**.
 
 This repository is prepared for the shared AI development harness. Product scope and implementation decisions should be captured in `PROJECT_STATE.md` before feature work begins.

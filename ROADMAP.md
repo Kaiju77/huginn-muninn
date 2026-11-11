@@ -1,27 +1,27 @@
 # Roadmap
 
-Huginn & Muninn is a local research desk. These four milestones are the product path. The synthetic Northline and Harbor book stays the demo on the existing pages until a person uses the entered portfolio instead.
+Updated 2026-11-11. The old ledger roadmap is in `docs/archive/ROADMAP_ledger_2026-10.md`.
 
-## 1. Portfolio onboarding
+## v1: one category, one asset (current sprint)
 
-A person enters their own accounts, instruments, contributions, withdrawals, purchases, sales, fees, dividends, and manual balances. ONBOARD-01 is this slice: a separate entered store, replayed through the existing ledger, with the synthetic demo left in place. Independent review on 2026-10-11 approved ONBOARD-01. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3`. Later onboarding work can add editing and import. Brokerage connections are not part of onboarding.
+Done means: `python scripts/event_study.py --category mideast-conflict --asset brent` prints a base-rate summary, and a Streamlit page shows the same summary with a chart of every event's path.
 
-## 2. Valuation and performance
+1. **Event catalog.** `data/events/mideast-conflict.csv` with 20-30 hand-curated events. Columns: `event_id, date_public, title, category, region, source_url, notes`.
+2. **Price series.** Daily Brent spot from EIA open data (series `PET.RBRTE.D`, needs a free API key), cached through the existing ingest client. Add `api.eia.gov` to the allowlist.
+3. **Event-study engine.** `src/huginn_muninn/study.py`. For windows of +5, +20 and +60 trading days: share of events with a rise, Wilson 95% CI, median, min/max, and the unconditional baseline. Pure functions, unit-tested on synthetic series with known answers.
+4. **Results page.** Streamlit with one table and one chart. Local first.
 
-Value a holding from a supplied price times quantity, or from a dated manual balance. A missing price stays unknown. A manual snapshot does not claim full attribution.
+## v2: more events, more assets
 
-ONBOARD-02 records a price on an entered instrument and values that book on a selected date. Cash stays at face in its own currency. One matching price on that date sets a quantity's value. Two prices on that date are ambiguous. A missing price stays unknown. A manual balance is a snapshot on its as-of date and is not priced. Allocation shares are shown only when every line on that date is known, every line is in NOK, and the known NOK subtotal is not zero. Otherwise, including a known NOK subtotal of zero and an empty date, the page says "Allocation is incomplete." and shows no shares. Independent review on 2026-10-11 approved ONBOARD-02. Reviewer `7f37206a-eb44-4416-b904-0ac8267e14b3`.
+- Categories: M&A announcements (for the acquirer and target share prices), sanctions, central bank surprises.
+- Map each event to the assets it affects (category -> asset list), with separate figures per asset: Brent, OSEBX energy, Equinor, NOK/USD.
+- Calibration backtest report.
 
-VALUE-01 separates contributions, withdrawals, fees, and dividends from the change in value between two dates on the entered book. The page is GET /portfolio/performance, linked from the entered valuation page. Flows are activities strictly after the start date and on or before the end date. Purchases and sales stay inside the two valuations; only their fees are fees. A fee is cash leaving, not a market gain. A dividend is cash received. It is not a contribution and it is not a price change. The page does this only when both dates are fully known NOK quantities times one same-currency price, or known NOK cash, and the book has no manual balance. Otherwise it says "Attribution is unavailable." and shows no price-change figure. It does not convert currencies and it does not fill a missing price. Independent review on 2026-10-11 approved VALUE-01. Reviewer `8e1b27f5-d9e5-48d4-afad-f638572be7c4`.
+## v3: live intake
 
-PRICE-01 lets a person accept one already-stored observation as an entered price. The page is GET and POST /portfolio/price, linked from the entered valuation page. GET only shows the form and the stored observations. POST is the only accept. The amount, currency, valuation date, and evidence date come from that observation, and the provenance includes the observation id. The accept does not run by itself and it does not copy the price into the synthetic ledger. USD/NOK, EUR/NOK, the policy rate, NOWA, CPI, a synthetic fixture row, a missing or non-finite value, or a unit that is not the listing currency is refused with "This observation is not a price for this holding." Independent review on 2026-10-11 approved PRICE-01. Reviewer `205dc4e4-7f9f-48cc-a38e-8a79d0059c51`.
+- Daily news and filings intake. Claude classifies a new event into a catalog category and finds its nearest past matches. Every claim links to its source.
+- Daily brief page that runs on a schedule (GitHub Actions), published publicly. This is the v1.0 for the portfolio.
 
-## 3. Market intelligence
+## Out of scope until v3 ships
 
-Practical adapters for filings, macro releases, permitted prices, and verified news. No unlicensed scrape.
-
-## 4. Portfolio-aware notes
-
-Notes keep observed facts separate from hypotheses. No recommendations until a later explicit authorization.
-
-NOTE-01 is GET and POST /portfolio/notes, linked from the entered portfolio. An observed note restates one stored observation. A hypothesis is labeled text that cites stored observation ids, and it is not a recommendation. Independent review on 2026-10-11 approved NOTE-01. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208`.
+Trade execution, broker connections, portfolio optimization, paid data vendors, and scraping that isn't allowed.
