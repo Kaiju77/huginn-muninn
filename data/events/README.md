@@ -12,6 +12,6 @@ One CSV per category. Loaded and validated by `src/huginn_muninn/catalog.py`.
 
 ## mideast-conflict.csv
 
-28 events in 22 episodes, 1988-2026. All are after 1987-05-20, when EIA daily Brent begins.
+28 events in 21 episodes, 1988-2026. All are after 1987-05-20, when EIA daily Brent begins.
 
 **Known bias (read before trusting a number):** the events were chosen by hand from well-known crises. Crises become well known partly *because* oil moved, so this list probably overstates the effect. The list deliberately includes cases where oil fell (2003 invasion of Iraq, 1991 Desert Storm), but the fix is a rule-based list. v2 will rebuild it from UCDP conflict data with a fixed threshold.

@@ -73,3 +73,46 @@ class ValidationTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CodexRound2Test(unittest.TestCase):
+    """Regression tests for the 2026-11-11 Codex review, round 2."""
+
+    def load(self, text):
+        path = write(text)
+        try:
+            return load_catalog(path)
+        finally:
+            path.unlink()
+
+    def test_4_extra_field_rejected(self):
+        with self.assertRaises(ValueError) as caught:
+            self.load(HEADER + '\n' + GOOD + ',unexpected\n')
+        self.assertIn('expected 9 fields', str(caught.exception))
+
+    def test_4_missing_field_rejected(self):
+        with self.assertRaises(ValueError) as caught:
+            self.load(HEADER + '\n' + GOOD[:-1] + '\n')
+        self.assertIn('expected 9 fields', str(caught.exception))
+
+    def test_4_unterminated_quote_rejected(self):
+        with self.assertRaises(ValueError):
+            self.load(HEADER + '\n' + GOOD + '"unterminated note\n')
+
+    def test_5_utf8_bom_accepted(self):
+        [event] = self.load('﻿' + HEADER + '\n' + GOOD + '\n')
+        self.assertEqual(event.event_id, 'e1')
+
+    def test_quoted_comma_in_notes_still_fine(self):
+        [event] = self.load(HEADER + '\n' + GOOD + '"a, b"\n')
+        self.assertEqual(event.notes, 'a, b')
+
+    def test_1_2_3_catalog_corrections(self):
+        events = {e.event_id: e for e in load_catalog(MIDEAST)}
+        self.assertEqual(events['me-1998-desert-fox'].date_public, date(1998, 12, 17))
+        self.assertEqual(events['me-2011-libya-uprising'].date_public, date(2011, 2, 16))
+        self.assertEqual(events['me-1990-kuwait-invasion'].episode,
+                         events['me-1991-desert-storm'].episode)
+        firsts = [e.event_id for e in first_per_episode(load_catalog(MIDEAST))]
+        self.assertIn('me-1990-kuwait-invasion', firsts)
+        self.assertNotIn('me-1991-desert-storm', firsts)

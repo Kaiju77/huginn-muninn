@@ -1,13 +1,13 @@
 event_id,date_public,title,category,region,episode,source_url,source_checked,notes
 me-1988-praying-mantis,1988-04-18,US-Iran naval battle (Operation Praying Mantis),mideast-conflict,Persian Gulf,1988-tanker-war,https://en.wikipedia.org/wiki/Operation_Praying_Mantis,no,
-me-1990-kuwait-invasion,1990-08-02,Iraq invades Kuwait,mideast-conflict,Kuwait/Iraq,1990-kuwait,https://en.wikipedia.org/wiki/Iraqi_invasion_of_Kuwait,no,
-me-1991-desert-storm,1991-01-17,Coalition air campaign against Iraq begins,mideast-conflict,Iraq,1991-desert-storm,https://en.wikipedia.org/wiki/Gulf_War,no,Began evening 16 Jan US time; markets reacted 17 Jan.
+me-1990-kuwait-invasion,1990-08-02,Iraq invades Kuwait,mideast-conflict,Kuwait/Iraq,1990-gulf-war,https://en.wikipedia.org/wiki/Iraqi_invasion_of_Kuwait,no,
+me-1991-desert-storm,1991-01-17,Coalition air campaign against Iraq begins,mideast-conflict,Iraq,1990-gulf-war,https://en.wikipedia.org/wiki/Gulf_War,no,Began evening 16 Jan US time; markets reacted 17 Jan. Same crisis as the Kuwait invasion (merged after Codex review).
 me-1996-desert-strike,1996-09-03,US cruise missile strikes on Iraq (Operation Desert Strike),mideast-conflict,Iraq,1996-desert-strike,https://en.wikipedia.org/wiki/Operation_Desert_Strike,no,
-me-1998-desert-fox,1998-12-16,US-UK bombing of Iraq (Operation Desert Fox),mideast-conflict,Iraq,1998-desert-fox,https://en.wikipedia.org/wiki/1998_bombing_of_Iraq,yes,
+me-1998-desert-fox,1998-12-17,US-UK bombing of Iraq (Operation Desert Fox),mideast-conflict,Iraq,1998-desert-fox,https://researchbriefings.files.parliament.uk/documents/RP99-13/RP99-13.pdf,yes,"Strikes began about 22:00 GMT on 16 Dec, after the Brent close. Corrected after Codex review 2026-11-11."
 me-2000-uss-cole,2000-10-12,USS Cole bombed in Aden,mideast-conflict,Yemen,2000-uss-cole,https://en.wikipedia.org/wiki/USS_Cole_bombing,no,
 me-2003-iraq-invasion,2003-03-20,US-led invasion of Iraq begins,mideast-conflict,Iraq,2003-iraq,https://en.wikipedia.org/wiki/2003_invasion_of_Iraq,no,War premium was priced in beforehand; Brent fell on invasion.
 me-2006-lebanon-war,2006-07-12,Israel-Hezbollah war begins,mideast-conflict,Lebanon/Israel,2006-lebanon,https://en.wikipedia.org/wiki/2006_Lebanon_War,no,
-me-2011-libya-uprising,2011-02-17,Libyan civil war begins,mideast-conflict,Libya,2011-libya,https://en.wikipedia.org/wiki/Libyan_civil_war_(2011),no,Unrest from 15 Feb; 17 Feb 'day of rage'.
+me-2011-libya-uprising,2011-02-16,Libyan civil war begins,mideast-conflict,Libya,2011-libya,https://www.voanews.com/amp/hundreds-of-libyans-stage-anti-government-protest-116299439/160198.html,no,Benghazi clashes broke out on the night of 15-16 Feb and were reported on 16 Feb; 17 Feb was the planned day of rage. Corrected after Codex review 2026-11-11.
 me-2011-libya-intervention,2011-03-19,NATO-led intervention in Libya begins,mideast-conflict,Libya,2011-libya,https://en.wikipedia.org/wiki/2011_military_intervention_in_Libya,no,Saturday.
 me-2013-ghouta,2013-08-21,Ghouta chemical attack; US strike threat,mideast-conflict,Syria,2013-syria,https://en.wikipedia.org/wiki/Ghouta_chemical_attack,no,
 me-2014-mosul,2014-06-10,ISIS captures Mosul,mideast-conflict,Iraq,2014-isis,https://en.wikipedia.org/wiki/Fall_of_Mosul,no,

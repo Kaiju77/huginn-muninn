@@ -86,7 +86,7 @@ class PipelineTest(unittest.TestCase):
                 code = event_study.main(['--prices', str(out)])
             text = buf.getvalue()
             self.assertEqual(code, 0)
-            self.assertIn('Brent: 22 events (28 in catalog)', text)
+            self.assertIn('Brent: 21 events (28 in catalog)', text)
             self.assertIn('20 trading days: in ', text)
             self.assertIn('not a forecast or advice', text)
 
@@ -100,3 +100,15 @@ class PipelineTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class PriceCsvStrictnessTest(unittest.TestCase):
+    def test_bom_ok_and_wrong_width_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            good = Path(tmp) / 'g.csv'
+            good.write_text('﻿date,usd_per_barrel\n2020-01-02,66.25\n', encoding='utf-8')
+            self.assertEqual(len(load_closes(good)), 1)
+            bad = Path(tmp) / 'b.csv'
+            bad.write_text('date,usd_per_barrel\n2020-01-02,66.25,x\n')
+            with self.assertRaises(ValueError):
+                load_closes(bad)

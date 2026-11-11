@@ -42,13 +42,28 @@ def load_catalog(path, category=None, today=None):
     the row number on the first problem."""
     today = today or date.today()
     path = Path(path)
-    with path.open(encoding='utf-8', newline='') as handle:
-        reader = csv.DictReader(handle)
-        if tuple(reader.fieldnames or ()) != COLUMNS:
+    # utf-8-sig accepts a byte-order mark from spreadsheet exports.
+    with path.open(encoding='utf-8-sig', newline='') as handle:
+        reader = csv.DictReader(handle, strict=True)
+        try:
+            header = tuple(reader.fieldnames or ())
+        except csv.Error as err:
+            raise ValueError(f'{path.name}: bad CSV header ({err})') from None
+        if header != COLUMNS:
             raise ValueError(f'{path.name}: columns must be {",".join(COLUMNS)}')
         events, seen = [], set()
-        for line, row in enumerate(reader, start=2):
+        rows = iter(reader)
+        while True:
+            try:
+                row = next(rows)
+            except StopIteration:
+                break
+            except csv.Error as err:
+                raise ValueError(f'{path.name} line {reader.line_num}: {err}') from None
+            line = reader.line_num
             where = f'{path.name} line {line}'
+            if None in row or any(value is None for value in row.values()):
+                raise ValueError(f'{where}: expected {len(COLUMNS)} fields')
             for col in ('event_id', 'date_public', 'title', 'category', 'episode', 'source_url'):
                 if not (row[col] or '').strip():
                     raise ValueError(f'{where}: {col} is empty')

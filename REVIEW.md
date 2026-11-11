@@ -1,5 +1,15 @@
 # Review log
 
+## 2026-11-11: Codex review round 2 (catalog and loader)
+
+1. P2: Desert Fox began about 22:00 GMT on 16 Dec 1998, after the Brent close. `date_public` changed to 1998-12-17, with the UK Parliament research paper as the source.
+2. P2: the Libya uprising was public on 16 Feb 2011 (Benghazi clashes); 17 Feb was the planned day of rage. Changed to 2011-02-16.
+3. P2: the Kuwait invasion and Desert Storm are one crisis. Merged into episode `1990-gulf-war` (21 episodes now).
+4. P2: malformed CSV rows (extra or missing field, unterminated quote) were accepted silently. Both loaders now parse strictly and check the field count.
+5. P3: a UTF-8 BOM broke the header. Both loaders now read `utf-8-sig`.
+
+Regression tests: `CodexRound2Test` in `tests/test_catalog.py` and `PriceCsvStrictnessTest` in `tests/test_brent_pipeline.py`. 243 tests OK.
+
 ## 2026-11-11: Codex review of `study.py` (commit b642be3)
 
 All five findings were P2. Each is fixed and has a regression test in `CodexReviewRegressionTest` in `tests/test_study.py`.
