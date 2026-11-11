@@ -8,12 +8,12 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 2. Done: `data/events/mideast-conflict.csv` (28 events, 22 episodes, 1988-2026), loader `catalog.py` with validation, 5 tests. Kai: review the list; 15 links are still `source_checked=no`.
 3. Done: `src/huginn_muninn/study.py` with synthetic tests (Wilson CI, no look-ahead entry, skip rather than truncate, era filter, baseline). Full suite: 212 tests OK.
 4. Done: Codex review, 5 findings fixed (see `REVIEW.md`). 24 study tests, 220 total.
-5. Done: entry rule. `after_news` is the default and `before_news` an option (Claude's default, 2026-11-11). Kai can override.
-6. Kai: Codex review round 2 (`docs/REVIEW_REQUEST.md`).
-7. Kai decision: where real data is fetched. The device sandbox has no internet. Options: GitHub Actions (needs push), or a fetch script run on Windows.
-8. Then: EIA Brent adapter (add `api.eia.gov` to the allowlist), `scripts/event_study.py` CLI, Streamlit page.
+5. Done: entry rule, `after_news` default.
+6. Done 2026-11-11: repo pushed to github.com/Kaiju77/huginn-muninn (`main`). Workflows: `tests` (every push) and `fetch-brent` (weekdays 06:23 UTC, plus manual runs).
+7. Next: first real run of `fetch-brent`, then read the base rates, then Codex review round 2 (`docs/REVIEW_REQUEST.md`).
+8. Then: Streamlit page (v1 step 4).
 
-No merge, push or deploy has been done.
+No merge, push or deploy without Kai's OK. Kai approved the initial push of `main` on 2026-11-11.
 
 ## Historical
 

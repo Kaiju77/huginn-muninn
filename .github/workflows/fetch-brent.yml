@@ -1,0 +1,47 @@
+name: fetch-brent
+
+# Daily Brent spot prices from EIA (series RBRTE) into data/prices/brent_daily.csv.
+# EIA publishes with a lag of a few days; a daily run keeps the file current.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 6 * * 1-5'   # 06:23 UTC on weekdays
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-brent
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch Brent
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+        run: python scripts/fetch_eia_brent.py
+      - name: Run event study on the new data
+        run: python scripts/event_study.py | tee study.txt
+      - name: Add study to the run summary
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat study.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+      - name: Commit if prices changed
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/prices/brent_daily.csv
+          if git diff --cached --quiet; then
+            echo 'No new prices.'
+          else
+            git commit -m "Update Brent prices $(date -u +%F)"
+            git push
+          fi
