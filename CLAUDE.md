@@ -7,5 +7,5 @@
 - Every probability shown has n, a 95% CI and a range. No look-ahead.
 - Tests: `python -m unittest discover -s tests`.
 - The parked ledger code (`ledger.py`, `onboarding.py`, `prototype.py`, `desk.py`) stays and keeps its tests passing. Build no new features on it.
-- Never push, merge, deploy or use paid APIs without Kai's OK. Work on branches.
+- Pushing to `main` in this repo: standing OK from Kai (2026-11-11). Every push must pass the tests first. Still ask before deleting data, force-pushing, deploying, publishing or using paid APIs.
 - End each session by updating `NEXT.md`.
