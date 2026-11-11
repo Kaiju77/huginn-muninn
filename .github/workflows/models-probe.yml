@@ -1,0 +1,31 @@
+name: models-probe
+
+# Diagnostic only: GitHub's documented GitHub Models example, with response
+# headers printed. The token is never printed.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  models: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Documented example request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -sS -i "https://models.github.ai/inference/chat/completions" \
+             -H "Content-Type: application/json" \
+             -H "Authorization: Bearer $GITHUB_TOKEN" \
+             -d '{"messages":[{"role":"user","content":"Say hi in one word."}],"model":"openai/gpt-4o"}' \
+             | head -c 1500
+          echo
+          echo '--- same with response_format json_object and gpt-4.1-mini ---'
+          curl -sS -i "https://models.github.ai/inference/chat/completions" \
+             -H "Content-Type: application/json" \
+             -H "Authorization: Bearer $GITHUB_TOKEN" \
+             -d '{"messages":[{"role":"user","content":"Return {\"a\":1} as JSON."}],"model":"openai/gpt-4.1-mini","response_format":{"type":"json_object"}}' \
+             | head -c 1500
