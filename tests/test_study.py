@@ -165,3 +165,63 @@ class RunStudyTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class CodexReviewRegressionTest(unittest.TestCase):
+    """One test per finding in the 2026-11-11 Codex review."""
+
+    def test_1_era_baseline_drops_windows_starting_after_era_end(self):
+        closes = series([0, 100, 200, 400, 800])
+        changes = baseline_changes(closes, 1, last_start=closes[1].on)
+        self.assertEqual(changes, [1.0])  # only the 100 -> 200 window
+
+    def test_baseline_windows_do_not_overlap(self):
+        closes = series([100, 101, 102, 103, 104, 105, 106])
+        changes = baseline_changes(closes, 2)
+        self.assertEqual(len(changes), 3)  # starts at 0, 2, 4
+        self.assertAlmostEqual(changes[0], 102 / 100 - 1)
+        self.assertAlmostEqual(changes[1], 104 / 102 - 1)
+
+    def test_2_baseline_line_has_n_ci_and_range(self):
+        events = [Event(f'e{i}', d.on) for i, d in enumerate(series(range(100, 120))[:8])]
+        [result] = run_study(events, series(range(100, 120)), horizons=(1,))
+        line = format_result(result, 'Brent')
+        baseline = line[line.index('Baseline'):]
+        self.assertIn('19 non-overlapping 1-day windows', baseline)
+        self.assertIn('19 rose (100%, 95% CI', baseline)
+        self.assertIn('range', baseline)
+
+    def test_2_baseline_with_too_few_windows_shows_no_share(self):
+        closes = series(range(100, 114))  # 14 closes: windows start at 0, 5
+        events = [Event(f'e{i}', c.on) for i, c in enumerate(closes[:8])]
+        [result] = run_study(events, closes, horizons=(5,))
+        self.assertIn('Baseline: too few windows (n=2)', format_result(result))
+
+    def test_3_min_n_below_eight_is_rejected(self):
+        closes = series([100, 110])
+        with self.assertRaises(ValueError):
+            run_study([Event('e', closes[0].on)], closes, horizons=(1,), min_n=1)
+        with self.assertRaises(ValueError):
+            summarize([0.1], min_n=1)
+        # Raising the bar is allowed.
+        summarize([0.1] * 20, min_n=12)
+
+    def test_4_bad_horizons_rejected_even_with_no_events(self):
+        closes = series(range(100, 120))
+        for bad in [(0,), (-1,), (), (1.5,), (True,)]:
+            with self.assertRaises(ValueError, msg=repr(bad)):
+                run_study([], closes, horizons=bad)
+
+    def test_empty_event_list_reports_no_comparable_events(self):
+        [result] = run_study([], series(range(100, 140)), horizons=(1,))
+        self.assertEqual(result.events.n, 0)
+        self.assertIn('no comparable events', format_result(result))
+
+    def test_5_non_finite_prices_are_rejected(self):
+        for bad in (float('nan'), float('inf'), float('-inf')):
+            closes = series([100, 101])
+            closes[1] = Close(closes[1].on, bad)
+            with self.assertRaises(ValueError, msg=repr(bad)):
+                run_study([Event('e', closes[0].on)], closes, horizons=(1,))
+        with self.assertRaises(ValueError):
+            summarize([0.1] * 7 + [float('nan')])

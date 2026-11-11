@@ -21,8 +21,8 @@ Kai makes every decision. The tool gives no guarantees and places no trades. Bas
 ## Method rules (non-negotiable)
 
 1. **No look-ahead.** An event study uses only data dated on or before the event date. Each event records its source and the date it became publicly known.
-2. **Always show n, the confidence interval and the range.** No bare percentages. Below n = 8, show "too few comparable events" and no percentage.
-3. **Baseline.** Report the move after the event against the unconditional move over windows of the same length, so "oil usually rises" doesn't read as an event effect.
+2. **Always show n, the confidence interval and the range,** for events and baseline alike. No bare percentages. Below n = 8, show "too few" and no percentage. The code rejects any `min_n` below 8.
+3. **Baseline.** Report the move after the event against the unconditional move over non-overlapping windows of the same length, so "oil usually rises" doesn't read as an event effect. Non-overlapping windows keep the baseline interval honest.
 4. **Era split.** Results can be filtered by era (for example pre-2000, 2000-2014, 2015 onward). A regime change is shown, not hidden.
 5. **Calibration.** Before any probability is trusted, backtest it: did the 60% calls come true about 60% of the time?
 6. Decimal arithmetic or numpy float64 is fine for statistics. Prices stay as stored, with their source.
@@ -30,4 +30,5 @@ Kai makes every decision. The tool gives no guarantees and places no trades. Bas
 ## Status
 
 - Working: allowlisted ingest client and cache (stdlib), 196 tests, the parked ledger prototype.
-- Not started: event catalog, price series for Brent, event-study engine, results page.
+- Done: event-study engine `src/huginn_muninn/study.py` (24 tests, Codex-reviewed 2026-11-11, all 5 findings fixed).
+- Not started: event catalog, Brent price series, CLI, results page.

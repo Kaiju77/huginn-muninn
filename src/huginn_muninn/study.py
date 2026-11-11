@@ -6,14 +6,16 @@ Rules (see PROJECT_STATE.md):
 - No look-ahead. Entry is the last close on or before the date the event
   became public. Only later closes are used for the exit.
 - Every share comes with n, a Wilson 95% interval, median and range.
-- Below ``min_n`` comparable events no share is reported.
-- Each horizon is compared with the unconditional baseline: every window of
-  the same length in the same price history.
+- Below ``min_n`` comparable events no share is reported. ``min_n`` can be
+  raised but never set below 8.
+- Each horizon is compared with the unconditional baseline: non-overlapping
+  windows of the same length in the same price history, so the baseline's
+  Wilson interval is not overstated by overlapping samples.
 """
 
 from bisect import bisect_right
 from datetime import date
-from math import sqrt
+from math import isfinite, sqrt
 from statistics import median
 from typing import NamedTuple, Optional, Sequence
 
@@ -62,6 +64,9 @@ class HorizonResult(NamedTuple):
 
 def sorted_closes(closes: Sequence[Close]) -> list:
     """Return closes sorted by date. Duplicate dates are an error."""
+    for c in closes:
+        if not isfinite(c.value):
+            raise ValueError(f'non-finite close on {c.on.isoformat()}')
     ordered = sorted(closes, key=lambda c: c.on)
     for before, after in zip(ordered, ordered[1:]):
         if before.on == after.on:
@@ -86,6 +91,11 @@ def wilson_interval(rises: int, n: int, z: float = Z_95):
 
 def summarize(changes: Sequence[float], min_n: int = DEFAULT_MIN_N) -> Summary:
     """Summarize fractional changes. A rise is a change strictly above 0."""
+    if min_n < DEFAULT_MIN_N:
+        raise ValueError(f'min_n cannot be below {DEFAULT_MIN_N}')
+    changes = list(changes)
+    if not all(isfinite(c) for c in changes):
+        raise ValueError('non-finite change')
     n = len(changes)
     if n == 0:
         return Summary(0, 0, None, None, None, None, None, None, True)
@@ -102,8 +112,7 @@ def event_return(closes: Sequence[Close], event: Event, horizon: int):
 
     ``closes`` must already be sorted (use ``sorted_closes``).
     """
-    if horizon < 1:
-        raise ValueError('horizon must be at least 1')
+    _check_horizon(horizon)
     dates = [c.on for c in closes]
     entry_index = bisect_right(dates, event.date_public) - 1
     if entry_index < 0:
@@ -118,18 +127,27 @@ def event_return(closes: Sequence[Close], event: Event, horizon: int):
     return EventReturn(event.event_id, entry.on, exit_.on, change), None
 
 
-def baseline_changes(closes: Sequence[Close], horizon: int) -> list:
-    """Every horizon-length change in the history (overlapping windows)."""
-    return [
-        closes[i + horizon].value / closes[i].value - 1
-        for i in range(len(closes) - horizon)
-        if closes[i].value > 0
-    ]
+def baseline_changes(closes: Sequence[Close], horizon: int, last_start=None) -> list:
+    """Non-overlapping horizon-length changes: windows start at index 0,
+    horizon, 2*horizon, ... A window is kept only if its start date is on or
+    before ``last_start`` (when given) and its start close is positive.
+    ``closes`` must already be sorted.
+    """
+    _check_horizon(horizon)
+    changes = []
+    for i in range(0, len(closes) - horizon, horizon):
+        start = closes[i]
+        if last_start is not None and start.on > last_start:
+            break
+        if start.value <= 0:
+            continue
+        changes.append(closes[i + horizon].value / start.value - 1)
+    return changes
 
 
-def _era_baseline(closes, horizon, starts):
-    changes = baseline_changes(closes, horizon)
-    return changes if starts is None else changes[:starts]
+def _check_horizon(horizon):
+    if isinstance(horizon, bool) or not isinstance(horizon, int) or horizon < 1:
+        raise ValueError(f'horizon must be a whole number of at least 1, got {horizon!r}')
 
 
 def run_study(
@@ -146,14 +164,20 @@ def run_study(
     exit may fall after the era end; cutting the history would silently drop
     late events.
     """
+    if min_n < DEFAULT_MIN_N:
+        raise ValueError(f'min_n cannot be below {DEFAULT_MIN_N}')
+    horizons = tuple(horizons)
+    if not horizons:
+        raise ValueError('at least one horizon is required')
+    for horizon in horizons:
+        _check_horizon(horizon)
     ordered = sorted_closes(closes)
     chosen = list(events)
-    base = ordered
+    base, last_start = ordered, None
     if era is not None:
-        start, end = era
-        chosen = [e for e in chosen if start <= e.date_public <= end]
+        start, last_start = era
+        chosen = [e for e in chosen if start <= e.date_public <= last_start]
         base = [c for c in ordered if c.on >= start]
-        cut = sum(1 for c in base if c.on <= end)
     ids = [e.event_id for e in chosen]
     if len(ids) != len(set(ids)):
         raise ValueError('duplicate event_id')
@@ -169,7 +193,7 @@ def run_study(
         results.append(HorizonResult(
             horizon,
             summarize([r.change for r in returns], min_n),
-            summarize(_era_baseline(base, horizon, cut if era else None), min_n),
+            summarize(baseline_changes(base, horizon, last_start), min_n),
             tuple(returns),
             tuple(skipped),
         ))
@@ -198,7 +222,11 @@ def format_result(result: HorizonResult, asset: str = 'the asset') -> str:
     )
     if b.share is not None:
         line += (
-            f' Baseline: any {result.horizon}-day window rose '
-            f'{b.share * 100:.0f}% of the time, median {_pct(b.median)}.'
+            f' Baseline: {b.n} non-overlapping {result.horizon}-day windows, '
+            f'{b.rises} rose ({b.share * 100:.0f}%, 95% CI '
+            f'{b.ci_low * 100:.0f}-{b.ci_high * 100:.0f}%), median {_pct(b.median)}, '
+            f'range {_pct(b.low)} to {_pct(b.high)}.'
         )
+    else:
+        line += f' Baseline: too few windows (n={b.n}).'
     return line

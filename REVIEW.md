@@ -1,4 +1,19 @@
-# Review
+# Review log
+
+## 2026-11-11: Codex review of `study.py` (commit b642be3)
+
+All five findings were P2. Each is fixed and has a regression test in `CodexReviewRegressionTest` in `tests/test_study.py`.
+
+1. The era baseline included windows starting after the era ended (the slice happened after invalid windows were dropped). Fixed: windows are filtered by start date before anything else.
+2. The baseline line had no n, CI or range. Fixed: the baseline now prints n, rises, share, Wilson CI, median and range, or "too few windows".
+3. `min_n` could be set below 8. Fixed: `ValueError`.
+4. A horizon of 0, a negative or non-integer horizon, or an empty horizon list passed when there were no events. Fixed: validated up front.
+5. NaN/inf prices reached the statistics. Fixed: `sorted_closes` and `summarize` reject non-finite values.
+
+Also adopted: the baseline uses non-overlapping windows, because overlapping windows understate the uncertainty in a Wilson CI (Codex note).
+
+Not a code issue: 107 errors and the failed HTTP check in Codex's run came from its read-only sandbox, which can't create temp directories. Outside the sandbox: 220 tests OK, e2e 12/12.
+
 
 Independent review on 2026-10-11 approved NOTE-01. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208` read the observed restatement, the hypothesis label, the citation gates, and the parent receipt. Verdict: approve. The reviewer did not rerun the suite and did not fetch. The parent sandbox discovered 195 tests, 195 passed, exit code 0. This verdict covers notes on the entered book. It is not native acceptance, a recommendation, or a filing match. The synthetic 10.25 rate remains the ledger rate. The listening desk was not restarted.
 
