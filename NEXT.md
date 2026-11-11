@@ -1,5 +1,21 @@
 # Next Steps
 
+Branch `claude/e2e-portfolio` (from `cursor/hm-01` @ 67df1fc), 2026-11-11.
+
+Done: `scripts/e2e_portfolio.py` and `tests/test_e2e_portfolio.py` drive the entered-portfolio workflow over HTTP with synthetic data (12/12 steps). Full suite: 196 tests OK. See `docs/E2E_PORTFOLIO.md`.
+
+1. Kai: run `python scripts/e2e_portfolio.py` on Windows and confirm 12/12 steps pass.
+2. Decide whether the e2e script should also cover `POST /portfolio/price` (accept a stored observation) and the USD-cash path (attribution unavailable).
+3. Settle the product brief: this repo is the finance system. The Claude project brief (multi-agent daily briefing) does not match it.
+4. Still open from the handoff: no pyproject or CI, master is not integrated, and EDGAR is blocked on a contact string.
+
+No merge, push, or deploy has been done.
+
+## Historical
+
+The following pointer was current before 2026-11-11. It is not the current next step.
+
+
 Ready work on branch `cursor/hm-01` in `C:/Users/kaiar/Documents/projects/cursor-worktrees/hm-01`.
 
 1. NOTE-01 is reviewed at `2052cf59a9636558732ef71410e31b0802277a28`. Reviewer `9f54c300-bce2-448f-bc4f-edc0ec9d0208` approved notes that restate a stored observation and keep a hypothesis labeled. The next executable task is item 2.
