@@ -68,7 +68,7 @@ def parse(text, items, on, catalog=(), min_sites=2):
     notes: other event types worth a line in the brief (no base rates).
     rejected: count of events dropped by validation.
     """
-    data = json.loads(text)
+    data = json.loads(_strip_fences(text))
     events = data.get('events') if isinstance(data, dict) else None
     if not isinstance(events, list):
         raise ValueError('model output has no events list')
@@ -108,6 +108,16 @@ def parse(text, items, on, catalog=(), min_sites=2):
         if region not in best or cand.n_sites > best[region][0].n_sites:
             best[region] = (cand, etype)
     return [best[r] for r in sorted(best)], notes, rejected
+
+
+def _strip_fences(text):
+    """Models sometimes wrap JSON in ```json fences or add a sentence around it."""
+    text = (text or '').strip()
+    if text.startswith('```'):
+        text = text.split('\n', 1)[1] if '\n' in text else ''
+        text = text.rsplit('```', 1)[0]
+    start, end = text.find('{'), text.rfind('}')
+    return text[start:end + 1] if start != -1 and end > start else text
 
 
 def _regions(event):

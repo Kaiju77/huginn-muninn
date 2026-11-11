@@ -38,7 +38,11 @@ def call(model, msgs, token, opener=urllib.request.urlopen):
         'Authorization': f'Bearer {token}', 'Content-Type': 'application/json',
         'Accept': 'application/json'})
     with opener(req, timeout=120) as resp:
-        payload = json.loads(resp.read().decode('utf-8'))
+        raw = resp.read().decode('utf-8')
+    try:
+        payload = json.loads(raw)
+    except ValueError:
+        raise ValueError(f'non-JSON API response: {raw[:160]!r}') from None
     return payload['choices'][0]['message']['content']
 
 
@@ -51,24 +55,31 @@ def screen(news, token, catalog, call=call):
     if not items:
         status.update(ok=True, error='no relevant headlines')
         return status
-    last_error = ''
+    errors = []
     for model in MODELS:
         for attempt in range(2):
+            text = ''
             try:
                 text = call(model, messages(items, on), token)
                 cands, notes, rejected = parse(text, items, on, catalog)
             except urllib.error.HTTPError as err:
-                last_error = f'{model}: HTTP {err.code}'
+                detail = err.read()[:200].decode('utf-8', 'replace') if err.fp else ''
+                errors.append(f'{model}: HTTP {err.code} {detail}'.strip())
                 break  # try the next model
-            except (urllib.error.URLError, TimeoutError, KeyError, IndexError, ValueError) as err:
-                last_error = f'{model}: {type(err).__name__}'
+            except (urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError,
+                    ValueError) as err:
+                # A short start of the model's own reply helps debugging; it never
+                # contains the token.
+                snippet = (text or '')[:160].replace('\n', ' ')
+                errors.append(f'{model}: {type(err).__name__} {snippet!r}')
                 time.sleep(5)
                 continue
-            status.update(ok=True, model=model, rejected=rejected, notes=notes, error='',
+            status.update(ok=True, model=model, rejected=rejected, notes=notes,
+                          error=' | '.join(errors),
                           candidates=[{**c._asdict(), 'date_public': c.date_public.isoformat(),
                                        'event_type': t} for c, t in cands])
             return status
-    status['error'] = last_error
+    status['error'] = ' | '.join(errors)[:1000]
     return status
 
 

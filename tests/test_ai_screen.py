@@ -90,6 +90,12 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(len(cands), 1)
         self.assertEqual(cands[0][0].n_sites, 3)
 
+    def test_fenced_or_wrapped_json_accepted(self):
+        body = json.dumps({'events': [ev()]})
+        for text in (f'```json\n{body}\n```', f'Here you go:\n{body}', f'```\n{body}```'):
+            cands, _, _ = parse(text, self.items, ON, load_catalog(EVENTS))
+            self.assertEqual(len(cands), 1, text)
+
     def test_garbage_output_raises(self):
         for text in ('not json', '[]', '{"events": "x"}', '{}'):
             with self.assertRaises(ValueError):
@@ -119,7 +125,8 @@ class ScreenTest(unittest.TestCase):
             raise urllib.error.HTTPError('u', 403, 'no', {}, io.BytesIO())
         status = screen(self.news, 't', [], call=fake)
         self.assertFalse(status['ok'])
-        self.assertIn('HTTP 403', status['error'])
+        self.assertIn(f'{MODELS[0]}: HTTP 403', status['error'])
+        self.assertIn(f'{MODELS[1]}: HTTP 403', status['error'])
 
 
 class FlowTest(unittest.TestCase):
