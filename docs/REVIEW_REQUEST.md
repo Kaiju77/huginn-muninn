@@ -1,27 +1,25 @@
-# Review request for Codex, round 2 (2026-11-11)
+# Review request for Codex, round 3 (2026-11-11)
 
-Branch `claude/event-study-plan`. Round 1 is logged in `REVIEW.md`. Review the commits after `06b5e03`:
+Rounds 1 and 2 are logged in `REVIEW.md`. Review everything after `1fabf81`:
 
-1. `a45cb41`: `data/events/mideast-conflict.csv`, `data/events/README.md`, `src/huginn_muninn/catalog.py`, `tests/test_catalog.py`.
-2. `84ad46d`: entry rules `after_news` (default) and `before_news` in `src/huginn_muninn/study.py`, with tests in `tests/test_study.py`.
-3. `2896a80`: `scripts/fetch_eia_brent.py`, `src/huginn_muninn/prices.py`, `scripts/event_study.py`, `.github/workflows/*.yml`, `tests/test_brent_pipeline.py`.
-4. Real data: `data/prices/brent_daily.csv` (EIA RBRTE, 10,013 rows, fetched by the workflow).
+1. `c1686c4`: `src/huginn_muninn/assets.py`, `scripts/fetch_prices.py` (EIA Brent, WTI, Henry Hub; Norges Bank USD/NOK), `scripts/event_study.py`, `study.event_path`, `.github/workflows/fetch-prices.yml`, `tests/test_prices_pipeline.py`.
+2. `72f63c1` and later: `src/huginn_muninn/report.py`, `app/streamlit_app.py`, `tests/test_report_and_app.py`.
+3. Real data in `data/prices/*.csv`, once the workflow has committed it.
 
-Codex's read-only sandbox can't create temp dirs, so use:
+Run (the read-only sandbox can't create temp dirs, so some tests may error there; say which):
 
-    python -m unittest tests.test_study tests.test_catalog tests.test_brent_pipeline -v
+    python -m unittest tests.test_study tests.test_catalog tests.test_prices_pipeline tests.test_report_and_app -v
     python scripts/event_study.py
     python scripts/event_study.py --entry before_news
 
 Check, and report each finding with file:line, severity and a failing example:
 
-- **Entry rules.** Is `after_news` really the first close on or after `date_public`, and `before_news` the last close strictly before? Is the `max_gap_days` check right at both ends of the history and across gaps?
-- **Catalog data.** For each row: is `date_public` the date the news broke in Europe/US trading time? Is `episode` grouping sensible (do any two episodes really belong together, or one should be split)? Flag any date you believe is wrong, with your source.
-- **Catalog loader.** Missing validation, CSV edge cases (quotes, BOM, trailing blank lines), and `first_per_episode` ordering.
-- **Fetch script.** Can the API key leak (logs, exceptions, files)? Paging and termination; behavior on partial failure; is the CSV written atomically?
-- **Workflows.** Permissions, secret handling, commit step, schedule. Anything that could push broken data?
-- **Price data.** Spot-check `brent_daily.csv`: gaps, duplicates, outliers (for example April 2020).
-- **Results.** Run the study. Is anything in the output misleading as worded?
-- **Docs vs code.** `PROJECT_STATE.md` rule 1 and `data/events/README.md`.
+- **WTI negative price.** `allow_nonpositive` is on for WTI only. Does anything downstream (study, baseline, paths, page) mishandle the -36.98 print on 2020-04-20?
+- **Norges Bank.** `fetch_norges` reuses `ingest/norges.parse_exr`. Is the parse correct for the full history? Units: NOK per 1 USD.
+- **Henry Hub.** Is EIA route `natural-gas/pri/fut`, series `RNGWHHD` the Henry Hub daily spot? If not, say what is.
+- **Workflow.** With `continue-on-error`, can a partly failed run commit bad data? Is the final failure step right? Is the rebase-before-push safe?
+- **Page.** Does anything on the page show a share without n and CI, or a misleading label? Is the chart's MEDIAN line computed correctly when paths have different lengths?
+- **Event paths.** `event_path` against `event_return` for both entry rules: same entry index?
+- **Price data.** Spot-check each CSV for gaps, duplicates and outliers.
 
 Report only. Don't edit files.

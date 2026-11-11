@@ -12,7 +12,9 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 6. Done 2026-11-11: repo pushed to github.com/Kaiju77/huginn-muninn (`main`). Workflows: `tests` (every push) and `fetch-brent` (weekdays 06:23 UTC, plus manual runs).
 7. Done: first `fetch-brent` run, 10,013 daily rows from 1987-05-20 to 2026-11-03. First real result: conflicts tend to see a jump at the news (`before_news`, 5 days: 17/22 rose), then Brent drifts down (`after_news`, 20 days: 7/22 rose vs baseline 53%). n=22, so the intervals are wide.
 7b. Done: Codex review round 2, 5 findings fixed (see `REVIEW.md`). With 21 episodes the pattern holds: a jump on the news, then a fade.
-8. Then: Streamlit page (v1 step 4).
+8. Done 2026-11-11: four assets (Brent, WTI, Henry Hub, USD/NOK), `fetch-prices` workflow, Streamlit page (`streamlit run app/streamlit_app.py`). v1 is complete.
+9. Kai: Codex round 3 (`docs/REVIEW_REQUEST.md`).
+10. Next options: (a) daily report (yesterday's moves + GDELT news + base rates); (b) rule-based events from UCDP; (c) central bank decisions as a second event type.
 
 No merge, push or deploy without Kai's OK. Kai approved the initial push of `main` on 2026-11-11.
 
