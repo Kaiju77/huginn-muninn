@@ -13,10 +13,11 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 7. Done: first `fetch-brent` run, 10,013 daily rows from 1987-05-20 to 2026-11-03. First real result: conflicts tend to see a jump at the news (`before_news`, 5 days: 17/22 rose), then Brent drifts down (`after_news`, 20 days: 7/22 rose vs baseline 53%). n=22, so the intervals are wide.
 7b. Done: Codex review round 2, 5 findings fixed (see `REVIEW.md`). With 21 episodes the pattern holds: a jump on the news, then a fade.
 8. Done 2026-11-11: four assets (Brent, WTI, Henry Hub, USD/NOK), `fetch-prices` workflow, Streamlit page (`streamlit run app/streamlit_app.py`). v1 is complete.
-9. Kai: Codex round 3 (`docs/REVIEW_REQUEST.md`).
-10. Next options: (a) daily report (yesterday's moves + GDELT news + base rates); (b) rule-based events from UCDP; (c) central bank decisions as a second event type.
-
-No merge, push or deploy without Kai's OK. Kai approved the initial push of `main` on 2026-11-11.
+9. Done: Codex round 3, 3 findings fixed (see `REVIEW.md`).
+10. Done 2026-11-11: daily brief (`scripts/daily_report.py`, `reports/latest.md`). It shows moves and how unusual they are, recent catalog events with comparable base rates, and GDELT headlines. It runs inside the `fetch-prices` workflow.
+11. Blocked on GitHub: an Actions outage since 20:48 UTC on 2026-11-11 left all runs queued. When it clears: run `fetch-prices`, check that WTI, Henry Hub and USD/NOK all fetch, and fix the Henry Hub route if needed.
+12. Kai: Codex round 4 (`docs/REVIEW_REQUEST.md`).
+13. Next options: (a) automatic new events: Claude classifies GDELT headlines into catalog candidates for Kai to approve; (b) rule-based history from UCDP; (c) central bank decisions as an event type.
 
 ## Historical
 
