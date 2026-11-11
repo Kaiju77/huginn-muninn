@@ -5,10 +5,11 @@ Branch `claude/event-study-plan` (from `claude/e2e-portfolio`), 2026-11-11.
 Done: product redefined as event study and historical base rates. `PROJECT_STATE.md`, `ROADMAP.md` and `CLAUDE.md` rewritten. The old ledger docs are in `docs/archive/`.
 
 1. Kai: get a free EIA API key (https://www.eia.gov/opendata/) and store it as the environment variable `EIA_API_KEY`. Don't commit it.
-2. Kai + Claude: draft `data/events/mideast-conflict.csv`, 20-30 events, each with its date and a source.
+2. Done: `data/events/mideast-conflict.csv` (28 events, 22 episodes, 1988-2026), loader `catalog.py` with validation, 5 tests. Kai: review the list; 15 links are still `source_checked=no`.
 3. Done: `src/huginn_muninn/study.py` with synthetic tests (Wilson CI, no look-ahead entry, skip rather than truncate, era filter, baseline). Full suite: 212 tests OK.
 4. Done: Codex review, 5 findings fixed (see `REVIEW.md`). 24 study tests, 220 total.
-5. Then: EIA Brent adapter (add `api.eia.gov` to the allowlist), `scripts/event_study.py` CLI, Streamlit page.
+5. Next decision (Kai): entry rule. Today, a weekday event enters at the same day's close (after the news). A weekend event enters at Friday's close (before the news), so it also measures the first reaction. Pick one: (a) `after_news` = first close on or after the public date (what you could actually act on) or (b) `before_news` = last close before it (full reaction). Recommendation: (a) as the default, with (b) as an option.
+6. Then: EIA Brent adapter (add `api.eia.gov` to the allowlist), `scripts/event_study.py` CLI, Streamlit page.
 
 No merge, push or deploy has been done.
 

@@ -1,0 +1,29 @@
+event_id,date_public,title,category,region,episode,source_url,source_checked,notes
+me-1988-praying-mantis,1988-04-18,US-Iran naval battle (Operation Praying Mantis),mideast-conflict,Persian Gulf,1988-tanker-war,https://en.wikipedia.org/wiki/Operation_Praying_Mantis,no,
+me-1990-kuwait-invasion,1990-08-02,Iraq invades Kuwait,mideast-conflict,Kuwait/Iraq,1990-kuwait,https://en.wikipedia.org/wiki/Iraqi_invasion_of_Kuwait,no,
+me-1991-desert-storm,1991-01-17,Coalition air campaign against Iraq begins,mideast-conflict,Iraq,1991-desert-storm,https://en.wikipedia.org/wiki/Gulf_War,no,Began evening 16 Jan US time; markets reacted 17 Jan.
+me-1996-desert-strike,1996-09-03,US cruise missile strikes on Iraq (Operation Desert Strike),mideast-conflict,Iraq,1996-desert-strike,https://en.wikipedia.org/wiki/Operation_Desert_Strike,no,
+me-1998-desert-fox,1998-12-16,US-UK bombing of Iraq (Operation Desert Fox),mideast-conflict,Iraq,1998-desert-fox,https://en.wikipedia.org/wiki/1998_bombing_of_Iraq,yes,
+me-2000-uss-cole,2000-10-12,USS Cole bombed in Aden,mideast-conflict,Yemen,2000-uss-cole,https://en.wikipedia.org/wiki/USS_Cole_bombing,no,
+me-2003-iraq-invasion,2003-03-20,US-led invasion of Iraq begins,mideast-conflict,Iraq,2003-iraq,https://en.wikipedia.org/wiki/2003_invasion_of_Iraq,no,War premium was priced in beforehand; Brent fell on invasion.
+me-2006-lebanon-war,2006-07-12,Israel-Hezbollah war begins,mideast-conflict,Lebanon/Israel,2006-lebanon,https://en.wikipedia.org/wiki/2006_Lebanon_War,no,
+me-2011-libya-uprising,2011-02-17,Libyan civil war begins,mideast-conflict,Libya,2011-libya,https://en.wikipedia.org/wiki/Libyan_civil_war_(2011),no,Unrest from 15 Feb; 17 Feb 'day of rage'.
+me-2011-libya-intervention,2011-03-19,NATO-led intervention in Libya begins,mideast-conflict,Libya,2011-libya,https://en.wikipedia.org/wiki/2011_military_intervention_in_Libya,no,Saturday.
+me-2013-ghouta,2013-08-21,Ghouta chemical attack; US strike threat,mideast-conflict,Syria,2013-syria,https://en.wikipedia.org/wiki/Ghouta_chemical_attack,no,
+me-2014-mosul,2014-06-10,ISIS captures Mosul,mideast-conflict,Iraq,2014-isis,https://en.wikipedia.org/wiki/Fall_of_Mosul,no,
+me-2015-yemen,2015-03-26,Saudi-led intervention in Yemen begins,mideast-conflict,Yemen,2015-yemen,https://en.wikipedia.org/wiki/Saudi_Arabian-led_intervention_in_Yemen,no,
+me-2017-shayrat,2017-04-07,US missile strike on Shayrat airbase,mideast-conflict,Syria,2017-shayrat,https://en.wikipedia.org/wiki/2017_Shayrat_missile_strike,no,
+me-2018-syria-strikes,2018-04-14,US-UK-France missile strikes on Syria,mideast-conflict,Syria,2018-syria,https://en.wikipedia.org/wiki/April_2018_missile_strikes_against_Syria,no,Saturday.
+me-2019-fujairah,2019-05-12,Four tankers sabotaged off Fujairah,mideast-conflict,Gulf of Oman,2019-gulf-of-oman,https://en.wikipedia.org/wiki/May_2019_Gulf_of_Oman_incident,yes,Sunday.
+me-2019-gulf-of-oman,2019-06-13,Two tankers attacked in Gulf of Oman,mideast-conflict,Gulf of Oman,2019-gulf-of-oman,https://en.wikipedia.org/wiki/June_2019_Gulf_of_Oman_incident,yes,
+me-2019-abqaiq,2019-09-14,Drone and missile attack on Abqaiq and Khurais,mideast-conflict,Saudi Arabia,2019-abqaiq,https://en.wikipedia.org/wiki/2019_Abqaiq%E2%80%93Khurais_attack,yes,Saturday.
+me-2020-soleimani,2020-01-03,US kills Qasem Soleimani,mideast-conflict,Iraq/Iran,2020-soleimani,https://en.wikipedia.org/wiki/Assassination_of_Qasem_Soleimani,no,
+me-2020-al-asad,2020-01-08,Iran missile strikes on US bases in Iraq,mideast-conflict,Iraq/Iran,2020-soleimani,https://en.wikipedia.org/wiki/Operation_Martyr_Soleimani,no,Evening 7 Jan US time.
+me-2023-oct-7,2023-10-07,Hamas attack on Israel,mideast-conflict,Israel/Gaza,2023-gaza,https://en.wikipedia.org/wiki/October_7_attacks,no,Saturday.
+me-2023-galaxy-leader,2023-11-19,Houthis seize Galaxy Leader; Red Sea attacks begin,mideast-conflict,Red Sea,2023-gaza,https://en.wikipedia.org/wiki/Houthi_hijacking_of_the_Galaxy_Leader,yes,Sunday.
+me-2024-iran-strikes-apr,2024-04-13,Iran's first direct strike on Israel,mideast-conflict,Iran/Israel,2024-iran-israel-apr,https://en.wikipedia.org/wiki/2024_Iran%E2%80%93Israel_conflict,yes,Saturday.
+me-2024-iran-strikes-oct,2024-10-01,Iran missile barrage on Israel,mideast-conflict,Iran/Israel,2024-iran-israel-oct,https://en.wikipedia.org/wiki/October_2024_Iranian_strikes_against_Israel,yes,
+me-2024-israel-strikes-oct,2024-10-26,Israeli strikes on Iran,mideast-conflict,Iran/Israel,2024-iran-israel-oct,https://en.wikipedia.org/wiki/October_2024_Israeli_strikes_on_Iran,yes,Saturday.
+me-2025-twelve-day-war,2025-06-13,Israel strikes Iran; Twelve-Day War begins,mideast-conflict,Iran/Israel,2025-twelve-day-war,https://en.wikipedia.org/wiki/Twelve-Day_War,yes,
+me-2025-us-strikes-iran,2025-06-22,US strikes Iranian nuclear sites,mideast-conflict,Iran,2025-twelve-day-war,https://en.wikipedia.org/wiki/Twelve-Day_War,yes,Sunday (21 June evening US time).
+me-2026-iran-war,2026-02-28,US and Israel strike Iran; 2026 Iran war begins,mideast-conflict,Iran,2026-iran-war,https://en.wikipedia.org/wiki/2026_Iran_war,yes,Saturday.
