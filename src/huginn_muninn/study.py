@@ -3,8 +3,12 @@
 Pure functions, standard library only. No fetching, no I/O.
 
 Rules (see PROJECT_STATE.md):
-- No look-ahead. Entry is the last close on or before the date the event
-  became public. Only later closes are used for the exit.
+- No look-ahead. Two entry rules, chosen per study:
+  ``after_news`` (default): first close on or after the public date, the
+  earliest price you could act on. Must fall within ``max_gap_days``.
+  ``before_news``: last close strictly before the public date, which also
+  captures the first reaction. Used to measure the reaction, not as a
+  tradeable result.
 - Every share comes with n, a Wilson 95% interval, median and range.
 - Below ``min_n`` comparable events no share is reported. ``min_n`` can be
   raised but never set below 8.
@@ -13,7 +17,7 @@ Rules (see PROJECT_STATE.md):
   Wilson interval is not overstated by overlapping samples.
 """
 
-from bisect import bisect_right
+from bisect import bisect_left
 from datetime import date
 from math import isfinite, sqrt
 from statistics import median
@@ -21,6 +25,10 @@ from typing import NamedTuple, Optional, Sequence
 
 DEFAULT_HORIZONS = (5, 20, 60)
 DEFAULT_MIN_N = 8
+AFTER_NEWS = 'after_news'
+BEFORE_NEWS = 'before_news'
+ENTRY_RULES = (AFTER_NEWS, BEFORE_NEWS)
+DEFAULT_MAX_GAP_DAYS = 5
 Z_95 = 1.959963984540054
 
 
@@ -107,16 +115,33 @@ def summarize(changes: Sequence[float], min_n: int = DEFAULT_MIN_N) -> Summary:
     return Summary(n, rises, rises / n, ci_low, ci_high, mid, low, high, False)
 
 
-def event_return(closes: Sequence[Close], event: Event, horizon: int):
+def event_return(
+    closes: Sequence[Close],
+    event: Event,
+    horizon: int,
+    entry: str = AFTER_NEWS,
+    max_gap_days: int = DEFAULT_MAX_GAP_DAYS,
+):
     """Return (EventReturn, None) or (None, reason).
 
     ``closes`` must already be sorted (use ``sorted_closes``).
     """
     _check_horizon(horizon)
+    _check_entry(entry)
     dates = [c.on for c in closes]
-    entry_index = bisect_right(dates, event.date_public) - 1
-    if entry_index < 0:
-        return None, 'no close on or before the event date'
+    first_on_or_after = bisect_left(dates, event.date_public)
+    if entry == AFTER_NEWS:
+        entry_index = first_on_or_after
+        if entry_index >= len(closes):
+            return None, 'no close on or after the event date'
+        if (dates[entry_index] - event.date_public).days > max_gap_days:
+            return None, f'no close within {max_gap_days} days after the event date'
+    else:
+        entry_index = first_on_or_after - 1
+        if entry_index < 0:
+            return None, 'no close before the event date'
+        if (event.date_public - dates[entry_index]).days > max_gap_days:
+            return None, f'no close within {max_gap_days} days before the event date'
     exit_index = entry_index + horizon
     if exit_index >= len(closes):
         return None, 'not enough closes after the event'
@@ -145,6 +170,11 @@ def baseline_changes(closes: Sequence[Close], horizon: int, last_start=None) -> 
     return changes
 
 
+def _check_entry(entry):
+    if entry not in ENTRY_RULES:
+        raise ValueError(f'entry must be one of {ENTRY_RULES}, got {entry!r}')
+
+
 def _check_horizon(horizon):
     if isinstance(horizon, bool) or not isinstance(horizon, int) or horizon < 1:
         raise ValueError(f'horizon must be a whole number of at least 1, got {horizon!r}')
@@ -156,6 +186,7 @@ def run_study(
     horizons: Sequence[int] = DEFAULT_HORIZONS,
     min_n: int = DEFAULT_MIN_N,
     era: Optional[tuple] = None,
+    entry: str = AFTER_NEWS,
 ) -> list:
     """Run the event study for each horizon.
 
@@ -171,6 +202,7 @@ def run_study(
         raise ValueError('at least one horizon is required')
     for horizon in horizons:
         _check_horizon(horizon)
+    _check_entry(entry)
     ordered = sorted_closes(closes)
     chosen = list(events)
     base, last_start = ordered, None
@@ -185,7 +217,7 @@ def run_study(
     for horizon in horizons:
         returns, skipped = [], []
         for event in chosen:
-            result, reason = event_return(ordered, event, horizon)
+            result, reason = event_return(ordered, event, horizon, entry)
             if result is None:
                 skipped.append((event.event_id, reason))
             else:

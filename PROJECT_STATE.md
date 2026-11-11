@@ -20,7 +20,7 @@ Kai makes every decision. The tool gives no guarantees and places no trades. Bas
 
 ## Method rules (non-negotiable)
 
-1. **No look-ahead.** An event study uses only data dated on or before the event date. Each event records its source and the date it became publicly known.
+1. **No look-ahead.** Each event records its source and the date it became public. Default entry is `after_news`: the first close on or after that date (the earliest price you could act on), at most 5 days later. `before_news` (last close before the date) is an option for measuring the full reaction, and is labeled as such. Decided 2026-11-11.
 2. **Always show n, the confidence interval and the range,** for events and baseline alike. No bare percentages. Below n = 8, show "too few" and no percentage. The code rejects any `min_n` below 8.
 3. **Baseline.** Report the move after the event against the unconditional move over non-overlapping windows of the same length, so "oil usually rises" doesn't read as an event effect. Non-overlapping windows keep the baseline interval honest.
 4. **Era split.** Results can be filtered by era (for example pre-2000, 2000-2014, 2015 onward). A regime change is shown, not hidden.

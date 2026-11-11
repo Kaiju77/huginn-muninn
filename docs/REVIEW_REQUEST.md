@@ -1,24 +1,19 @@
-# Review request for Codex (2026-11-11)
+# Review request for Codex, round 2 (2026-11-11)
 
-Branch: `claude/event-study-plan`. Base for comparison: `cursor/hm-01`.
+Branch `claude/event-study-plan`. Round 1 is logged in `REVIEW.md`. Review the commits after `06b5e03`:
 
-Review three commits:
-1. `adddad7`: `scripts/e2e_portfolio.py` and `tests/test_e2e_portfolio.py`, an end-to-end HTTP check of the parked ledger prototype.
-2. `e091ea5`: product redefinition (`PROJECT_STATE.md`, `ROADMAP.md`, `CLAUDE.md`, `NEXT.md`, `ideas.md`).
-3. The latest commit: `src/huginn_muninn/study.py` and `tests/test_study.py`, the event-study engine.
+1. `a45cb41`: `data/events/mideast-conflict.csv`, `data/events/README.md`, `src/huginn_muninn/catalog.py`, `tests/test_catalog.py`.
+2. The latest commit: entry rules `after_news` (default) and `before_news` in `src/huginn_muninn/study.py`, with tests in `tests/test_study.py`.
 
-Run:
+Codex's read-only sandbox can't create temp dirs, so use:
 
-    python -m unittest discover -s tests
-    python scripts/e2e_portfolio.py
+    python -m unittest tests.test_study tests.test_catalog -v
 
-Then check, and report each finding with file:line, severity and a failing example:
+Check, and report each finding with file:line, severity and a failing example:
 
-- **Look-ahead.** Can any result use a close dated after `date_public` as the entry? Is the weekend/holiday rule right?
-- **Statistics.** Wilson interval correctness; rise defined as change > 0; the baseline uses overlapping windows (is that acceptable for a share and a median?); the `min_n` cut-off.
-- **Era filter.** Events are selected by `date_public`, baseline windows by start date, and exits may fall after the era end. Is that consistent?
-- **Edge cases.** Non-positive prices, unsorted or duplicate closes, horizon at the end of the history, empty event list.
-- **Tests.** Does each test assert behavior that matters? Is anything important untested?
-- **Docs vs code.** Do `PROJECT_STATE.md` method rules match what `study.py` actually does?
+- **Entry rules.** Is `after_news` really the first close on or after `date_public`, and `before_news` the last close strictly before? Is the `max_gap_days` check right at both ends of the history and across gaps?
+- **Catalog data.** For each row: is `date_public` the date the news broke in Europe/US trading time? Is `episode` grouping sensible (do any two episodes really belong together, or one should be split)? Flag any date you believe is wrong, with your source.
+- **Catalog loader.** Missing validation, CSV edge cases (quotes, BOM, trailing blank lines), and `first_per_episode` ordering.
+- **Docs vs code.** `PROJECT_STATE.md` rule 1 and `data/events/README.md`.
 
-Don't modify files. Report only. Then write your findings to `REVIEW.md` under a dated heading, if Kai asks.
+Report only. Don't edit files.

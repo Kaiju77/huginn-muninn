@@ -8,8 +8,10 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 2. Done: `data/events/mideast-conflict.csv` (28 events, 22 episodes, 1988-2026), loader `catalog.py` with validation, 5 tests. Kai: review the list; 15 links are still `source_checked=no`.
 3. Done: `src/huginn_muninn/study.py` with synthetic tests (Wilson CI, no look-ahead entry, skip rather than truncate, era filter, baseline). Full suite: 212 tests OK.
 4. Done: Codex review, 5 findings fixed (see `REVIEW.md`). 24 study tests, 220 total.
-5. Next decision (Kai): entry rule. Today, a weekday event enters at the same day's close (after the news). A weekend event enters at Friday's close (before the news), so it also measures the first reaction. Pick one: (a) `after_news` = first close on or after the public date (what you could actually act on) or (b) `before_news` = last close before it (full reaction). Recommendation: (a) as the default, with (b) as an option.
-6. Then: EIA Brent adapter (add `api.eia.gov` to the allowlist), `scripts/event_study.py` CLI, Streamlit page.
+5. Done: entry rule. `after_news` is the default and `before_news` an option (Claude's default, 2026-11-11). Kai can override.
+6. Kai: Codex review round 2 (`docs/REVIEW_REQUEST.md`).
+7. Kai decision: where real data is fetched. The device sandbox has no internet. Options: GitHub Actions (needs push), or a fetch script run on Windows.
+8. Then: EIA Brent adapter (add `api.eia.gov` to the allowlist), `scripts/event_study.py` CLI, Streamlit page.
 
 No merge, push or deploy has been done.
 

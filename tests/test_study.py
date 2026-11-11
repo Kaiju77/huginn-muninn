@@ -74,24 +74,53 @@ class EventReturnTest(unittest.TestCase):
         self.closes = sorted_closes(series(range(100, 130)))
 
     def test_entry_is_close_on_event_date(self):
-        event = Event('e1', date(2020, 1, 1))
+        event = Event('e1', date(2020, 1, 1))  # after_news: same-day close
         result, reason = event_return(self.closes, event, 5)
         self.assertIsNone(reason)
         self.assertEqual(result.entry_date, date(2020, 1, 1))
         self.assertAlmostEqual(result.change, 105 / 100 - 1)
 
-    def test_weekend_event_uses_previous_close_not_next(self):
-        # Saturday 2020-01-04: last close before it is Friday 2020-01-03 (102).
+    def test_weekend_event_after_news_enters_monday(self):
+        # Saturday 2020-01-04: first close on or after it is Monday 2020-01-06 (103).
         event = Event('e2', date(2020, 1, 4))
         result, _ = event_return(self.closes, event, 1)
+        self.assertEqual(result.entry_date, date(2020, 1, 6))
+        self.assertEqual(result.exit_date, date(2020, 1, 7))
+        self.assertAlmostEqual(result.change, 104 / 103 - 1)
+
+    def test_weekend_event_before_news_enters_friday(self):
+        event = Event('e2', date(2020, 1, 4))
+        result, _ = event_return(self.closes, event, 1, entry='before_news')
         self.assertEqual(result.entry_date, date(2020, 1, 3))
-        self.assertEqual(result.exit_date, date(2020, 1, 6))
         self.assertAlmostEqual(result.change, 103 / 102 - 1)
+
+    def test_weekday_rules_differ_by_one_close(self):
+        event = Event('e', date(2020, 1, 8))  # Wednesday, close 105
+        after, _ = event_return(self.closes, event, 1)
+        before, _ = event_return(self.closes, event, 1, entry='before_news')
+        self.assertEqual(after.entry_date, date(2020, 1, 8))
+        self.assertEqual(before.entry_date, date(2020, 1, 7))
 
     def test_event_before_history_is_skipped(self):
         result, reason = event_return(self.closes, Event('e3', date(2019, 12, 1)), 5)
         self.assertIsNone(result)
-        self.assertIn('no close', reason)
+        self.assertIn('within 5 days', reason)
+        result, reason = event_return(
+            self.closes, Event('e3', date(2019, 12, 1)), 5, entry='before_news')
+        self.assertIsNone(result)
+        self.assertIn('no close before', reason)
+
+    def test_gap_in_history_after_event_is_skipped(self):
+        gap = [c for c in self.closes if not date(2020, 1, 6) <= c.on <= date(2020, 1, 17)]
+        result, reason = event_return(gap, Event('e', date(2020, 1, 6)), 1)
+        self.assertIsNone(result)
+        self.assertIn('within 5 days', reason)
+
+    def test_unknown_entry_rule_rejected(self):
+        with self.assertRaises(ValueError):
+            event_return(self.closes, Event('e', date(2020, 1, 6)), 1, entry='open')
+        with self.assertRaises(ValueError):
+            run_study([], self.closes, horizons=(1,), entry='open')
 
     def test_event_near_end_is_skipped_not_truncated(self):
         last = self.closes[-3].on
