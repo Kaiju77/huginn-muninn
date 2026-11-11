@@ -6,5 +6,5 @@
  "candidates": [],
  "notes": [],
  "rejected": 0,
- "error": "openai/gpt-4.1-mini: ValueError: non-JSON API response: 'OK' '' | openai/gpt-4.1-mini: ValueError: non-JSON API response: 'OK' '' | openai/gpt-4o-mini: ValueError: non-JSON API response: 'OK' '' | openai/gpt-4o-mini: ValueError: non-JSON API response: 'OK' ''"
+ "error": "openai/gpt-4.1-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4.1-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4o-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4o-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' ''"
 }
