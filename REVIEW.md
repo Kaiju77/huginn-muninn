@@ -1,5 +1,14 @@
 # Review log
 
+## 2026-11-11: Codex review round 4 (daily brief)
+
+1. P2: a past brief could show headlines from later. Headlines now appear only when they were fetched on the brief's own date.
+2. P2: the quiet-day fallback named a future event. It now uses only events on or before the brief's date.
+3. P2: a failed news refresh looked successful. A brief with no fetch from today now says "today's fetch failed or has not run" and shows no old headlines.
+4. P2: an empty or malformed GDELT response became "no news" and overwrote the cache. `parse` now raises, so the old file is kept and the step is marked failed.
+
+Regression tests: `CodexRound4Test` in `tests/test_daily_report.py`.
+
 ## 2026-11-11: Codex review round 3 (four assets, page, workflow)
 
 1. P2: the page showed a baseline share without n and range. `report.base_rate_rows` now includes `baseline n` and `baseline range %`.

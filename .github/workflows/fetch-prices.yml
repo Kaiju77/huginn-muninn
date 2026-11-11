@@ -44,6 +44,9 @@ jobs:
         id: news
         continue-on-error: true   # the brief says "news unavailable" instead
         run: python scripts/fetch_news.py
+      - name: Suggest new events from headlines
+        if: steps.news.outcome == 'success'
+        run: python scripts/suggest_events.py
       - name: Write the daily brief
         run: |
           mkdir -p data/news reports
@@ -52,7 +55,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A data/prices data/news reports
+          git add -A data/prices data/news data/events/candidates.csv reports
           if git diff --cached --quiet; then
             echo 'Nothing new.'
           else

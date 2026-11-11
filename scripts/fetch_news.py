@@ -32,13 +32,18 @@ def url(query=QUERY, timespan='1d', maxrecords=75):
 
 
 def parse(body):
+    """Articles from a GDELT ArtList response. An empty body, an object without
+    an ``articles`` list, or an error object is a failure, not "no news": the
+    query is broad enough that a real day always has matches."""
     text = body.decode('utf-8', errors='replace').strip()
     if not text:
-        return []
+        raise ValueError('empty GDELT response')
     data = json.loads(text)
-    articles = data.get('articles', [])
-    if not isinstance(articles, list):
-        raise ValueError('unexpected GDELT response')
+    if not isinstance(data, dict) or not isinstance(data.get('articles'), list):
+        raise ValueError('GDELT response has no articles list')
+    articles = data['articles']
+    if not articles:
+        raise ValueError('GDELT returned zero articles')
     return [{k: a.get(k, '') for k in ('title', 'url', 'domain', 'seendate', 'sourcecountry')}
             for a in articles if isinstance(a, dict)]
 

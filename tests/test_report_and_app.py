@@ -29,7 +29,7 @@ class ReportTest(unittest.TestCase):
         rows = report.base_rate_rows(report.study(self.events, self.closes, 'after_news'))
         self.assertEqual([r['horizon (trading days)'] for r in rows], [5, 20, 60])
         for r in rows:
-            self.assertEqual(r['events n'], 21)
+            self.assertEqual(r['events n'], len(self.events))
             self.assertEqual(r['share rose %'], 100.0)
             self.assertIsNotNone(r['95% CI %'])
             self.assertIsNotNone(r['range %'])
@@ -43,11 +43,11 @@ class ReportTest(unittest.TestCase):
 
     def test_event_rows_and_paths(self):
         rows = report.event_rows(self.events, self.closes, (5, 20), 'after_news')
-        self.assertEqual(len(rows), 21)
+        self.assertEqual(len(rows), len(self.events))
         self.assertTrue(all(r['source'].startswith('https://') for r in rows))
         self.assertGreater(rows[0]['5d %'], 0)
         paths = report.paths(self.events, self.closes, 10, 'after_news')
-        self.assertEqual(len(paths), 21)
+        self.assertEqual(len(paths), len(self.events))
         first = next(iter(paths.values()))
         self.assertEqual(first[0], (0, 0.0))
         self.assertEqual(len(first), 11)

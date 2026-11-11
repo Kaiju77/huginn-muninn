@@ -1,0 +1,55 @@
+name: approve-event
+
+# One-click approval: paste a candidate id from the daily brief.
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_id:
+        description: 'Candidate id from the brief, e.g. c-20261111-iran'
+        required: true
+      title:
+        description: 'Optional better title (leave empty to keep the headline)'
+        required: false
+      episode:
+        description: 'Optional episode (leave empty to use the suggestion)'
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-prices   # never runs at the same time as the daily job
+  cancel-in-progress: false
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Approve
+        env:
+          CANDIDATE_ID: ${{ inputs.candidate_id }}
+          TITLE: ${{ inputs.title }}
+          EPISODE: ${{ inputs.episode }}
+        run: |
+          args=("$CANDIDATE_ID")
+          [ -n "$TITLE" ] && args+=(--title "$TITLE")
+          [ -n "$EPISODE" ] && args+=(--episode "$EPISODE")
+          python scripts/approve_event.py "${args[@]}"
+      - name: Tests still pass
+        run: python -m unittest discover -s tests
+      - name: Rewrite the brief and commit
+        run: |
+          python scripts/daily_report.py > /dev/null
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A data/events reports
+          git commit -m "Approve event ${CANDIDATE_ID}"
+          git pull --rebase origin main
+          git push
+        env:
+          CANDIDATE_ID: ${{ inputs.candidate_id }}

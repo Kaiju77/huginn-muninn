@@ -52,7 +52,6 @@ class HeadlinesTest(unittest.TestCase):
                                          'seendate': '20261110T100000Z', 'extra': 1}]}).encode()
         self.assertEqual(parse(body)[0]['title'], 'T')
         self.assertNotIn('extra', parse(body)[0])
-        self.assertEqual(parse(b''), [])
         self.assertIn('mode=ArtList', url())
         self.assertIn('timespan=1d', url())
 
@@ -88,17 +87,56 @@ class BuildTest(unittest.TestCase):
         self.assertIn('News unavailable.', text)
         self.assertIn('Not a forecast or advice', text)
 
-    def test_headlines_and_stale_news_warning(self):
-        fresh = {'fetched_at': datetime.now(timezone.utc).isoformat(),
-                 'articles': [{'title': 'Tanker hit [update]', 'url': 'https://n/1',
-                               'domain': 'n', 'seendate': '20261111T100000Z'}]}
-        self.news.write_text(json.dumps(fresh))
+    def write_news(self, fetched_at, titles=('Tanker hit [update]',)):
+        self.news.write_text(json.dumps({
+            'fetched_at': fetched_at.isoformat(),
+            'articles': [{'title': x, 'url': f'https://n/{i}', 'domain': 'n',
+                          'seendate': '20261111T100000Z'} for i, x in enumerate(titles)]}))
+
+    def test_headlines_fetched_today_are_shown(self):
+        self.write_news(datetime(2026, 11, 11, 6, 30, tzinfo=timezone.utc))
         text = build(date(2026, 11, 11), self.dir, EVENTS, self.news)
-        self.assertIn('- [Tanker hit (update)](https://n/1) (n)', text)
-        self.assertNotIn('hours old', text)
-        fresh['fetched_at'] = (datetime.now(timezone.utc) - timedelta(days=3)).isoformat()
-        self.news.write_text(json.dumps(fresh))
-        self.assertIn('hours old', build(date(2026, 11, 11), self.dir, EVENTS, self.news))
+        self.assertIn('- [Tanker hit (update)](https://n/0) (n)', text)
+        self.assertIn('Fetched 2026-11-11 06:30 UTC', text)
+
+
+class CodexRound4Test(unittest.TestCase):
+    """Regression tests for the 2026-11-11 Codex review, round 4."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+        days = weekdays(date(1987, 5, 20), 10200)
+        write_csv([(d, 50 + i * 0.001) for i, d in enumerate(days)],
+                  self.dir / 'brent.csv', 'USD/barrel')
+        self.news = self.dir / 'news.json'
+        self.news.write_text(json.dumps({
+            'fetched_at': '2026-11-11T06:30:00+00:00',
+            'articles': [{'title': 'November headline', 'url': 'https://n/1',
+                          'domain': 'n', 'seendate': '20261111T060000Z'}]}))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_1_past_brief_shows_no_future_headlines(self):
+        text = build(date(2026, 3, 20), self.dir, EVENTS, self.news)
+        self.assertNotIn('November headline', text)
+        self.assertIn('No headlines fetched on 2026-03-20', text)
+
+    def test_2_quiet_day_fallback_has_no_future_events(self):
+        text = build(date(1980, 1, 1), self.dir, EVENTS, self.news)
+        self.assertNotIn('2026', text.split('## Recent events')[1].split('## Headlines')[0])
+
+    def test_3_failed_refresh_today_is_reported(self):
+        text = build(date(2026, 11, 12), self.dir, EVENTS, self.news)  # yesterday's cache
+        self.assertNotIn('November headline', text)
+        self.assertIn("today's fetch failed or has not run", text)
+
+    def test_4_empty_or_malformed_gdelt_is_a_failure(self):
+        for body in (b'', b'{}', b'{"error":"backend unavailable"}',
+                     b'{"articles": []}', b'{"articles": "x"}', b'[]'):
+            with self.assertRaises(ValueError, msg=body):
+                parse(body)
 
 
 if __name__ == '__main__':

@@ -16,8 +16,10 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 9. Done: Codex round 3, 3 findings fixed (see `REVIEW.md`).
 10. Done 2026-11-11: daily brief (`scripts/daily_report.py`, `reports/latest.md`). It shows moves and how unusual they are, recent catalog events with comparable base rates, and GDELT headlines. It runs inside the `fetch-prices` workflow.
 11. Blocked on GitHub: an Actions outage since 20:48 UTC on 2026-11-11 left all runs queued. When it clears: run `fetch-prices`, check that WTI, Henry Hub and USD/NOK all fetch, and fix the Henry Hub route if needed.
-12. Kai: Codex round 4 (`docs/REVIEW_REQUEST.md`).
-13. Next options: (a) automatic new events: Claude classifies GDELT headlines into catalog candidates for Kai to approve; (b) rule-based history from UCDP; (c) central bank decisions as an event type.
+12. Done: Codex round 4, 4 findings fixed.
+13. Done 2026-11-11: event suggestions. `candidates.py` screens headlines (an escalation word plus a region, reported by 3 or more sites) and writes `data/events/candidates.csv`. The brief lists pending candidates. The `approve-event` workflow (one input: the candidate id) validates and adds the event, runs the tests, and rewrites the brief. Free; no paid API.
+14. Kai: Codex round 5 (`docs/REVIEW_REQUEST.md`).
+15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 
 ## Historical
 

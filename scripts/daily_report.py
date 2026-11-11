@@ -22,6 +22,7 @@ from src.huginn_muninn.assets import ASSETS, BY_ID  # noqa: E402
 from src.huginn_muninn.catalog import first_per_episode, load_catalog  # noqa: E402
 from src.huginn_muninn.prices import load_closes  # noqa: E402
 from src.huginn_muninn.study import format_result  # noqa: E402
+from scripts.suggest_events import CANDIDATES, read_candidates  # noqa: E402
 
 EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 NEWS = ROOT / 'data' / 'news' / 'latest.json'
@@ -45,7 +46,49 @@ def unusual(rank):
     return 'normal'
 
 
-def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_days=90):
+def news_lines(today, news_path):
+    """Headlines only if they were fetched on ``today`` (UTC). Anything else is
+    either a failed refresh or a past brief, and is said plainly."""
+    try:
+        news = json.loads(news_path.read_text(encoding='utf-8'))
+        fetched = datetime.fromisoformat(news['fetched_at'])
+        articles = news['articles']
+    except (OSError, ValueError, KeyError, TypeError):
+        return ['News unavailable.']
+    fetched_day = fetched.astimezone(timezone.utc).date()
+    if fetched_day != today:
+        return [f'No headlines fetched on {today.isoformat()} (the latest fetch is from '
+                f'{fetched_day.isoformat()}; today\'s fetch failed or has not run).']
+    items = daily.headlines(articles)
+    if not items:
+        return ['News unavailable (the fetch returned no usable headlines).']
+    out = [f'Fetched {fetched.strftime("%Y-%m-%d %H:%M")} UTC, covering the previous 24 hours.', '']
+    for title, domain, link, _seen in items:
+        safe = title.replace('[', '(').replace(']', ')')
+        out.append(f'- [{safe}]({link}) ({domain})')
+    return out
+
+
+def candidate_lines(today, path):
+    rows = [r for r in read_candidates(path)
+            if r['status'] == 'pending' and r['date_public'] == today.isoformat()]
+    if not rows:
+        return []
+    out = ['## Possible new events (need your approval)', '',
+           'Several news sites reported escalation in the same region today. '
+           'This is a keyword screen, not a judgment.', '']
+    for r in rows:
+        hint = f', may belong to episode `{r["episode_hint"]}`' if r['episode_hint'] else ''
+        out.append(f'- `{r["candidate_id"]}`: [{r["title"]}]({r["source_url"]}) '
+                   f'({r["n_sites"]} sites{hint})')
+    out += ['', 'To add one: GitHub, then Actions, then **approve-event**, then Run workflow, '
+            'and paste the id.', '']
+    return out
+
+
+def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_days=90,
+          candidates_path=None):
+    candidates_path = candidates_path or CANDIDATES
     lines = [f'# Daily market brief, {today.isoformat()}', '', DISCLAIMER, '']
     loaded = {}
     lines += ['## Moves', '',
@@ -71,10 +114,10 @@ def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_day
     catalog = load_catalog(events_path)
     recent = daily.recent_events(catalog, today, recent_days)
     if not recent:
-        last = max(catalog, key=lambda e: e.date_public)
-        lines += [f'No catalog events in the last {recent_days} days. Latest: '
-                  f'{last.title} ({last.date_public.isoformat()}). '
-                  'The catalog is updated by hand for now.', '']
+        earlier = [e for e in catalog if e.date_public <= today]  # no future events
+        latest = (f' Latest: {max(earlier, key=lambda e: e.date_public).title} '
+                  f'({max(e.date_public for e in earlier).isoformat()}).') if earlier else ''
+        lines += [f'No catalog events in the last {recent_days} days.{latest}', '']
     for event in recent:
         comparable = [e for e in first_per_episode(catalog)
                       if e.episode != event.episode and e.date_public < event.date_public]
@@ -90,21 +133,9 @@ def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_day
             lines += [f'- {format_result(r, asset.label)}' for r in ctx.results]
             lines.append('')
 
-    lines += ['## Headlines (GDELT, last 24 hours)', '']
-    try:
-        news = json.loads(news_path.read_text(encoding='utf-8'))
-        fetched = datetime.fromisoformat(news['fetched_at'])
-        age_h = (datetime.now(timezone.utc) - fetched).total_seconds() / 3600
-        items = daily.headlines(news.get('articles', []))
-        if age_h > 36:
-            lines.append(f'News is {age_h:.0f} hours old; the last fetch may have failed.')
-        if not items:
-            lines.append('No matching headlines.')
-        for title, domain, link, _seen in items:
-            safe = title.replace('[', '(').replace(']', ')')
-            lines.append(f'- [{safe}]({link}) ({domain})')
-    except (OSError, ValueError, KeyError):
-        lines.append('News unavailable.')
+    lines += candidate_lines(today, candidates_path)
+    lines += ['## Headlines (GDELT)', '']
+    lines += news_lines(today, news_path)
     lines += ['', 'Headlines from the same day are context. They do not prove why a price moved.', '']
     return '\n'.join(lines)
 

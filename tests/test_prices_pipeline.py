@@ -203,7 +203,9 @@ class CliTest(unittest.TestCase):
                 code = event_study.main(['--prices-dir', str(tmp)])
             text = buf.getvalue()
         self.assertEqual(code, 0)
-        self.assertIn('21 events (28 in catalog)', text)
+        from src.huginn_muninn.catalog import first_per_episode, load_catalog
+        catalog = load_catalog(ROOT / 'data' / 'events' / 'mideast-conflict.csv')
+        self.assertIn(f'{len(first_per_episode(catalog))} events ({len(catalog)} in catalog)', text)
         self.assertIn('Brent (USD/barrel)', text)
         self.assertIn('20 trading days: in ', text)
         self.assertIn('WTI: no price file yet', text)
