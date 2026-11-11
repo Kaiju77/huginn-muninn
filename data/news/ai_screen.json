@@ -1,0 +1,10 @@
+{
+ "date": "2026-11-11",
+ "ok": false,
+ "model": "",
+ "headlines": 20,
+ "candidates": [],
+ "notes": [],
+ "rejected": 0,
+ "error": "openai/gpt-4o-mini: JSONDecodeError"
+}
