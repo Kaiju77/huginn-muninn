@@ -47,10 +47,11 @@ jobs:
         id: news
         continue-on-error: true   # the brief says "news unavailable" instead
         run: python scripts/fetch_news.py
-      - name: AI screen of headlines (GitHub Models)
+      - name: AI screen of headlines (Groq, then GitHub Models)
         # Runs even if this fetch failed: an earlier fetch from today may exist.
         # Stale news gives a status for an older date, which the brief ignores.
         env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/ai_screen.py
       - name: Suggest new events from headlines

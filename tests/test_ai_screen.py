@@ -162,6 +162,53 @@ class CurlCallTest(unittest.TestCase):
             call('m', [], 't', run=run)
 
 
+class ProviderTest(unittest.TestCase):
+    news = {'fetched_at': '2026-11-11T06:30:00+00:00', 'articles': ARTICLES}
+
+    def test_provider_order_and_keys(self):
+        from scripts.ai_screen import providers
+        self.assertEqual([p[0] for p in providers({})], [])
+        self.assertEqual([p[0] for p in providers({'GITHUB_TOKEN': 'g'})], ['github-models'])
+        self.assertEqual([p[0] for p in providers({'GROQ_API_KEY': 'k', 'GITHUB_TOKEN': 'g'})],
+                         ['groq', 'github-models'])
+
+    def test_groq_request_has_no_github_headers_or_json_mode(self):
+        from scripts.ai_screen import GROQ_ENDPOINT, groq_call
+        seen = {}
+
+        def run(args, **kw):
+            import subprocess
+            seen['headers'] = Path(args[args.index('-H') + 1][1:]).read_text()
+            seen['body'] = Path(args[args.index('--data-binary') + 1][1:]).read_text()
+            seen['url'] = args[-1]
+            reply = json.dumps({'choices': [{'message': {'content': '{"events": []}'}}]})
+            return subprocess.CompletedProcess(args, 0, reply + '\n200', '')
+
+        self.assertEqual(groq_call('openai/gpt-oss-120b', [], 'KEY', run=run), '{"events": []}')
+        self.assertEqual(seen['url'], GROQ_ENDPOINT)
+        self.assertNotIn('X-GitHub-Api-Version', seen['headers'])
+        self.assertNotIn('response_format', seen['body'])
+
+    def test_falls_through_providers_and_records_errors(self):
+        from scripts.ai_screen import screen_all
+
+        def bad(model, msgs, token):
+            raise ValueError('HTTP 200 non-JSON response')
+
+        def good(model, msgs, token):
+            return json.dumps({'events': [ev()]})
+
+        status = screen_all(self.news, [('groq', ('m1',), 'k', bad),
+                                        ('github-models', ('m2',), 'g', good)],
+                            load_catalog(EVENTS))
+        self.assertTrue(status['ok'])
+        self.assertEqual(status['provider'], 'github-models')
+        self.assertIn('groq:', status['error'])
+        none = screen_all(self.news, [], [])
+        self.assertFalse(none['ok'])
+        self.assertIn('no AI provider key set', none['error'])
+
+
 class FlowTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

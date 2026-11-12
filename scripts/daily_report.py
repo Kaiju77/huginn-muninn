@@ -75,7 +75,7 @@ def candidate_lines(today, path, ai_path=AI):
     ai = ai_status(today, ai_path)
     out = ['## Event screen', '']
     if ai is not None:
-        out.append(f'AI screen ({ai["model"]}) read {ai["headlines"]} relevant headlines; '
+        out.append(f'AI screen ({ai.get("provider", "")} {ai["model"]}) read {ai["headlines"]} relevant headlines; '
                    f'every result is checked by code (region, cited headlines, 2+ sites).')
     else:
         out.append('AI screen unavailable today; the keyword screen was used '

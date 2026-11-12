@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Ask GitHub Models to screen today's headlines; write data/news/ai_screen.json.
+"""Ask an AI model to screen today's headlines; write data/news/ai_screen.json.
 
     python scripts/ai_screen.py
 
-Needs GITHUB_TOKEN with the models:read permission (set in the workflow).
+Providers, tried in order, each only if its key is set:
+  1. Groq (free plan): GROQ_API_KEY, a repository secret.
+  2. GitHub Models: GITHUB_TOKEN with models:read (not available on Kai's
+     account as of 2026-11-12; kept in case GitHub enables it).
 Always writes the status file, with ok=false on any failure, so the brief
 can say the AI screen was unavailable.
 """
@@ -31,23 +34,29 @@ OUT = ROOT / 'data' / 'news' / 'ai_screen.json'
 EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 ENDPOINT = 'https://models.github.ai/inference/chat/completions'
 MODELS = ('openai/gpt-4.1-mini', 'openai/gpt-4o-mini')
+GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
+GROQ_MODELS = ('openai/gpt-oss-120b', 'llama-3.1-8b-instant')
+GITHUB_HEADERS = ('Accept: application/vnd.github+json\n'
+                  'X-GitHub-Api-Version: 2022-11-28\n')
 
 
-def call(model, msgs, token, run=subprocess.run):
+def call(model, msgs, token, run=subprocess.run, endpoint=ENDPOINT,
+         extra_headers=GITHUB_HEADERS, json_mode=True):
     """POST to GitHub Models with curl, exactly as GitHub's quickstart does.
 
     Python's urllib turns a redirected POST into a GET, which got a bare "OK"
     back; curl keeps the request as documented. The token goes in a temporary
     header file (mode 600), never on the command line.
     """
-    body = json.dumps({'model': model, 'messages': msgs, 'temperature': 0,
-                       'response_format': {'type': 'json_object'}})
+    request = {'model': model, 'messages': msgs, 'temperature': 0}
+    if json_mode:
+        request['response_format'] = {'type': 'json_object'}
+    body = json.dumps(request)
     with tempfile.TemporaryDirectory() as tmp:
         headers = Path(tmp) / 'h'
         headers.write_text(
             f'Authorization: Bearer {token}\n'
-            'Accept: application/vnd.github+json\n'
-            'X-GitHub-Api-Version: 2022-11-28\n'
+            + extra_headers +
             'Content-Type: application/json\n'
             'User-Agent: huginn-muninn-ai-screen\n', encoding='utf-8')
         headers.chmod(0o600)
@@ -55,7 +64,7 @@ def call(model, msgs, token, run=subprocess.run):
         data.write_text(body, encoding='utf-8')
         done = run(['curl', '-sS', '-L', '--max-time', '120', '-X', 'POST',
                     '-H', f'@{headers}', '--data-binary', f'@{data}',
-                    '-w', '\n%{http_code}', ENDPOINT],
+                    '-w', '\n%{http_code}', endpoint],
                    capture_output=True, text=True, timeout=150)
     if done.returncode != 0:
         raise ValueError(f'curl exit {done.returncode}: {done.stderr[:160]}')
@@ -69,7 +78,40 @@ def call(model, msgs, token, run=subprocess.run):
     return payload['choices'][0]['message']['content']
 
 
-def screen(news, token, catalog, call=call):
+def groq_call(model, msgs, token, run=subprocess.run):
+    # The parser accepts plain or fenced JSON, so JSON mode is not required.
+    return call(model, msgs, token, run=run, endpoint=GROQ_ENDPOINT, extra_headers='',
+                json_mode=False)
+
+
+def providers(env):
+    """[(name, models, token, call)] for every provider whose key is set."""
+    out = []
+    if env.get('GROQ_API_KEY', '').strip():
+        out.append(('groq', GROQ_MODELS, env['GROQ_API_KEY'].strip(), groq_call))
+    if env.get('GITHUB_TOKEN', '').strip():
+        out.append(('github-models', MODELS, env['GITHUB_TOKEN'].strip(), call))
+    return out
+
+
+def screen_all(news, provider_list, catalog):
+    """Try each provider until one succeeds; keep every error."""
+    errors, status = [], None
+    for name, models, token, fn in provider_list:
+        status = screen(news, token, catalog, call=fn, models=models)
+        if status['ok']:
+            status['provider'] = name
+            if errors:
+                status['error'] = ' | '.join(errors + ([status['error']] if status['error'] else []))
+            return status
+        errors.append(f'{name}: {status["error"]}')
+    if status is None:
+        return {'date': '', 'ok': False, 'error': 'no AI provider key set'}
+    status['error'] = ' || '.join(errors)[:1500]
+    return status
+
+
+def screen(news, token, catalog, call=call, models=MODELS):
     fetched = datetime.fromisoformat(news['fetched_at']).astimezone(timezone.utc)
     on = fetched.date()
     items = numbered(news['articles'])
@@ -79,7 +121,7 @@ def screen(news, token, catalog, call=call):
         status.update(ok=True, error='no relevant headlines')
         return status
     errors = []
-    for model in MODELS:
+    for model in models:
         for attempt in range(2):
             text = ''
             try:
@@ -107,20 +149,18 @@ def screen(news, token, catalog, call=call):
 
 
 def main():
-    token = os.environ.get('GITHUB_TOKEN', '').strip()
     try:
         news = json.loads(NEWS.read_text(encoding='utf-8'))
     except (OSError, ValueError):
         news = None
     if news is None:
         status = {'date': '', 'ok': False, 'error': 'no news file'}
-    elif not token:
-        status = {'date': '', 'ok': False, 'error': 'GITHUB_TOKEN not set'}
     else:
-        status = screen(news, token, load_catalog(EVENTS))
+        status = screen_all(news, providers(os.environ), load_catalog(EVENTS))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(status, indent=1, ensure_ascii=False), encoding='utf-8')
-    print(f"AI screen ok={status.get('ok')} candidates={len(status.get('candidates', []))} "
+    print(f"AI screen ok={status.get('ok')} provider={status.get('provider', '')} "
+          f"candidates={len(status.get('candidates', []))} "
           f"notes={len(status.get('notes', []))} {status.get('error', '')}")
     return 0  # never fails the job; the brief reports the status
 
