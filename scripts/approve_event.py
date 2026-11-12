@@ -10,6 +10,7 @@ is validated with the normal catalog loader before anything is written.
 import argparse
 import csv
 import os
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -32,7 +33,8 @@ def approve(candidate_id, title=None, episode=None, events=EVENTS, candidates=CA
         raise ValueError(f'no candidate {candidate_id}')
     cand = match[0]
     day = day or cand['date_public']
-    event_id = f'me-{day[:4]}-{cand["region"]}-{day[5:7]}{day[8:10]}'
+    suffix = candidate_id[len(f'c-{cand["date_public"].replace("-", "")}-{cand["region"]}'):]
+    event_id = f'me-{day[:4]}-{cand["region"]}-{day[5:7]}{day[8:10]}{suffix}'
     with events.open(encoding='utf-8-sig', newline='') as handle:
         existing = list(csv.DictReader(handle))
     already = [r for r in existing if r['event_id'] == event_id]
@@ -89,6 +91,8 @@ def main(argv=None):
     p.add_argument('--date', help='YYYY-MM-DD, to correct the public date')
     a = p.parse_args(argv)
     try:
+        if a.date and not re.fullmatch(r'\d{4}-\d{2}-\d{2}', a.date):
+            raise ValueError('--date must be YYYY-MM-DD')
         if a.date:
             date.fromisoformat(a.date)
         row = approve(a.candidate_id.strip(), a.title, a.episode, day=a.date)

@@ -11,6 +11,7 @@ Brier score: mean of (predicted probability - outcome)^2. Lower is better.
 0.25 is what always saying 50% scores.
 """
 
+import random
 from bisect import bisect_left
 from typing import NamedTuple, Optional
 
@@ -83,3 +84,26 @@ def score(preds, horizon):
                  brier([(p.p_baseline, p.rose) for p in preds]),
                  brier([(0.5, p.rose) for p in preds]),
                  rose, wilson_interval(rose, len(preds)))
+
+
+def bootstrap_diff(preds, resamples=2000, seed=0):
+    """Brier(event base rate) - Brier(baseline), with a 95% bootstrap interval.
+    Negative means the event base rate did better. Returns (diff, low, high) or
+    None when there are no predictions with a baseline."""
+    pairs = [p for p in preds if p.p_baseline is not None]
+    if not pairs:
+        return None
+
+    def diff(sample):
+        return (brier([(p.p_event, p.rose) for p in sample])
+                - brier([(p.p_baseline, p.rose) for p in sample]))
+
+    rng = random.Random(seed)
+    draws = sorted(diff([rng.choice(pairs) for _ in pairs]) for _ in range(resamples))
+    return diff(pairs), draws[int(0.025 * resamples)], draws[int(0.975 * resamples) - 1]
+
+
+def baseline_side_hits(preds):
+    """How often the baseline's side (p >= 0.5 means rise) was right."""
+    return sum(1 for p in preds if p.p_baseline is not None
+               and (p.p_baseline >= 0.5) == p.rose)

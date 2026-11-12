@@ -65,18 +65,28 @@ jobs:
       - name: Backtest (is the tool right?)
         continue-on-error: true
         run: python scripts/backtest.py > /dev/null
-      - name: Commit prices, news and brief
+      - name: Commit prices, news and brief (retries if main moved)
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A data/prices data/news data/events/candidates.csv reports
-          if git diff --cached --quiet; then
-            echo 'Nothing new.'
-          else
-            git commit -m "Daily data and brief $(date -u +%F)"
-            git pull --rebase origin main   # someone may have pushed meanwhile
-            git push
-          fi
+          # Keep what this run fetched; everything derived is rebuilt on top of
+          # the latest main, so an approval pushed meanwhile is never overwritten.
+          mkdir -p /tmp/fetched && cp -r data/prices data/news /tmp/fetched/
+          for attempt in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            cp -r /tmp/fetched/prices /tmp/fetched/news data/
+            python scripts/suggest_events.py || true
+            python scripts/daily_report.py > /dev/null
+            python scripts/backtest.py > /dev/null || true
+            git add -A data/prices data/news data/events/candidates.csv reports
+            if git diff --cached --quiet; then echo 'Nothing new.'; exit 0; fi
+            git commit -q -m "Daily data and brief $(date -u +%F)"
+            if git push -q origin HEAD:main; then exit 0; fi
+            echo "main moved; rebuilding on top of it ($attempt)"
+            sleep 10
+          done
+          exit 1
       - name: Fail the run if any asset failed
         if: steps.fetch.outcome == 'failure'
         run: |

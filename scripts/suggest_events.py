@@ -81,20 +81,28 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
             covered = {c['region'] for c in found}
             found += [c for c in keyword if c['region'] not in covered]
     rows = read_candidates(out)
-    by_id = {r['candidate_id']: r for r in rows}
     new = []
     for c in found:
-        old = by_id.get(c['candidate_id'])
-        if old is None:
-            rows.append({k: c.get(k, '') for k in COLUMNS})
+        base = c['candidate_id']
+        same_slot = [r for r in rows if r['candidate_id'] == base
+                     or r['candidate_id'].startswith(base + '-')]
+        same_story = [r for r in same_slot if r['source_url'] == c['source_url']
+                      or r['title'] == c['title']]
+        keyword_reject = [r for r in same_slot if r['status'] == 'rejected'
+                          and r.get('method') == 'keyword' and c.get('method') == 'ai']
+        if keyword_reject and not [r for r in same_slot if r.get('method') == 'ai']:
+            # An AI candidate replaces a rejected keyword false alarm (2026-11-12).
+            keyword_reject[0].update({k: c.get(k, '') for k in COLUMNS})
             new.append(c)
-        elif (old['status'] == 'rejected' and old.get('method') == 'keyword'
-              and c.get('method') == 'ai'):
-            # A rejected keyword false alarm must not hide an AI candidate for the
-            # same region and day (2026-11-12). A rejected candidate is never
-            # revived by the same screen with a different headline (review 6).
-            old.update({k: c.get(k, '') for k in COLUMNS})
-            new.append(c)
+            continue
+        if same_story:
+            continue  # already known (pending, approved or rejected): never revived
+        if same_slot:
+            # Same region and day but a different story: keep it, with a suffix,
+            # rather than drop it silently (review round 7).
+            c = dict(c, candidate_id=f'{base}-{len(same_slot) + 1}')
+        rows.append({k: c.get(k, '') for k in COLUMNS})
+        new.append(c)
     if new or not out.exists():
         write_candidates(rows, out)
     return new

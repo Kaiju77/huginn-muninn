@@ -1,5 +1,18 @@
 # Review log
 
+## 2026-11-12: review round 7 (independent reviewer agent; 340 tests ran, all OK)
+
+1. P1: the round 6 date fix overcorrected. News first seen in the evening was dated that same day, so the `after_news` entry was a close printed before the news. For example, the 2025-06-12 22:00 UTC strike on Iran showed +13.5% at 5 days instead of +3.6%. News first seen at or after 19:00 UTC (around the Brent close) is now dated the next day.
+2. P1: overlapping fetch windows could give a new story an existing id, and it was dropped silently. Same slot plus same story (same URL or title) is skipped; a different story gets a suffix (`-2`), and approval carries the suffix into the `event_id`.
+3. P1/P2: an approval pushed during the daily run made its rebase fail, and the day's data was lost. The daily commit now saves what it fetched, resets to `main`, rebuilds candidates, the brief and the backtest on top, and retries up to 3 times.
+4. P2: one-candidate-per-story hid a second story in the same region. A region is split into stories by shared headline words, but only when every part independently has 3 or more sites.
+5. P2: the backtest understated noise. It now shows a 95% bootstrap interval for the Brier difference, the baseline's side-right count, the 12-comparisons caveat and the hindsight-curated-events caveat.
+6. P3: vocabulary. Added "shells" (but not "Shell"). The sport veto is lifted when casualty words appear. Labour and business vetoes only match phrases next to "strike", and "struck a deal" is handled.
+7. P3: `--date 20261111` wrote a malformed row. It must now be YYYY-MM-DD.
+8. P3: the episode hint was rendered with mangled quotes. Fixed.
+
+Regression tests: `tests/test_review_round7.py`.
+
 ## 2026-11-12: review round 6 (independent reviewer agent; 317 tests ran, all OK)
 
 From now on, reviews are done by an independent reviewer agent in the cloud workspace: fresh context, all tests run, no temp-dir limits.

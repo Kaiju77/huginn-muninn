@@ -13,7 +13,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.huginn_muninn.assets import ASSETS  # noqa: E402
-from src.huginn_muninn.calibration import score, walk_forward  # noqa: E402
+from src.huginn_muninn.calibration import (  # noqa: E402
+    baseline_side_hits, bootstrap_diff, score, walk_forward)
 from src.huginn_muninn.catalog import first_per_episode, load_catalog  # noqa: E402
 from src.huginn_muninn.prices import load_closes  # noqa: E402
 from src.huginn_muninn.study import DEFAULT_HORIZONS, ENTRY_RULES  # noqa: E402
@@ -32,8 +33,8 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
              f'Entry rule: `{entry}`. Each event is "predicted" from earlier events whose outcome '
              'was already known on its date, then scored against what happened. '
              'Brier score: lower is better; always saying 50% scores 0.250.', '',
-             '| Asset | Horizon | Predictions | Side right | Brier: event base rate | '
-             'Brier: normal-period baseline | Brier: 50% |',
+             '| Asset | Horizon | Predictions | Side right: event / baseline | '
+             'Brier: event | Brier: baseline | Difference (95% interval) |',
              '|---|---|---|---|---|---|---|']
     for asset in ASSETS:
         path = (prices_dir / f'{asset.asset_id}.csv') if prices_dir else asset.csv_path
@@ -41,13 +42,22 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
             continue
         closes = load_closes(path)
         for h in DEFAULT_HORIZONS:
-            s = score(walk_forward(events, closes, h, entry), h)
-            side = f'{s.hits}/{s.n}' if s.n else '0'
-            lines.append(f'| {asset.label} | {h} days | {s.n} | {side} | {fmt(s.brier_event)} | '
-                         f'{fmt(s.brier_baseline)} | {fmt(s.brier_coin)} |')
-    lines += ['', 'How to read it: the event base rate is only useful if its Brier score is '
-              'clearly below both the baseline and 50%. With this few predictions, differences '
-              'under about 0.03 are noise.', '',
+            preds = walk_forward(events, closes, h, entry)
+            s = score(preds, h)
+            if not s.n:
+                lines.append(f'| {asset.label} | {h} days | 0 | | | | |')
+                continue
+            d = bootstrap_diff(preds)
+            diff = 'n/a' if d is None else f'{d[0]:+.3f} ({d[1]:+.3f} to {d[2]:+.3f})'
+            lines.append(f'| {asset.label} | {h} days | {s.n} | {s.hits} / {baseline_side_hits(preds)} | '
+                         f'{fmt(s.brier_event)} | {fmt(s.brier_baseline)} | {diff} |')
+    lines += ['', '**How to read it.** Difference = event Brier minus baseline Brier; negative '
+              'means the event base rate did better. Only an interval entirely below 0 is evidence '
+              'of skill, and even then: there are 12 comparisons here, so one or two will look '
+              'good by luck alone.', '',
+              '**Limits.** 10 to 13 predictions per row is very few. The event list was picked by '
+              'hand with hindsight (see `data/events/README.md`), which can make event base rates '
+              'look better than they would be live. The live prediction log is the real test.', '',
               '_Historical backtest, not a forecast or advice._', '']
     return '\n'.join(lines)
 

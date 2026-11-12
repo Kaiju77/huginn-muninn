@@ -26,6 +26,7 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 14b. Done 2026-11-12: `GROQ_API_KEY` added. The AI screen works (groq openai/gpt-oss-120b, 34 headlines). Fixed: a rejected candidate id no longer blocks a different new candidate for the same region and day.
 14c. Done 2026-11-12: review round 6 by an independent reviewer agent; 10 findings fixed (see `REVIEW.md`). Reviews are now done by the agent automatically; Codex is optional.
 14d. Done 2026-11-12: walk-forward backtest (`scripts/backtest.py`, `reports/calibration.md`), run daily. First result: mostly no better than the normal-period baseline or 50% (n=10-13 per cell). Exception: USD/NOK 5 days, 12/13 right, Brier 0.151 vs 0.256 baseline.
+14d2. Done: review round 7, 8 findings fixed. Backtest with intervals: only USD/NOK 5 days has an interval entirely below 0 (-0.104, -0.148 to -0.051); Brent 5 days is worse than the baseline.
 14e. Next: prediction log (record each live base rate and score it when its horizon has passed); more independent events, because n=13 is too small to tell skill from luck. (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 

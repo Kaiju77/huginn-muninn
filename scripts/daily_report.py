@@ -97,10 +97,10 @@ def candidate_lines(today, path, ai_path=AI):
     if rows:
         out += ['**Possible new events (need your approval):**', '']
         for r in rows:
-            hint = f', may belong to episode `{r["episode_hint"]}`' if r['episode_hint'] else ''
+            hint = f', may belong to episode {md(r["episode_hint"])}' if r['episode_hint'] else ''
             kind = f'{r.get("event_type")}, ' if r.get('event_type') else ''
             out.append(f'- `{md(r["candidate_id"])}`: [{md(r["title"])}]({url(r["source_url"])}) '
-                       f'({md(kind)}{md(r["n_sites"])} sites{md(hint)})')
+                       f'({md(kind)}{md(r["n_sites"])} sites{hint})')
         out += ['', 'To add one: GitHub, then Actions, then **approve-event**, then Run '
                 'workflow, and paste the id.', '']
     else:
