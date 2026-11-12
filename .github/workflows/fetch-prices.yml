@@ -8,6 +8,8 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '23 6 * * 1-5'   # 06:23 UTC on weekdays
+    - cron: '47 10 * * 1-5'  # backup: GitHub sometimes delays or skips scheduled runs;
+                             # a second run on the same day is harmless (same data, fresh brief)
 
 permissions:
   contents: write
