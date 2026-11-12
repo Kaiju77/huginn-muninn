@@ -1,6 +1,6 @@
 {
- "fetched_at": "2026-11-12T08:22:46+00:00",
- "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya) sourcelang:english",
+ "fetched_at": "2026-11-12T09:27:29+00:00",
+ "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
   {
    "title": "After midterm setback , JD Vance weighs direct talks with Iranian official amid US push for peace : Report",
@@ -143,6 +143,13 @@
    "sourcecountry": "United States"
   },
   {
+   "title": "NFF warns Albanese Government over global COP31 methane push | Stock & Land",
+   "url": "https://www.stockandland.com.au/story/9389799/nff-warns-albanese-government-over-global-cop31-methane-push/",
+   "domain": "stockandland.com.au",
+   "seendate": "20261112T053000Z",
+   "sourcecountry": "Australia"
+  },
+  {
    "title": "Refiners , Marketers To FCCPC : Understand Market Before Petrol Price Cut Demand",
    "url": "https://leadership.ng/refiners-marketers-to-fccpc-understand-market-before-petrol-price-cut-demand/",
    "domain": "leadership.ng",
@@ -155,6 +162,13 @@
    "domain": "theglobeandmail.com",
    "seendate": "20261112T053000Z",
    "sourcecountry": "Canada"
+  },
+  {
+   "title": "NFF warns Albanese Government over global COP31 methane push | Stock Journal",
+   "url": "https://www.stockjournal.com.au/story/9389799/nff-warns-albanese-government-over-global-cop31-methane-push/",
+   "domain": "stockjournal.com.au",
+   "seendate": "20261112T053000Z",
+   "sourcecountry": "Australia"
   },
   {
    "title": "Qatar Buys 25 % of Chevron Namibia Block",
@@ -178,6 +192,13 @@
    "sourcecountry": "United States"
   },
   {
+   "title": "NFF warns Albanese Government over global COP31 methane push | The Land",
+   "url": "https://www.theland.com.au/story/9389799/nff-warns-albanese-government-over-global-cop31-methane-push/",
+   "domain": "theland.com.au",
+   "seendate": "20261112T040000Z",
+   "sourcecountry": "Australia"
+  },
+  {
    "title": "Turkmenistan foreign trade growth accelerates to 9 . 5 % in January - October",
    "url": "https://www.trend.az/casia/turkmenistan/4245446.html",
    "domain": "trend.az",
@@ -195,6 +216,13 @@
    "title": "Why are gas prices dropping and how low will they go ? ",
    "url": "https://www.wdsu.com/article/why-are-gas-prices-dropping-and-how-low-will-they-go/74404165",
    "domain": "wdsu.com",
+   "seendate": "20261112T040000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Blue wave ? Meh . It the Brazil election that matters at COP . – POLITICO",
+   "url": "https://www.politico.eu/article/blue-wave-meh-brazil-election-that-matters-cop/",
+   "domain": "politico.eu",
    "seendate": "20261112T040000Z",
    "sourcecountry": "United States"
   },
@@ -311,6 +339,13 @@
    "sourcecountry": "Kenya"
   },
   {
+   "title": "Norway to Buy Carbon Offsets from Indonesian Power Projects",
+   "url": "https://english.kontan.co.id/news/norway-to-buy-carbon-offsets-from-indonesian-power-projects",
+   "domain": "english.kontan.co.id",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "Indonesia"
+  },
+  {
    "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
    "url": "https://www.kpax.com/science-and-tech/energy/gas-prices-fall-below-4-as-more-oil-flows-but-experts-warn-relief-may-not-last",
    "domain": "kpax.com",
@@ -402,6 +437,13 @@
    "sourcecountry": "Fiji"
   },
   {
+   "title": "Press Release",
+   "url": "https://www.mining.com/press-release?id=6af4f8672fd1aa7c588d3d60",
+   "domain": "mining.com",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "Canada"
+  },
+  {
    "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
    "url": "https://www.richmondandtwickenhamtimes.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
    "domain": "richmondandtwickenhamtimes.co.uk",
@@ -414,6 +456,13 @@
    "domain": "grenadachronicle.com",
    "seendate": "20261112T033000Z",
    "sourcecountry": "United States"
+  },
+  {
+   "title": "NFF warns Albanese Government over global COP31 methane push | Farm Weekly",
+   "url": "https://www.farmweekly.com.au/story/9389799/nff-warns-albanese-government-over-global-cop31-methane-push/",
+   "domain": "farmweekly.com.au",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "Australia"
   },
   {
    "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
@@ -477,55 +526,6 @@
    "domain": "marklevinshow.com",
    "seendate": "20261112T030000Z",
    "sourcecountry": "United States"
-  },
-  {
-   "title": "2026 US Congress Midterm : Power , Policy and Global Impact",
-   "url": "https://www.dailyexcelsior.com/2026-us-congress-midterm-power-policy-and-global-impact/",
-   "domain": "dailyexcelsior.com",
-   "seendate": "20261112T030000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Every American will see heating bills rise 7 %, leaving millions at risk this winter",
-   "url": "https://www.independent.co.uk/us/money/winter-heating-costs-increase-inflation-b3083429.html",
-   "domain": "independent.co.uk",
-   "seendate": "20261112T030000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Is more oil going through Hormuz than before the Iran war , as Byron Donalds said ? No . – PolitiFact",
-   "url": "https://politifact.com/factchecks/2026/nov/11/byron-donalds/florida-byron-donalds-iran-war-strait-hormuz-oil/",
-   "domain": "politifact.com",
-   "seendate": "20261112T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Could next week meeting of this century  Big Three  end divide - and - conquer  forever war ? – World Tribune : U . S . Politics and Culture , Geostrategy , China , North Korea , Corporate Watch , Media Watch",
-   "url": "https://worldtribune.com/could-next-weeks-meeting-of-this-centurys-big-three-end-divide-and-conquer-forever-wars/",
-   "domain": "worldtribune.com",
-   "seendate": "20261112T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
-   "url": "https://www.hexham-courant.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
-   "domain": "hexham-courant.co.uk",
-   "seendate": "20261112T030000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Middle East - Casino & Gambling",
-   "url": "https://www.worldcasinodirectory.com/region/middle-east",
-   "domain": "worldcasinodirectory.com",
-   "seendate": "20261112T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
-   "url": "https://www.cotswoldjournal.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
-   "domain": "cotswoldjournal.co.uk",
-   "seendate": "20261112T013000Z",
-   "sourcecountry": "United Kingdom"
   }
  ]
 }

@@ -1,10 +1,45 @@
 {
  "date": "2026-11-12",
- "ok": false,
- "model": "",
+ "ok": true,
+ "model": "openai/gpt-oss-120b",
  "headlines": 34,
- "candidates": [],
- "notes": [],
- "rejected": 0,
- "error": "openai/gpt-4.1-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4.1-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4o-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4o-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' ''"
+ "candidates": [
+  {
+   "candidate_id": "c-20261112-hormuz-gulf",
+   "date_public": "2026-11-12",
+   "title": "Iran threatens Hormuz, tankers hit mines",
+   "region": "hormuz-gulf",
+   "episode_hint": "",
+   "source_url": "https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
+   "n_sites": 2,
+   "status": "pending",
+   "event_type": "supply_disruption"
+  }
+ ],
+ "notes": [
+  {
+   "title": "US‑Iran direct talks considered amid peace push",
+   "region": "iran",
+   "event_type": "talks",
+   "url": "https://news.webindia123.com/news/Articles/World/20261112/4518650.html",
+   "sites": 1
+  },
+  {
+   "title": "Qatar acquires 25% stake in Chevron Namibia block",
+   "region": "qatar-uae-kuwait",
+   "event_type": "other",
+   "url": "https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/",
+   "sites": 1
+  },
+  {
+   "title": "Saudi preliminarily approves revival of Iraq‑Saudi oil pipeline",
+   "region": "iraq",
+   "event_type": "talks",
+   "url": "https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/",
+   "sites": 1
+  }
+ ],
+ "rejected": 2,
+ "error": "",
+ "provider": "groq"
 }

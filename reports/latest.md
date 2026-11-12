@@ -19,13 +19,19 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 ## Event screen
 
-AI screen unavailable today; the keyword screen was used (an escalation word plus a region, 3+ sites).
+AI screen (groq openai/gpt-oss-120b) read 34 relevant headlines; every result is checked by code (region, cited headlines, 2+ sites).
 
 No new conflict escalation found today.
 
+**Also noted** (not conflict escalations, so no base rates yet):
+
+- US‑Iran direct talks considered amid peace push (talks, iran, [source](https://news.webindia123.com/news/Articles/World/20261112/4518650.html))
+- Qatar acquires 25% stake in Chevron Namibia block (other, qatar-uae-kuwait, [source](https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/))
+- Saudi preliminarily approves revival of Iraq‑Saudi oil pipeline (talks, iraq, [source](https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/))
+
 ## Headlines (GDELT)
 
-Fetched 2026-11-12 08:22 UTC, covering the previous 24 hours.
+Fetched 2026-11-12 09:27 UTC, covering the previous 24 hours.
 
 - [After midterm setback , JD Vance weighs direct talks with Iranian official amid US push for peace : Report](https://news.webindia123.com/news/Articles/World/20261112/4518650.html) (news.webindia123.com)
 - [Iran tells COP31 it wants compensation for environmental damage from US - Israeli strikes](https://www.asiaone.com:443/asia/iran-tells-cop31-it-wants-compensation-environmental-damage-us-israeli-strikes) (asiaone.com)
