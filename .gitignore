@@ -1,2 +1,5 @@
 var/
 __pycache__/
+
+# Codex review output (local only)
+codex-review-output.txt
