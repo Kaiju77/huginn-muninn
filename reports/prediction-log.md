@@ -2,7 +2,7 @@
 
 _Live log of historical base rates. Very few predictions so far, and rows for the same event (other assets, other horizons) are not independent. Not a forecast or advice. You make the decisions._
 
-Every base rate the daily brief shows for a recent event is recorded here once, with only the prices known that day, and scored when its horizon has passed. This is the live test of the walk-forward backtest (`reports/calibration.md`).
+For each new crisis (the event that opens its episode; follow-ups in the same crisis are shown in the brief but not logged, so a crisis counts once), the brief's base rates are recorded once, with only the prices known that day, and scored when the horizon has passed. EIA publishes late, so a few closes after the entry may already be known when a row is recorded. This is the live test of the walk-forward backtest (`reports/calibration.md`).
 
 0 predictions: 0 open, 0 scored, 0 void.
 

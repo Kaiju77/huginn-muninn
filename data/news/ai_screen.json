@@ -13,15 +13,30 @@
    "source_url": "https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
    "n_sites": 2,
    "status": "pending",
-   "event_type": "supply_disruption"
+   "urls": "https://openthemagazine.com/world/strait-of-hormuz-crisis-iran-says-key-oil-route-will-never-return-to-pre-war-status-as-us-peace-talks-stall|https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
+   "event_type": "attack"
   }
  ],
  "notes": [
   {
-   "title": "US‑Iran direct talks considered amid peace push",
+   "title": "JD Vance considers direct talks with Iranian official",
    "region": "iran",
    "event_type": "talks",
    "url": "https://news.webindia123.com/news/Articles/World/20261112/4518650.html",
+   "sites": 1
+  },
+  {
+   "title": "Iran warns it may target US bases in Europe",
+   "region": "iran",
+   "event_type": "other",
+   "url": "https://jowhar.com/iran-warns-it-may-target-u-s-military-bases-across-europe/",
+   "sites": 1
+  },
+  {
+   "title": "Saudi Arabia approves revival of Iraq‑Saudi oil pipeline",
+   "region": "iraq",
+   "event_type": "other",
+   "url": "https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/",
    "sites": 1
   },
   {
@@ -30,16 +45,9 @@
    "event_type": "other",
    "url": "https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/",
    "sites": 1
-  },
-  {
-   "title": "Saudi preliminarily approves revival of Iraq‑Saudi oil pipeline",
-   "region": "iraq",
-   "event_type": "talks",
-   "url": "https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/",
-   "sites": 1
   }
  ],
- "rejected": 2,
+ "rejected": 1,
  "error": "",
  "provider": "groq"
 }

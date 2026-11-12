@@ -9,7 +9,7 @@ _Historical base rates and headlines. Not a forecast or advice. You make the dec
 | Brent | 2026-11-03 | 107.03 USD/barrel | -0.3% | -13.1% | normal |
 | WTI | 2026-11-03 | 99.64 USD/barrel | -0.4% | -3.6% | normal |
 | Henry Hub gas | 2026-11-03 | 2.63 USD/MMBtu | +3.5% | -4.7% | normal |
-| USD/NOK | 2026-11-11 | 9.5394 NOK per USD | +0.8% | +3.4% | normal |
+| USD/NOK | 2026-11-12 | 9.5325 NOK per USD | -0.1% | +2.5% | normal |
 
 EIA publishes a few days late, so the latest close can be several days old.
 
@@ -29,13 +29,14 @@ To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and
 
 **Also noted** (not conflict escalations, so no base rates yet):
 
-- US‑Iran direct talks considered amid peace push (talks, iran, [source](https://news.webindia123.com/news/Articles/World/20261112/4518650.html))
+- JD Vance considers direct talks with Iranian official (talks, iran, [source](https://news.webindia123.com/news/Articles/World/20261112/4518650.html))
+- Iran warns it may target US bases in Europe (other, iran, [source](https://jowhar.com/iran-warns-it-may-target-u-s-military-bases-across-europe/))
+- Saudi Arabia approves revival of Iraq‑Saudi oil pipeline (other, iraq, [source](https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/))
 - Qatar acquires 25% stake in Chevron Namibia block (other, qatar-uae-kuwait, [source](https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/))
-- Saudi preliminarily approves revival of Iraq‑Saudi oil pipeline (talks, iraq, [source](https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/))
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-12 09:27 UTC, covering the previous 24 hours.
+Fetched 2026-11-12 18:38 UTC, covering the previous 36 hours.
 
 - [After midterm setback , JD Vance weighs direct talks with Iranian official amid US push for peace : Report](https://news.webindia123.com/news/Articles/World/20261112/4518650.html) (news.webindia123.com)
 - [Iran tells COP31 it wants compensation for environmental damage from US - Israeli strikes](https://www.asiaone.com:443/asia/iran-tells-cop31-it-wants-compensation-environmental-damage-us-israeli-strikes) (asiaone.com)
