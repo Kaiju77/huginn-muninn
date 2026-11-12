@@ -12,7 +12,10 @@ from typing import NamedTuple
 ESCALATION = re.compile(
     r'\b(attack(s|ed)?|strike[sd]?|airstrikes?|missiles?|drones?|rockets?|invad(e|es|ed)|'
     r'invasion|seiz(e|es|ed|ure)|hijack(s|ed)?|blockade|bomb(s|ed|ing)?|explosions?|'
-    r'assassinat(e|ed|ion)|war|offensive|shot down|mines?)\b', re.I)
+    r'assassinat(e|ed|ion)|offensive|shot down)\b', re.I)
+# Not included: "war" (names an ongoing situation, e.g. analysis of "the Iran war",
+# not something new today) and "mine(s)" (also mining news). Found 2026-11-12:
+# both of that day's keyword candidates were analysis pieces about "the Iran war".
 
 # Region label -> words that place a headline there.
 REGIONS = {

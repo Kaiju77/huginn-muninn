@@ -44,6 +44,13 @@ class SuggestTest(unittest.TestCase):
         self.assertEqual(c.source_url, 'https://a.com/first')  # earliest report
         self.assertEqual(c.candidate_id, 'c-20261111-iran')
 
+    def test_analysis_of_an_ongoing_war_is_not_a_new_event(self):
+        arts = [art('The Iran War is transforming LNG deals', 'a.com'),
+                art('Is more oil going through Hormuz than before the Iran war? No.', 'b.com'),
+                art('How the Iran war changed tanker insurance', 'c.com'),
+                art('Iran war: what it means for oil', 'd.com')]
+        self.assertEqual(suggest(arts, date(2026, 11, 12), []), [])
+
     def test_same_site_three_times_is_not_enough(self):
         arts = [art(f'Missile strike on Iran {i}', 'same.com') for i in range(5)]
         self.assertEqual(suggest(arts, date(2026, 11, 11), []), [])

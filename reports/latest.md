@@ -21,12 +21,7 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 AI screen unavailable today; the keyword screen was used (an escalation word plus a region, 3+ sites).
 
-**Possible new events (need your approval):**
-
-- `c-20261112-hormuz-gulf`: [Is more oil going through Hormuz than before the Iran war , as Byron Donalds said ? No . – PolitiFact](https://politifact.com/factchecks/2026/nov/11/byron-donalds/florida-byron-donalds-iran-war-strait-hormuz-oil/) (3 sites)
-- `c-20261112-iran`: [The Iran War is transforming liquefied natural gas deals](https://www.marketplace.org/story/2026/11/11/the-iran-war-is-transforming-liquefied-natural-gas-deals) (8 sites)
-
-To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
+No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
