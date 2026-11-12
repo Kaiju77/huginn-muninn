@@ -38,25 +38,27 @@ REGIONS = {
 AMBIGUOUS = {'strike', 'strikes', 'striking', 'struck', 'offensive', 'rocket', 'rockets'}
 # Phrases where those words are labour or business, matched near the word itself,
 # so "Israel strikes Hezbollah targets as investors flee" still counts.
+# Principle (review round 10): the keyword screen prefers a false alarm (Kai
+# ignores it with one click) to a missed attack. Only clear labour, business,
+# price and sport phrases veto an ambiguous word; anything in doubt passes.
+_DEAL_WORD = (r'(\$\S+|\d\S*|a|an|the|new|major|landmark|historic|record|preliminary|'
+              r'framework|in-principle|long-term|multi-?billion(-dollar)?|billion|lng|gas|'
+              r'oil|arms|supply|energy|trade|export|import|purchase|defen[cs]e|\w+-year)')
 NOT_MILITARY_STRIKE = re.compile(
-    r'\b(strik(e|es|ing)|struck)\s+'
-    r'((?!despite\b|after\b|amid\b|as\b|following\b|ignoring\b|violat|breach|over\b|'
-    r'against\b|on\b|in\b)\S+\s+){0,4}?(deals?|agreements?|accords?|pacts?|'
-    r'partnerships?|contracts?|balance|chord)\b|'
-    r'\bstrik(e|es)\s+(gold|silver|bronze|twice|again|late|first|back)\b|'
-    r'\b(price|prices|stocks?|shares|oil|brent|crude|bonds?|yields?|index)\s+'
-    r'(sky)?rockets?\b|'
+    r'\b(strik(e|es|ing)|struck)\s+(' + _DEAL_WORD + r'\s+){0,4}'
+    r'(deals?|agreements?|accords?|pacts?|partnerships?|contracts?|balance|chord)\b|'
     r'\b(workers?|unions?|staff|employees|pilots|dockers|drivers|nurses)\s+(\w+\s+){0,2}'
     r'(strike|strikes|striking|walk\s*out)|'
     r'\b(on|general|labou?r|national)\s+strike\b|\bstrike\s+(action|ballot|pay)\b|'
+    r'\bstrik(e|es)\s+(gold|silver|bronze)\b|'
+    r'\b(price|prices|stocks?|shares|brent|crude|bonds?|yields?|index)\s+(sky)?rockets?\b|'
     r'\bcharm\s+offensive\b|\boffensive\s+(on|in)\s+(sales|pricing|markets?)\b', re.I)
 
 # Sport only. Generic words (team, league, match, cup, goal) were removed after
 # review round 6: "Arab League condemns...", "UN aid team" are real news.
 NON_MILITARY = re.compile(
     r'\b(football|soccer|fifa|olympics?|striker|tournament|championship|qualifiers?|'
-    r'world cup|premier league|champions league|kick-?off|asian games|medals?|'
-    r'grand prix)\b', re.I)
+    r'world cup|premier league|champions league|kick-?off|asian games)\b', re.I)
 # Words that make a headline military even if it mentions sport
 # ("Israeli strike hits football stadium in Gaza, killing 12").
 # (Not "rockets"/"drones"/"missiles": sport uses them as verbs, "striker rockets...".)

@@ -109,8 +109,11 @@ def report(rows, today):
     scored = [r for r in rows if r.status == pr.SCORED]
     void = [r for r in rows if r.status == pr.VOID]
     lines = [f'# Prediction log, {today.isoformat()}', '', CAVEAT, '',
-             'Every base rate the daily brief shows for a recent event is recorded here once, '
-             'with only the prices known that day, and scored when its horizon has passed. '
+             'For each new crisis (the event that opens its episode; follow-ups in the same crisis '
+             'are shown in the brief but not logged, so a crisis counts once), the brief\'s base '
+             'rates are recorded once, with only the prices known that day, and scored when the '
+             'horizon has passed. EIA publishes late, so a few closes after the entry may already '
+             'be known when a row is recorded. '
              'This is the live test of the walk-forward backtest (`reports/calibration.md`).', '',
              f'{len(rows)} predictions: {len(open_rows)} open, {len(scored)} scored, '
              f'{len(void)} void.', '',
@@ -146,6 +149,10 @@ def report(rows, today):
     return '\n'.join(lines)
 
 
+BACKFILL_BANNER = ('**BACKFILL, not live: uses a catalog picked with hindsight. Not evidence '
+                   'of skill.**\n\n')
+
+
 class BackfillRefused(ValueError):
     pass
 
@@ -163,15 +170,19 @@ def run(today, log_path=LOG, report_path=REPORT, prices_dir=None, events_path=EV
         raise BackfillRefused(f'--today {today} is before the newest row ({newest})')
     if today != now and not allow_backfill:
         raise BackfillRefused(f'--today {today} is not today ({now}); use --backfill-to FILE')
-    if allow_backfill and Path(log_path).resolve() == LOG.resolve():
-        raise BackfillRefused('a backfill must not write to the live log')
+    if allow_backfill and (Path(log_path).resolve() == LOG.resolve()
+                           or Path(report_path).resolve() == REPORT.resolve()):
+        raise BackfillRefused('a backfill must not write the live log or the live report')
     closes = load_prices(today, prices_dir)
     catalog = [e for e in load_catalog(events_path) if e.date_public <= today]
-    recent = pr.first_of_episodes(daily.recent_events(catalog, today, RECENT_DAYS), catalog)
+    recent = pr.first_of_episodes(daily.recent_events(catalog, today, RECENT_DAYS), catalog,
+                                  {r.event_id for r in rows})
     rows = pr.record(rows, today, recent, lambda e: pr.comparables(catalog, e), closes)
     rows = pr.score(rows, closes, today)
     write_atomic(log_path, pr.to_csv(rows))
     text = report(rows, today)
+    if allow_backfill:
+        text = BACKFILL_BANNER + text
     write_atomic(report_path, text)
     return rows, text
 
@@ -187,7 +198,6 @@ def main(argv=None):
         if a.backfill_to:
             _rows, text = run(a.today, log_path=a.backfill_to,
                               report_path=a.backfill_to.with_suffix('.md'), allow_backfill=True)
-            text = '**BACKFILL, not live: uses a catalog picked with hindsight.**\n\n' + text
         else:
             _rows, text = run(a.today)
     except BackfillRefused as err:

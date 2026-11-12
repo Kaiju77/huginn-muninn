@@ -31,6 +31,20 @@ EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 CANDIDATES = ROOT / 'data' / 'events' / 'candidates.csv'
 
 
+def _days_apart(row, cand):
+    try:
+        return abs((date.fromisoformat(row['date_public'])
+                    - date.fromisoformat(cand['date_public'])).days)
+    except (KeyError, TypeError, ValueError):
+        return 99  # a hand-edited, unreadable date never matches (review round 10)
+
+
+def _mostly_shared(a, b):
+    if not a or not b:
+        return False
+    return len(a & b) >= max(1, (min(len(a), len(b)) + 1) // 2)
+
+
 def _urls(row):
     return {u for u in (row.get('urls') or '').split('|') if u} | (
         {row['source_url']} if row.get('source_url') else set())
@@ -100,10 +114,12 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
         # in this region within two days either side: robust to a new earliest
         # headline, an AI re-title (round 8) and a story spanning midnight or the
         # 12:00 cutoff (round 9).
-        near = [r for r in rows if r['region'] == c['region'] and r.get('date_public')
-                and abs((date.fromisoformat(r['date_public'])
-                         - date.fromisoformat(c['date_public'])).days) <= 2]
-        same = [r for r in near if (_urls(r) & mine) or r['title'] == c['title']]
+        near = [r for r in rows if r['region'] == c['region'] and _days_apart(r, c) <= 2]
+        # Same story: the same slot and the same title, or (within 2 days)
+        # articles mostly shared. One shared round-up link is not enough, and a
+        # repeated headline days later can be a new strike (review round 10).
+        same = [r for r in near if _mostly_shared(_urls(r), mine)
+                or (r in slot and r['title'] == c['title'])]
         if same:
             old = same[0]
             if (old['status'] == 'rejected' and old.get('method') == 'keyword'

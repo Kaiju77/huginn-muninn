@@ -73,8 +73,9 @@ class F3NoLateRecording(unittest.TestCase):
     def test_entry_older_than_limit_not_recorded(self):
         tmp = Path(tempfile.mkdtemp())
         try:
-            # 12 days after the 2025-06-13 event: entry close is too old.
-            rows, _ = prediction_log.run(date(2025, 6, 25), tmp / 'l.csv', tmp / 'r.md',
+            # 27 days after the 2025-06-13 event: entry close is too old
+            # (the cap is 21 days since round 10).
+            rows, _ = prediction_log.run(date(2025, 7, 10), tmp / 'l.csv', tmp / 'r.md',
                                          allow_backfill=True, now=date(2026, 11, 12))
             self.assertEqual(rows, [])
             rows, _ = prediction_log.run(date(2025, 6, 16), tmp / 'l2.csv', tmp / 'r2.md',
@@ -174,8 +175,9 @@ class F8DamagedLogIsVisible(unittest.TestCase):
 
 class F9SportAndPriceVerbs(unittest.TestCase):
     def test_reviewer_examples(self):
-        for title in ('Ronaldo strikes twice as Al-Nassr win in Riyadh',
-                      'Iran strikes gold at Asian Games',
+        # "Ronaldo strikes twice..." passes again since round 10 (recall first:
+        # "Israel strikes twice in Gaza" must not be lost). Accepted false alarm.
+        for title in ('Iran strikes gold at Asian Games',
                       'Oil price rockets as Iran tensions rise'):
             self.assertFalse(is_escalation(title), title)
         self.assertTrue(is_escalation('Rockets fired at Israel from Lebanon'))

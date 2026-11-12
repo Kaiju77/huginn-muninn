@@ -1,5 +1,23 @@
 # Review log
 
+## 2026-11-12: review round 10 (Fable 5.2; 425 tests ran, all OK; 6 of 11 round-9 fixes held)
+
+**Principle adopted for the keyword screen:** prefer a false alarm (Kai ignores it with one click) to a missed attack. Only clear labour, business, price and sport phrases veto an ambiguous word. The AI screen and Kai do the precise sorting. This ends the vocabulary back-and-forth of rounds 6-10.
+
+1. P1: any imprecise UCDP row with 1 death blocked a war's onset. Only fuzzy rows whose deaths, spread over their range, could reach the threshold within one window block an onset.
+2. P2: the ±2-day same-story match dropped different stories (a repeated headline days later; one shared round-up link). Across days, a story now only matches if most of its article links are shared; a title match counts only within the same slot.
+3. P2: a crisis was predicted twice if its opener was approved after a follow-up. Episodes that already have rows in the log are skipped.
+4. P2: the 10-day entry cap was close to EIA's lag and dropped oil and gas rows for good. The cap is 21 days, and the report explains the lag.
+5. P2: sport phrases vetoed real strikes ("Israel strikes back at Iran", "Grand Prix track"). These were removed (recall first).
+6. P2: the BACKFILL label went only to stdout, and a backfill could overwrite the live report. The label is now written in the file, and the live report path is refused.
+7. P3: ceasefire-deal phrasing gaps, and some new false positives. "strike … deal" is now a business deal only when every word in between is a deal modifier ($20bn, LNG, supply, long-term…). Accepted false alarm: "Kuwait strikes over pay deal…".
+8. P3: "Iraqi oil rockets: militia fires…" was read as a price move. "oil" was removed from the price-subject list ("oil price rockets" still matches via "price").
+9. P3: a hand-edited `date_public` stopped candidate suggestions. Unreadable dates never match and no longer crash.
+10. P3: fuzzy rows ending up to 6 days before the calm start were ignored. The check now reaches back one window.
+11. P3: the report wording now says a crisis is logged once (its opener).
+
+Regression tests: `tests/test_review_round10.py`.
+
 ## 2026-11-12: review round 9 (independent reviewer on Fable 5.2; 410 tests ran, all OK)
 
 1. P1: `--today` in the past filled the live log with fake "live" predictions built on a hindsight catalog (Brier 0.136 vs 0.294). The live log now only moves forward in real time. A backfill needs `--backfill-to FILE`, can never write the live log, and its report is labelled BACKFILL.

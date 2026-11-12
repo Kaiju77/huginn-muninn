@@ -182,10 +182,15 @@ def find_onsets(rows, rule=OnsetRule()):
     # calm: an onset whose calm period overlaps one with deaths is not declared
     # (review round 9: a 1000-death January row was dropped, and February was
     # then reported as "after 90 calm days").
+    # Only fuzzy rows that could by themselves have broken the calm count: their
+    # deaths spread evenly over their range would reach the threshold within one
+    # window. A 1-death row over a year must not block a war's onset (round 10).
     fuzzy = defaultdict(list)
     for row in rows:
-        if (row.type_of_violence in rule.types and row.date_prec > rule.max_date_prec
-                and row.best > 0):
+        if row.type_of_violence not in rule.types or row.date_prec <= rule.max_date_prec:
+            continue
+        span = (row.date_end - row.date_start).days + 1
+        if row.best * min(rule.window_days, span) / max(span, 1) >= rule.threshold:
             fuzzy[row.country_id].append((row.date_start, row.date_end))
     onsets = []
     for country_id, days in per_country.items():
@@ -204,7 +209,9 @@ def find_onsets(rows, rule=OnsetRule()):
                 # The calm check needs every window sum in the calm period, and
                 # the first of those reaches window-1 days further back.
                 observed = (calm_start - timedelta(days=window - 1)) >= rule.data_start
-                unclear = any(s <= day - timedelta(days=1) and e >= calm_start
+                # The first calm window sum reaches window-1 days before calm_start.
+                reach = calm_start - timedelta(days=window - 1)
+                unclear = any(s <= day - timedelta(days=1) and e >= reach
                               for s, e in fuzzy.get(country_id, ()))
                 if calm_ok and observed and not unclear:
                     onsets.append(Onset(country_id, names[country_id], day, running))

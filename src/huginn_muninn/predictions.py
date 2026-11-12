@@ -94,14 +94,23 @@ def entry_index(closes, day, max_gap_days=DEFAULT_MAX_GAP_DAYS):
 # few days late, so a few known closes after the entry are unavoidable; an entry
 # older than this means a late first run or a late approval, and most of the
 # path would already be known (review round 9).
-MAX_ENTRY_AGE_DAYS = 10
+# 21 days, not 10: EIA's own lag is often 8 days or more, and a cap too close to
+# it dropped Brent/WTI/Henry Hub rows for good (review round 10). The report
+# shows how many closes after the entry were already known at recording.
+MAX_ENTRY_AGE_DAYS = 21
 
 
-def first_of_episodes(recent_events, catalog):
+def first_of_episodes(recent_events, catalog, logged_event_ids=()):
     """Only events that open their episode (no earlier catalog event in the same
-    episode), so one crisis is predicted once (review round 9)."""
+    episode) and whose episode has no rows in the log yet, so one crisis is
+    predicted once even if its opener was approved after a follow-up
+    (review rounds 9 and 10)."""
+    episode_of = {c.event_id: c.episode for c in catalog}
+    logged = {episode_of[i] for i in logged_event_ids if i in episode_of}
     out = []
     for e in recent_events:
+        if e.episode in logged:
+            continue
         earlier = [c for c in catalog if c.episode == e.episode
                    and (c.date_public, c.event_id) < (e.date_public, e.event_id)]
         if not earlier:
