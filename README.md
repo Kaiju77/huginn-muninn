@@ -11,7 +11,59 @@ Event study and historical base rates for market-moving events. Example: "In 18 
     python scripts/backtest.py                    # is it right? -> reports/calibration.md
     python scripts/compare_catalogs.py            # hand-picked vs UCDP rule list -> reports/catalog-comparison.md
 
-Every weekday the `fetch-prices` GitHub workflow fetches prices (EIA: Brent, WTI, Henry Hub; Norges Bank: USD/NOK) and headlines (GDELT), and writes the brief to [`reports/latest.md`](reports/latest.md).
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Sources["Free data sources"]
+    EIA["EIA API<br/>Brent, WTI, Henry Hub"]
+    NB["Norges Bank<br/>USD/NOK"]
+    GD["GDELT<br/>headlines"]
+    UC["UCDP GED<br/>conflict deaths"]
+  end
+  subgraph Actions["GitHub Actions (scheduled)"]
+    FP["fetch-prices<br/>daily 06:23 + 10:47 UTC"]
+    FU["fetch-ucdp<br/>weekly"]
+    AE["approve-event<br/>manual"]
+  end
+  subgraph Repo["Repository data"]
+    P[("data/prices/*.csv")]
+    E[("data/events/<br/>hand-picked list")]
+    R[("data/events/<br/>UCDP rule list")]
+    C[("candidates.csv")]
+    L[("predictions/log.csv")]
+  end
+  subgraph Engine["Python, standard library"]
+    ST["study.py<br/>base rates, n, 95% CI, baseline"]
+    CA["calibration.py<br/>walk-forward backtest"]
+    SC["candidates + AI screen<br/>(Groq)"]
+  end
+  subgraph Out["Outputs"]
+    BR["reports/latest.md<br/>daily brief"]
+    CB["reports/calibration.md"]
+    CC["reports/catalog-comparison.md"]
+    ST2["Streamlit page"]
+  end
+  EIA --> FP --> P
+  NB --> FP
+  GD --> FP --> SC --> C
+  C -- "Kai approves" --> AE --> E
+  UC --> FU --> R
+  P --> ST
+  E --> ST
+  R --> ST
+  ST --> BR
+  ST --> ST2
+  ST --> L
+  P --> CA
+  E --> CA --> CB
+  R --> CC
+  E --> CC
+```
+
+Rules that hold everywhere: no look-ahead (an event counts from the first close after it was public), one event per crisis episode, and every probability comes with n, a 95% CI, a range and a normal-period baseline.
+
+Every day the `fetch-prices` GitHub workflow fetches prices (EIA: Brent, WTI, Henry Hub; Norges Bank: USD/NOK) and headlines (GDELT), and writes the brief to [`reports/latest.md`](reports/latest.md).
 
 The sections below describe the parked ledger prototype, which is kept and tested.
 
