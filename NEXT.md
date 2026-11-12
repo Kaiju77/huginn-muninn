@@ -27,7 +27,10 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 14c. Done 2026-11-12: review round 6 by an independent reviewer agent; 10 findings fixed (see `REVIEW.md`). Reviews are now done by the agent automatically; Codex is optional.
 14d. Done 2026-11-12: walk-forward backtest (`scripts/backtest.py`, `reports/calibration.md`), run daily. First result: mostly no better than the normal-period baseline or 50% (n=10-13 per cell). Exception: USD/NOK 5 days, 12/13 right, Brier 0.151 vs 0.256 baseline.
 14d2. Done: review round 7, 8 findings fixed. Backtest with intervals: only USD/NOK 5 days has an interval entirely below 0 (-0.104, -0.148 to -0.051); Brent 5 days is worse than the baseline.
-14e. Next: prediction log (record each live base rate and score it when its horizon has passed); more independent events, because n=13 is too small to tell skill from luck. (`docs/REVIEW_REQUEST.md`).
+14e2. Done 2026-11-12: review round 8, 7 findings fixed. Built in parallel by two builder agents and merged: the live prediction log (`scripts/prediction_log.py`, `reports/prediction-log.md`, run daily) and the rule-based UCDP onset catalog (`scripts/fetch_ucdp.py`, `scripts/build_ucdp_catalog.py`, weekly `fetch-ucdp` workflow).
+14f. Kai: request a UCDP API token (UCDP sends it by email; see ucdp.uu.se/apidocs) and add it as the repo secret `UCDP_TOKEN`.
+14g. Next: run the study and backtest on the UCDP catalog next to the hand-picked one. Review round 9 runs on Fable 5.2.
+14e. Earlier next: prediction log (record each live base rate and score it when its horizon has passed); more independent events, because n=13 is too small to tell skill from luck. (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 
 ## Historical

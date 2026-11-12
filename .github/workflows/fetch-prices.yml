@@ -79,7 +79,8 @@ jobs:
             python scripts/suggest_events.py || true
             python scripts/daily_report.py > /dev/null
             python scripts/backtest.py > /dev/null || true
-            git add -A data/prices data/news data/events/candidates.csv reports
+            python scripts/prediction_log.py > /dev/null || true
+            git add -A data/prices data/news data/events/candidates.csv data/predictions reports
             if git diff --cached --quiet; then echo 'Nothing new.'; exit 0; fi
             git commit -q -m "Daily data and brief $(date -u +%F)"
             if git push -q origin HEAD:main; then exit 0; fi
