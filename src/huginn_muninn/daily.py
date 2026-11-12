@@ -7,6 +7,7 @@ and which headlines appeared. Headlines are context, not proof of cause.
 
 import re
 from bisect import bisect_left
+from datetime import datetime, timedelta, timezone
 
 from src.huginn_muninn.candidates import regions_of
 from typing import NamedTuple, Optional
@@ -73,7 +74,29 @@ def event_context(event, comparable, closes, horizons=(5, 20, 60)):
 
 
 ENERGY = re.compile(r'\b(oil|crude|brent|wti|opec\+?|gas|lng|tankers?|refiner(y|ies)|'
-                    r'pipelines?|barrels?|energy|fuel|petroleum|krone|nok)\b', re.I)
+                    r'pipelines?|barrels?|energy|fuel|petroleum|krone|nok|'
+                    r'oilfields?|offshore|equinor|aker bp|vår energi|var energi|sverdrup|'
+                    r'troll|north sea|norges bank|norwegian|norway)\b', re.I)
+
+
+def seen_at(article):
+    """GDELT seendate ('20261111T080000Z') as an aware datetime, or None."""
+    try:
+        return datetime.strptime(article.get('seendate', ''), '%Y%m%dT%H%M%SZ').replace(
+            tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def in_window(articles, fetched, hours=36):
+    """Only articles seen in the ``hours`` before ``fetched`` (plus one hour of
+    clock slack). Undated, old and future articles are dropped."""
+    out = []
+    for a in articles:
+        seen = seen_at(a) if isinstance(a, dict) else None
+        if seen and fetched - timedelta(hours=hours) <= seen <= fetched + timedelta(hours=1):
+            out.append(a)
+    return out
 
 
 def relevant(title):

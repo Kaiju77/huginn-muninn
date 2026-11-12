@@ -99,7 +99,7 @@ class BuildTest(unittest.TestCase):
         self.news.write_text(json.dumps({
             'fetched_at': fetched_at.isoformat(),
             'articles': [{'title': x, 'url': f'https://n/{i}', 'domain': 'n',
-                          'seendate': '20261111T100000Z'} for i, x in enumerate(titles)]}))
+                          'seendate': '20261111T060000Z'} for i, x in enumerate(titles)]}))
 
     def test_headlines_fetched_today_are_shown(self):
         self.write_news(datetime(2026, 11, 11, 6, 30, tzinfo=timezone.utc))

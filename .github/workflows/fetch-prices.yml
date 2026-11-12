@@ -48,6 +48,7 @@ jobs:
         continue-on-error: true   # the brief says "news unavailable" instead
         run: python scripts/fetch_news.py
       - name: AI screen of headlines (Groq, then GitHub Models)
+        continue-on-error: true   # the brief falls back to the keyword screen
         # Runs even if this fetch failed: an earlier fetch from today may exist.
         # Stale news gives a status for an older date, which the brief ignores.
         env:

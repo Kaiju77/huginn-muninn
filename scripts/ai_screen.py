@@ -114,7 +114,7 @@ def screen_all(news, provider_list, catalog):
 def screen(news, token, catalog, call=call, models=MODELS):
     fetched = datetime.fromisoformat(news['fetched_at']).astimezone(timezone.utc)
     on = fetched.date()
-    items = numbered(news['articles'])
+    items = numbered(news['articles'], fetched)
     status = {'date': on.isoformat(), 'ok': False, 'model': '', 'headlines': len(items),
               'candidates': [], 'notes': [], 'rejected': 0, 'error': ''}
     if not items:
@@ -131,8 +131,8 @@ def screen(news, token, catalog, call=call, models=MODELS):
                 detail = err.read()[:200].decode('utf-8', 'replace') if err.fp else ''
                 errors.append(f'{model}: HTTP {err.code} {detail}'.strip())
                 break  # try the next model
-            except (urllib.error.URLError, TimeoutError, KeyError, IndexError, TypeError,
-                    ValueError) as err:
+            except (urllib.error.URLError, TimeoutError, subprocess.TimeoutExpired, OSError,
+                    KeyError, IndexError, TypeError, ValueError) as err:
                 # A short start of the model's own reply helps debugging; it never
                 # contains the token.
                 snippet = (text or '')[:160].replace('\n', ' ')
@@ -156,7 +156,10 @@ def main():
     if news is None:
         status = {'date': '', 'ok': False, 'error': 'no news file'}
     else:
-        status = screen_all(news, providers(os.environ), load_catalog(EVENTS))
+        try:
+            status = screen_all(news, providers(os.environ), load_catalog(EVENTS))
+        except Exception as err:  # never let the AI step break the daily job
+            status = {'date': '', 'ok': False, 'error': f'unexpected {type(err).__name__}'}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(status, indent=1, ensure_ascii=False), encoding='utf-8')
     print(f"AI screen ok={status.get('ok')} provider={status.get('provider', '')} "

@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
 
 from src.huginn_muninn.candidates import COLUMNS, suggest  # noqa: E402
 from src.huginn_muninn.catalog import load_catalog  # noqa: E402
+from src.huginn_muninn.daily import in_window  # noqa: E402
 
 NEWS = ROOT / 'data' / 'news' / 'latest.json'
 AI = ROOT / 'data' / 'news' / 'ai_screen.json'
@@ -62,15 +63,23 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
         return []
     if fetched != today:
         return []
+    fetched_at = datetime.fromisoformat(news['fetched_at'])
+    articles = in_window(news['articles'], fetched_at)
+    keyword = [{'candidate_id': c.candidate_id, 'date_public': c.date_public.isoformat(),
+                'title': c.title, 'region': c.region, 'episode_hint': c.episode_hint,
+                'source_url': c.source_url, 'n_sites': c.n_sites, 'status': 'pending',
+                'method': 'keyword', 'event_type': ''}
+               for c in suggest(articles, today, load_catalog(events_path))]
     ai = ai_status(today, ai_path)
-    if ai is not None:
-        found = [{**c, 'status': 'pending', 'method': 'ai'} for c in ai['candidates']]
+    if ai is None:
+        found = keyword
     else:
-        found = [{'candidate_id': c.candidate_id, 'date_public': c.date_public.isoformat(),
-                  'title': c.title, 'region': c.region, 'episode_hint': c.episode_hint,
-                  'source_url': c.source_url, 'n_sites': c.n_sites, 'status': 'pending',
-                  'method': 'keyword', 'event_type': ''}
-                 for c in suggest(news['articles'], today, load_catalog(events_path))]
+        found = [{**c, 'status': 'pending', 'method': 'ai'} for c in ai['candidates']]
+        if ai.get('rejected'):
+            # The model proposed something that failed validation; don't let that
+            # hide what the keyword screen found in other regions.
+            covered = {c['region'] for c in found}
+            found += [c for c in keyword if c['region'] not in covered]
     rows = read_candidates(out)
     known = {r['candidate_id'] for r in rows}
     new = [c for c in found if c['candidate_id'] not in known]

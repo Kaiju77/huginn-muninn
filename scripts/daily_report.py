@@ -59,7 +59,7 @@ def news_lines(today, news_path):
     if fetched_day != today:
         return [f'No headlines fetched on {today.isoformat()} (the latest fetch is from '
                 f'{fetched_day.isoformat()}; today\'s fetch failed or has not run).']
-    items = daily.headlines(articles)
+    items = daily.headlines(daily.in_window(articles, fetched))
     if not items:
         return ['News unavailable (the fetch returned no usable headlines).']
     out = [f'Fetched {fetched.strftime("%Y-%m-%d %H:%M")} UTC, covering the previous 24 hours.', '']

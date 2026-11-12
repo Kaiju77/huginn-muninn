@@ -1,5 +1,19 @@
 # Review log
 
+## 2026-11-12: Codex review round 5 (event screen, AI screen, approval)
+
+1. P2: old or future articles could appear as today's headlines and candidates. `daily.in_window` now keeps only articles seen in the 36 hours before the fetch, everywhere (brief, keyword screen, AI screen).
+2. P2: `{"articles":[null]}` or `[{}]` overwrote good news. `parse` now keeps only articles with a title and an http URL, and fails if none remain.
+3. P2: the AI could attach a story to unrelated headlines or cite numbers that don't exist. Every cited number must exist, the region must appear in the cited headlines themselves, and 2 or more of those sites are required.
+4. P2: an AI result that was entirely rejected suppressed the keyword screen. When the AI rejected anything, keyword candidates for uncovered regions are added.
+5. P2: a curl timeout crashed the AI step and the whole job. `TimeoutExpired`/`OSError` are caught, `main` catches everything, and the step is `continue-on-error`.
+6. P2: "attacking" and "Yemeni" were missing. Added, with other -ing forms.
+7. P3: sport headlines ("football team launches offensive") became conflict candidates. They are now excluded, in both screens.
+8. P2: Norwegian supply news was filtered out. Equinor, Johan Sverdrup, the North Sea and Norway are now relevant, and the GDELT query includes them.
+9. P2: approval wasn't atomic. The catalog and candidate file are swapped in with `os.replace`, and a retry after a half-finished approval completes it.
+
+Regression tests: `tests/test_codex_round5.py`, one class per finding.
+
 ## 2026-11-11: Codex review round 4 (daily brief)
 
 1. P2: a past brief could show headlines from later. Headlines now appear only when they were fetched on the brief's own date.

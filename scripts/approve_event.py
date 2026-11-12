@@ -9,9 +9,8 @@ is validated with the normal catalog loader before anything is written.
 
 import argparse
 import csv
-import shutil
+import os
 import sys
-import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -30,10 +29,19 @@ def approve(candidate_id, title=None, episode=None, events=EVENTS, candidates=CA
     if not match:
         raise ValueError(f'no candidate {candidate_id}')
     cand = match[0]
-    if cand['status'] != 'pending':
-        raise ValueError(f'{candidate_id} is already {cand["status"]}')
     day = cand['date_public']
     event_id = f'me-{day[:4]}-{cand["region"]}-{day[5:7]}{day[8:10]}'
+    with events.open(encoding='utf-8-sig', newline='') as handle:
+        existing = list(csv.DictReader(handle))
+    already = [r for r in existing if r['event_id'] == event_id]
+    if already and cand['status'] == 'pending':
+        # An earlier run added the event but stopped before marking the
+        # candidate: finish that run instead of failing.
+        cand['status'] = 'approved'
+        _atomic_write_candidates(rows, candidates)
+        return already[0]
+    if cand['status'] != 'pending':
+        raise ValueError(f'{candidate_id} is already {cand["status"]}')
     new_row = {
         'event_id': event_id, 'date_public': day,
         'title': (title or cand['title']).strip(), 'category': 'mideast-conflict',
@@ -42,21 +50,30 @@ def approve(candidate_id, title=None, episode=None, events=EVENTS, candidates=CA
         'source_url': cand['source_url'], 'source_checked': 'no',
         'notes': f'Approved from headline candidate {candidate_id} ({cand["n_sites"]} sites).',
     }
-    with events.open(encoding='utf-8-sig', newline='') as handle:
-        existing = list(csv.DictReader(handle))
     existing.append(new_row)
     existing.sort(key=lambda r: (r['date_public'], r['event_id']))
-    with tempfile.TemporaryDirectory() as tmp:
-        trial = Path(tmp) / events.name
+    # Write next to the target and swap in with os.replace (atomic on one file
+    # system), so an interruption leaves either the old or the new catalog.
+    trial = events.with_name(events.name + '.tmp')
+    try:
         with trial.open('w', encoding='utf-8', newline='') as handle:
             writer = csv.DictWriter(handle, fieldnames=COLUMNS)
             writer.writeheader()
             writer.writerows(existing)
         load_catalog(trial, category='mideast-conflict')  # raises on any problem
-        shutil.copyfile(trial, events)
+        os.replace(trial, events)
+    finally:
+        if trial.exists():
+            trial.unlink()
     cand['status'] = 'approved'
-    write_candidates(rows, candidates)
+    _atomic_write_candidates(rows, candidates)
     return new_row
+
+
+def _atomic_write_candidates(rows, path):
+    tmp = path.with_name(path.name + '.tmp')
+    write_candidates(rows, tmp)
+    os.replace(tmp, path)
 
 
 def main(argv=None):

@@ -10,8 +10,8 @@ output can never do more than add a pending candidate for Kai to judge.
 import json
 from datetime import date
 
-from src.huginn_muninn.candidates import REGIONS, Candidate
-from src.huginn_muninn.daily import relevant
+from src.huginn_muninn.candidates import NON_MILITARY, REGIONS, Candidate, regions_of
+from src.huginn_muninn.daily import in_window, relevant
 
 ESCALATION_TYPES = ('attack', 'airstrike', 'invasion', 'seizure', 'blockade',
                     'supply_disruption', 'assassination')
@@ -25,8 +25,11 @@ SYSTEM = (
 )
 
 
-def numbered(articles):
-    """Relevant, de-duplicated headlines as [(n, article)], n from 1."""
+def numbered(articles, fetched=None):
+    """Relevant, de-duplicated headlines as [(n, article)], n from 1. With
+    ``fetched``, only articles seen in the 36 hours before it."""
+    if fetched is not None:
+        articles = in_window(articles, fetched)
     seen, out = set(), []
     for a in articles:
         title = (a.get('title') or '').strip()
@@ -85,13 +88,24 @@ def parse(text, items, on, catalog=(), min_sites=2):
         except (KeyError, TypeError, ValueError):
             rejected += 1
             continue
-        cited = [n for n in cited if n in by_n]
-        sites = {by_n[n].get('domain') for n in cited if by_n[n].get('domain')}
+        # Every cited number must exist, and the region must come from the cited
+        # headlines themselves, so the model can't attach a story to unrelated
+        # (or prompt-injected) headlines.
         if (not title or region not in REGIONS or etype not in ESCALATION_TYPES + OTHER_TYPES
-                or not cited or relevance not in ('high', 'medium', 'low')):
+                or not cited or any(n not in by_n for n in cited)
+                or relevance not in ('high', 'medium', 'low')):
             rejected += 1
             continue
-        first = min((by_n[n] for n in cited), key=lambda a: a.get('seendate', ''))
+        support = [n for n in cited if region in regions_of(by_n[n]['title'])]
+        sites = {by_n[n].get('domain') for n in support if by_n[n].get('domain')}
+        if not support:
+            rejected += 1
+            continue
+        if etype in ESCALATION_TYPES and any(NON_MILITARY.search(by_n[n]['title'])
+                                            for n in support):
+            rejected += 1
+            continue
+        first = min((by_n[n] for n in support), key=lambda a: a.get('seendate', ''))
         if etype in OTHER_TYPES:
             if relevance in ('high', 'medium'):
                 notes.append({'title': title, 'region': region, 'event_type': etype,

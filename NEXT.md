@@ -22,7 +22,9 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 13c. Done: AI headline screen through GitHub Models (free; `models: read` on GITHUB_TOKEN). `src/huginn_muninn/ai_screen.py` validates every model result (region, cited headlines, 2 or more sites; escalations only). De-escalation and sanctions appear as notes. Falls back to the keyword screen if the model is unavailable.
 13d. GitHub Models is not available for this account: it answers `HTTP 200 text/plain "OK"` even to GitHub's documented example (`models-probe` workflow), and the repo has no Settings > Models entry (checked 2026-11-12). The brief uses the keyword screen. Decision for Kai: Anthropic API (paid, small) or keyword screen only.
 13e. 2026-11-12: the scheduled 06:23 run did not start; a backup schedule was added at 10:47 UTC. Keyword screen: removed "war" and "mine(s)" after two false alarms (analysis of "the Iran war"). Those two candidates are marked rejected.
-14. Kai: Codex round 5 (`docs/REVIEW_REQUEST.md`).
+14. Done: Codex round 5, 9 findings fixed (see `REVIEW.md`). The AI screen now supports Groq (free plan) first and GitHub Models second.
+14b. Kai: create a Groq API key (console.groq.com) and add it as the repo secret `GROQ_API_KEY`.
+14c. Kai: Codex round 6 (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 
 ## Historical

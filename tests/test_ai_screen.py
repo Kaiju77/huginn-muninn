@@ -103,7 +103,7 @@ class ParseTest(unittest.TestCase):
 
 
 class ScreenTest(unittest.TestCase):
-    news = {'fetched_at': '2026-11-11T06:30:00+00:00', 'articles': ARTICLES}
+    news = {'fetched_at': '2026-11-11T12:00:00+00:00', 'articles': ARTICLES}
 
     def test_falls_back_to_second_model_on_http_error(self):
         calls = []
@@ -163,7 +163,7 @@ class CurlCallTest(unittest.TestCase):
 
 
 class ProviderTest(unittest.TestCase):
-    news = {'fetched_at': '2026-11-11T06:30:00+00:00', 'articles': ARTICLES}
+    news = {'fetched_at': '2026-11-11T12:00:00+00:00', 'articles': ARTICLES}
 
     def test_provider_order_and_keys(self):
         from scripts.ai_screen import providers

@@ -21,7 +21,8 @@ OUT = ROOT / 'data' / 'news' / 'latest.json'
 ENDPOINT = 'https://api.gdeltproject.org/api/v2/doc/doc'
 QUERY = ('(oil OR crude OR brent OR opec OR "natural gas" OR lng) '
          '(iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon '
-         'OR syria OR hormuz OR "red sea" OR qatar OR uae OR libya) sourcelang:english')
+         'OR syria OR hormuz OR "red sea" OR qatar OR uae OR libya '
+         'OR norway OR equinor OR "north sea") sourcelang:english')
 
 
 def url(query=QUERY, timespan='1d', maxrecords=75):
@@ -41,11 +42,13 @@ def parse(body):
     data = json.loads(text)
     if not isinstance(data, dict) or not isinstance(data.get('articles'), list):
         raise ValueError('GDELT response has no articles list')
-    articles = data['articles']
-    if not articles:
-        raise ValueError('GDELT returned zero articles')
-    return [{k: a.get(k, '') for k in ('title', 'url', 'domain', 'seendate', 'sourcecountry')}
-            for a in articles if isinstance(a, dict)]
+    keep = [{k: str(a.get(k) or '') for k in ('title', 'url', 'domain', 'seendate',
+                                              'sourcecountry')}
+            for a in data['articles'] if isinstance(a, dict)]
+    keep = [a for a in keep if a['title'].strip() and a['url'].startswith('http')]
+    if not keep:
+        raise ValueError('GDELT returned no usable articles')
+    return keep
 
 
 def get(target, retries=3):

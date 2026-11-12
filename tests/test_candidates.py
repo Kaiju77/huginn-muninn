@@ -72,7 +72,7 @@ class FlowTest(unittest.TestCase):
         shutil.copyfile(EVENTS, self.events)
         self.cands = self.dir / 'candidates.csv'
         self.news = self.dir / 'news.json'
-        self.news.write_text(json.dumps({'fetched_at': '2026-11-11T06:30:00+00:00',
+        self.news.write_text(json.dumps({'fetched_at': '2026-11-11T12:00:00+00:00',
                                          'articles': ESCALATION_DAY}))
 
     def tearDown(self):
