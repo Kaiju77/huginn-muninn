@@ -23,7 +23,7 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 13d. GitHub Models is not available for this account: it answers `HTTP 200 text/plain "OK"` even to GitHub's documented example (`models-probe` workflow), and the repo has no Settings > Models entry (checked 2026-11-12). The brief uses the keyword screen. Decision for Kai: Anthropic API (paid, small) or keyword screen only.
 13e. 2026-11-12: the scheduled 06:23 run did not start; a backup schedule was added at 10:47 UTC. Keyword screen: removed "war" and "mine(s)" after two false alarms (analysis of "the Iran war"). Those two candidates are marked rejected.
 14. Done: Codex round 5, 9 findings fixed (see `REVIEW.md`). The AI screen now supports Groq (free plan) first and GitHub Models second.
-14b. Kai: create a Groq API key (console.groq.com) and add it as the repo secret `GROQ_API_KEY`.
+14b. Done 2026-11-12: `GROQ_API_KEY` added. The AI screen works (groq openai/gpt-oss-120b, 34 headlines). Fixed: a rejected candidate id no longer blocks a different new candidate for the same region and day.
 14c. Kai: Codex round 6 (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 

@@ -81,9 +81,19 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
             covered = {c['region'] for c in found}
             found += [c for c in keyword if c['region'] not in covered]
     rows = read_candidates(out)
-    known = {r['candidate_id'] for r in rows}
-    new = [c for c in found if c['candidate_id'] not in known]
-    rows.extend({k: c.get(k, '') for k in COLUMNS} for c in new)
+    by_id = {r['candidate_id']: r for r in rows}
+    new = []
+    for c in found:
+        old = by_id.get(c['candidate_id'])
+        if old is None:
+            rows.append({k: c.get(k, '') for k in COLUMNS})
+            new.append(c)
+        elif old['status'] == 'rejected' and old['title'] != c['title']:
+            # A rejected suggestion must not hide a different one for the same
+            # region and day (found 2026-11-12: a rejected keyword false alarm
+            # blocked a later AI candidate).
+            old.update({k: c.get(k, '') for k in COLUMNS})
+            new.append(c)
     if new or not out.exists():
         write_candidates(rows, out)
     return new

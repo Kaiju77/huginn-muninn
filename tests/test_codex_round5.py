@@ -189,5 +189,31 @@ class Finding9AtomicApproval(unittest.TestCase):
         self.assertIs(approve_event._atomic_write_candidates, real)
 
 
+class RejectedIdDoesNotBlockNewSuggestion(unittest.TestCase):
+    def test_rejected_keyword_candidate_is_replaced_by_new_ai_candidate(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            news = tmp / 'n.json'
+            news.write_text(json.dumps({'fetched_at': FETCHED.isoformat(), 'articles': IRAN_ATTACK}))
+            cands = tmp / 'c.csv'
+            run(ON, news, EVENTS, cands, tmp / 'none.json')
+            rows = read_candidates(cands)
+            rows[0]['status'] = 'rejected'
+            from scripts.suggest_events import write_candidates
+            write_candidates(rows, cands)
+            ai = tmp / 'ai.json'
+            ai.write_text(json.dumps({'date': ON.isoformat(), 'ok': True, 'rejected': 0,
+                                      'candidates': [dict(rows[0], title='Different AI title',
+                                                          status='pending')]}))
+            new = run(ON, news, EVENTS, cands, ai)
+            self.assertEqual(len(new), 1)
+            row = read_candidates(cands)[0]
+            self.assertEqual((row['status'], row['title'], row['method']),
+                             ('pending', 'Different AI title', 'ai'))
+            self.assertEqual(run(ON, news, EVENTS, cands, ai), [])  # no churn on rerun
+        finally:
+            shutil.rmtree(tmp)
+
+
 if __name__ == '__main__':
     unittest.main()

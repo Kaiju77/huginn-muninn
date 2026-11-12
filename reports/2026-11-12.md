@@ -21,7 +21,11 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 AI screen (groq openai/gpt-oss-120b) read 34 relevant headlines; every result is checked by code (region, cited headlines, 2+ sites).
 
-No new conflict escalation found today.
+**Possible new events (need your approval):**
+
+- `c-20261112-hormuz-gulf`: [Iran threatens Hormuz, tankers hit mines](https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465) (supply_disruption, 2 sites)
+
+To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
 
 **Also noted** (not conflict escalations, so no base rates yet):
 
