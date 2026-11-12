@@ -10,6 +10,8 @@ Existing candidate ids are not duplicated.
 
 import argparse
 import csv
+import os
+import re
 import json
 import sys
 from datetime import date, datetime, timezone
@@ -29,6 +31,11 @@ EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 CANDIDATES = ROOT / 'data' / 'events' / 'candidates.csv'
 
 
+def _urls(row):
+    return {u for u in (row.get('urls') or '').split('|') if u} | (
+        {row['source_url']} if row.get('source_url') else set())
+
+
 def read_candidates(path=CANDIDATES):
     if not path.exists():
         return []
@@ -38,10 +45,12 @@ def read_candidates(path=CANDIDATES):
 
 def write_candidates(rows, path=CANDIDATES):
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('w', encoding='utf-8', newline='') as handle:
+    tmp = path.with_name(path.name + '.writing')
+    with tmp.open('w', encoding='utf-8', newline='') as handle:
         writer = csv.DictWriter(handle, fieldnames=COLUMNS, restval='')
         writer.writeheader()
         writer.writerows({k: r.get(k, '') for k in COLUMNS} for r in rows)
+    os.replace(tmp, path)
 
 
 def ai_status(today, path=AI):
@@ -68,7 +77,7 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
     keyword = [{'candidate_id': c.candidate_id, 'date_public': c.date_public.isoformat(),
                 'title': c.title, 'region': c.region, 'episode_hint': c.episode_hint,
                 'source_url': c.source_url, 'n_sites': c.n_sites, 'status': 'pending',
-                'method': 'keyword', 'event_type': ''}
+                'method': 'keyword', 'event_type': '', 'urls': c.urls}
                for c in suggest(articles, today, load_catalog(events_path))]
     ai = ai_status(today, ai_path)
     if ai is None:
@@ -84,26 +93,35 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
     new = []
     for c in found:
         base = c['candidate_id']
-        same_slot = [r for r in rows if r['candidate_id'] == base
-                     or r['candidate_id'].startswith(base + '-')]
-        same_story = [r for r in same_slot if r['source_url'] == c['source_url']
-                      or r['title'] == c['title']]
-        keyword_reject = [r for r in same_slot if r['status'] == 'rejected'
-                          and r.get('method') == 'keyword' and c.get('method') == 'ai']
-        if keyword_reject and not [r for r in same_slot if r.get('method') == 'ai']:
-            # An AI candidate replaces a rejected keyword false alarm (2026-11-12).
-            keyword_reject[0].update({k: c.get(k, '') for k in COLUMNS})
-            new.append(c)
-            continue
-        if same_story:
-            continue  # already known (pending, approved or rejected): never revived
-        if same_slot:
-            # Same region and day but a different story: keep it, with a suffix,
-            # rather than drop it silently (review round 7).
-            c = dict(c, candidate_id=f'{base}-{len(same_slot) + 1}')
+        slot = [r for r in rows if r['candidate_id'] == base
+                or re.fullmatch(re.escape(base) + r'-\d+', r['candidate_id'])]
+        mine = _urls(c)
+        # Same story = at least one supporting article in common (or same title);
+        # robust to a new earliest headline or an AI re-title (review round 8).
+        same = [r for r in slot if (_urls(r) & mine) or r['title'] == c['title']]
+        if same:
+            old = same[0]
+            if (old['status'] == 'rejected' and old.get('method') == 'keyword'
+                    and c.get('method') == 'ai'):
+                # An AI candidate replaces a rejected keyword false alarm, keeping
+                # that row's own id so ids stay unique (2026-11-12, review round 8).
+                keep = old['candidate_id']
+                old.update({k: c.get(k, '') for k in COLUMNS})
+                old['candidate_id'] = keep
+                new.append(dict(c, candidate_id=keep))
+            elif old['status'] == 'pending':
+                # Same story seen again: remember its new articles.
+                old['urls'] = '|'.join(sorted(_urls(old) | mine))
+            continue  # never revived, never duplicated
+        if slot:
+            # A different story for the same region and day keeps its own row.
+            suffixes = [int(r['candidate_id'].rsplit('-', 1)[1]) for r in slot
+                        if r['candidate_id'] != base]
+            c = dict(c, candidate_id=f'{base}-{max(suffixes + [1]) + 1}')
         rows.append({k: c.get(k, '') for k in COLUMNS})
         new.append(c)
-    if new or not out.exists():
+    changed = bool(new) or any(r.get('urls') for r in rows)
+    if changed or not out.exists():
         write_candidates(rows, out)
     return new
 

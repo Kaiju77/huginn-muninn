@@ -39,9 +39,9 @@ AMBIGUOUS = {'strike', 'strikes', 'striking', 'struck', 'offensive'}
 # Phrases where those words are labour or business, matched near the word itself,
 # so "Israel strikes Hezbollah targets as investors flee" still counts.
 NOT_MILITARY_STRIKE = re.compile(
-    r'\b(strik(e|es|ing)|struck)\s+(a\s+|an\s+|new\s+)?(deals?|agreements?|accords?|'
-    r'pacts?|partnerships?|balance|chord|gold|oil\b(?!\s+(facilit|terminal|field|tanker)))|'
-    r'\b(workers?|unions?|staff|employees|pilots|dockers|drivers|nurses)\s+(\w+\s+)?'
+    r'\b(strik(e|es|ing)|struck)\s+(\S+\s+){0,4}?(deals?|agreements?|accords?|pacts?|'
+    r'partnerships?|contracts?|balance|chord)\b|'
+    r'\b(workers?|unions?|staff|employees|pilots|dockers|drivers|nurses)\s+(\w+\s+){0,2}'
     r'(strike|strikes|striking|walk\s*out)|'
     r'\b(on|general|labou?r|national)\s+strike\b|\bstrike\s+(action|ballot|pay)\b|'
     r'\bcharm\s+offensive\b|\boffensive\s+(on|in)\s+(sales|pricing|markets?)\b', re.I)
@@ -53,26 +53,34 @@ NON_MILITARY = re.compile(
     r'world cup|premier league|champions league|kick-?off)\b', re.I)
 # Words that make a headline military even if it mentions sport
 # ("Israeli strike hits football stadium in Gaza, killing 12").
+# (Not "rockets"/"drones"/"missiles": sport uses them as verbs, "striker rockets...".)
 CASUALTY = re.compile(r'\b(kill(s|ed|ing)?|dead|deaths?|wounded|injur(ed|ies)|'
-                      r'missiles?|airstrikes?|drones?|rockets?|bomb(s|ed|ing)?)\b', re.I)
+                      r'airstrikes?|bomb(s|ed|ing)?|casualties)\b', re.I)
 
 
 def is_escalation(title):
-    words = {m.group(0).lower() for m in ESCALATION.finditer(title)}
-    if not words:
+    if not ESCALATION.search(title):
         return False
     if NON_MILITARY.search(title) and not CASUALTY.search(title):
         return False
-    if words <= AMBIGUOUS and NOT_MILITARY_STRIKE.search(title):
-        return False
-    return True
+    # Escalation unless every match is an ambiguous word inside a labour or
+    # business phrase ("Israel strikes Gaza as unions call general strike" counts).
+    spans = [m.span() for m in NOT_MILITARY_STRIKE.finditer(title)]
+    for m in ESCALATION.finditer(title):
+        if m.group(0).lower() not in AMBIGUOUS:
+            return True
+        if not any(a <= m.start() and m.end() <= b for a, b in spans):
+            return True
+    return False
 
 
-# Brent settles around 19:30 London time. News first seen at or after 19:00 UTC
-# is dated the next day, so the after_news entry is a close printed after the
-# news (no look-ahead). Review round 7: dating 22:00 UTC news to the same day
-# booked the whole reaction as an "after news" move.
-CLOSE_CUTOFF_UTC_HOUR = 19
+# News first seen at or after 12:00 UTC is dated the next day, so the after_news
+# entry is always a price fixed after the news, for every asset: Norges Bank
+# fixes USD/NOK at 14:15 CET (12:15 UTC in summer) and Brent settles around
+# 19:30 London (18:30 UTC in summer). Earlier cutoffs (19:00) let some news be
+# dated before a close it followed (review rounds 7 and 8). Dating later is
+# conservative: it can miss part of a first-day reaction but never peeks ahead.
+CLOSE_CUTOFF_UTC_HOUR = 12
 
 
 def seen_day(article, fallback):
@@ -88,7 +96,7 @@ def seen_day(article, fallback):
 
 
 COLUMNS = ('candidate_id', 'date_public', 'title', 'region', 'episode_hint',
-           'source_url', 'n_sites', 'status', 'method', 'event_type')
+           'source_url', 'n_sites', 'status', 'method', 'event_type', 'urls')
 
 
 class Candidate(NamedTuple):
@@ -100,41 +108,13 @@ class Candidate(NamedTuple):
     source_url: str
     n_sites: int
     status: str = 'pending'
+    urls: str = ''      # every supporting article URL, '|'-separated
 
 
 def regions_of(title):
     low = title.lower()
     return [r for r, words in REGIONS.items()
             if any(re.search(r'\b' + re.escape(w) + r'\b', low) for w in words)]
-
-
-STOP = {'the', 'a', 'an', 'in', 'on', 'of', 'to', 'for', 'and', 'as', 'at', 'by', 'with',
-        'after', 'over', 'from', 'is', 'are', 'says', 'say', 'said', 'new', 'amid'}
-
-
-def _words(title):
-    return {w for w in re.findall(r"[a-z]+", title.lower()) if len(w) > 2 and w not in STOP}
-
-
-def stories(items, threshold=0.25):
-    """Group articles whose headlines share enough words (Jaccard >= threshold
-    with any member of a group). Simple single-link clustering."""
-    groups = []
-    for a in items:
-        wa = _words(a.get('title', ''))
-        hits = [g for g in groups if any(
-            len(wa & w) / max(1, len(wa | w)) >= threshold for w in g['words'])]
-        if not hits:
-            groups.append({'items': [a], 'words': [wa]})
-            continue
-        first = hits[0]
-        first['items'].append(a)
-        first['words'].append(wa)
-        for g in hits[1:]:  # merge groups this headline links together
-            first['items'] += g['items']
-            first['words'] += g['words']
-            groups.remove(g)
-    return [g['items'] for g in groups]
 
 
 def suggest(articles, on, catalog, min_domains=3, recent_days=60):
@@ -155,22 +135,14 @@ def suggest(articles, on, catalog, min_domains=3, recent_days=60):
             groups.setdefault(region, []).append(a)
     # Split each region into stories by shared headline words, so two different
     # Israel stories on one day stay two candidates (review round 7).
-    # Split only when every part is strong enough on its own; one event is
-    # usually worded very differently by different sites, and the AI screen
-    # separates events properly.
-    clusters = []
-    for region, items in groups.items():
-        parts = stories(items)
-        strong = [s for s in parts
-                  if len({a.get('domain') for a in s if a.get('domain')}) >= min_domains]
-        if len(parts) > 1 and len(strong) == len(parts):
-            clusters += [(region, s) for s in parts]
-        else:
-            clusters.append((region, items))
-    clusters.sort(key=lambda rc: (-len({a.get('domain') for a in rc[1]}), rc[0]))
-    used, out, slots = set(), [], {}
-    for region, items in clusters:
-        # Only articles not already behind a chosen candidate count, so
+    # One candidate per region and day. Splitting a region into stories by
+    # wording split single events (wire services word them differently;
+    # review round 8); separating events is the AI screen's job.
+    ranked = sorted(groups.items(),
+                    key=lambda kv: (-len({a.get('domain') for a in kv[1]}), kv[0]))
+    used, out = set(), []
+    for region, items in ranked:
+        # Articles already behind a chosen candidate don't count again, so
         # "Iranian missile attack on Israel" gives one candidate, not two.
         fresh = [a for a in items if id(a) not in used]
         domains = {a.get('domain', '') for a in fresh if a.get('domain')}
@@ -182,9 +154,8 @@ def suggest(articles, on, catalog, min_domains=3, recent_days=60):
         recent = [e for e in catalog if 0 <= (day - e.date_public).days <= recent_days
                   and region in regions_of(e.title + ' ' + e.region.replace('/', ' '))]
         hint = max(recent, key=lambda e: e.date_public).episode if recent else ''
-        base = f'c-{day.strftime("%Y%m%d")}-{region}'
-        slots[base] = slots.get(base, 0) + 1
-        cid = base if slots[base] == 1 else f'{base}-{slots[base]}'
-        out.append(Candidate(cid, day, top['title'].strip(), region, hint,
-                             top.get('url', ''), len(domains)))
+        out.append(Candidate(
+            f'c-{day.strftime("%Y%m%d")}-{region}', day, top['title'].strip(), region,
+            hint, top.get('url', ''), len(domains),
+            urls='|'.join(sorted({a.get('url', '') for a in fresh if a.get('url')}))))
     return sorted(out, key=lambda c: c.candidate_id)

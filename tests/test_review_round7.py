@@ -28,8 +28,9 @@ def art(title, domain, seen):
 class P1EveningNewsIsNextDay(unittest.TestCase):
     def test_cutoff(self):
         self.assertEqual(seen_day({'seendate': '20250612T220000Z'}, None), date(2025, 6, 13))
-        self.assertEqual(seen_day({'seendate': '20250612T185959Z'}, None), date(2025, 6, 12))
-        self.assertEqual(seen_day({'seendate': '20250612T190000Z'}, None), date(2025, 6, 13))
+        # Cutoff moved to 12:00 UTC in round 8 (safe for the USD/NOK fixing too).
+        self.assertEqual(seen_day({'seendate': '20250612T115959Z'}, None), date(2025, 6, 12))
+        self.assertEqual(seen_day({'seendate': '20250612T120000Z'}, None), date(2025, 6, 13))
         self.assertEqual(seen_day({'seendate': 'garbage'}, date(2000, 1, 1)), date(2000, 1, 1))
 
     def test_reviewer_example_matches_catalog_date(self):
@@ -53,7 +54,7 @@ class P1NoSilentDropOnIdCollision(unittest.TestCase):
             rows = read_candidates(cands)
             rows[0]['status'] = 'rejected'
             write_candidates(rows, cands)
-            day2 = [art(f'Missile strike on Saudi port {d}', d, '20261111T150000Z') for d in THREE]
+            day2 = [art(f'Missile strike on Saudi port {d}', d, '20261111T100000Z') for d in THREE]
             news.write_text(json.dumps({'fetched_at': '2026-11-12T06:23:00+00:00', 'articles': day2}))
             new = run(date(2026, 11, 12), news, EVENTS, cands, tmp / 'none')
             self.assertEqual([c['candidate_id'] for c in new], ['c-20261111-saudi-2'])
@@ -77,15 +78,17 @@ class P1DailyJobRebuildsOnTopOfMain(unittest.TestCase):
 
 
 class P2SecondStorySameDay(unittest.TestCase):
+    # Round 8 decision: the keyword screen gives ONE candidate per region and day
+    # (splitting by wording split single events); the AI screen separates events.
     def test_reviewer_example(self):
         arts = ([art(f'Iranian missile attack on Israel {d}', d, '20261111T080000Z') for d in THREE]
                 + [art(f'Israel airstrike kills commander in Jenin {d}', d, '20261111T090000Z')
                    for d in ('d.com', 'e.com', 'f.com')])
         found = suggest(arts, date(2026, 11, 11), [])
-        self.assertEqual(len(found), 2)
-        titles = ' '.join(c.title for c in found)
-        self.assertIn('Jenin', titles)
-        self.assertIn('Iranian missile', titles)
+        self.assertEqual(len(found), 1)
+        # The Jenin story is not lost: its articles (d/e/f.com) are on the candidate.
+        for site in ('a.com', 'd.com', 'e.com', 'f.com'):
+            self.assertIn(site, found[0].urls)
 
 
 class P2BacktestUncertainty(unittest.TestCase):

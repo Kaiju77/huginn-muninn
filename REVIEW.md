@@ -1,5 +1,21 @@
 # Review log
 
+## 2026-11-12: review round 8 (independent reviewer agent; 349 tests ran, all OK)
+
+Three of the round 7 fixes held. Round 8 found new problems in the rest, and the fix is simpler rather than more patches:
+
+1. P2: ids were duplicated when an AI candidate replaced a suffixed rejected row. The replacement now keeps that row's own id, and suffixes take the next free number.
+2. P2: one story became several candidates across the morning and backup runs (new earliest headline, AI re-title, order flip). Candidates now store all supporting article URLs (`urls` column), and "same story" means a shared URL or the same title.
+3. P2: splitting a region into stories by wording split single events (wire services word them differently). **Decision:** the keyword screen gives one candidate per region and day, and the AI screen separates events. Splitting by wording is removed.
+4. P2: business deals ("Qatar strikes $20bn LNG supply deal") passed as escalations. Up to four words may now sit between "strike" and "deal". "Israel strikes Gaza as unions call general strike" counts, because only ambiguous words that sit inside a labour or business phrase are vetoed.
+5. P3: the 19:00 UTC cutoff was 30 minutes late in summer for Brent, and wrong for the USD/NOK fixing (14:15 CET). **Decision:** the cutoff is now 12:00 UTC, which is safe for all four assets. It is conservative and can miss part of a first-day reaction, but it never peeks ahead.
+6. P3: sport verbs ("striker rockets…") bypassed the sport veto. "rockets", "drones" and "missiles" were removed from the casualty override.
+7. P3: the backtest caveat counts were hardcoded. They are now computed.
+
+Also, from the reviewer's notes: `write_candidates` is now atomic.
+
+Regression tests: `tests/test_review_round8.py`. Round 7 tests were updated where round 8 deliberately changed behaviour.
+
 ## 2026-11-12: review round 7 (independent reviewer agent; 340 tests ran, all OK)
 
 1. P1: the round 6 date fix overcorrected. News first seen in the evening was dated that same day, so the `after_news` entry was a close printed before the news. For example, the 2025-06-12 22:00 UTC strike on Iran showed +13.5% at 5 days instead of +3.6%. News first seen at or after 19:00 UTC (around the Brent close) is now dated the next day.

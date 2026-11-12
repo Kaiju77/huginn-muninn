@@ -118,7 +118,9 @@ def parse(text, items, on, catalog=(), min_sites=2):
         hint = max(recent, key=lambda e: e.date_public).episode if recent else ''
         day = seen_day(first, on)  # the day it was first reported, not the fetch day
         cand = Candidate(f'c-{day.strftime("%Y%m%d")}-{region}', day, title, region, hint,
-                         first.get('url', ''), len(sites))
+                         first.get('url', ''), len(sites),
+                         urls='|'.join(sorted({by_n[n].get('url', '') for n in support
+                                               if by_n[n].get('url')})))
         if region not in best or cand.n_sites > best[region][0].n_sites:
             best[region] = (cand, etype)
     return [best[r] for r in sorted(best)], notes, rejected

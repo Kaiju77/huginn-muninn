@@ -36,6 +36,7 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
              '| Asset | Horizon | Predictions | Side right: event / baseline | '
              'Brier: event | Brier: baseline | Difference (95% interval) |',
              '|---|---|---|---|---|---|---|']
+    rows_n, comparisons = [], 0
     for asset in ASSETS:
         path = (prices_dir / f'{asset.asset_id}.csv') if prices_dir else asset.csv_path
         if not path.exists():
@@ -44,6 +45,9 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
         for h in DEFAULT_HORIZONS:
             preds = walk_forward(events, closes, h, entry)
             s = score(preds, h)
+            if s.n:
+                rows_n.append(s.n)
+                comparisons += 1
             if not s.n:
                 lines.append(f'| {asset.label} | {h} days | 0 | | | | |')
                 continue
@@ -53,9 +57,10 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
                          f'{fmt(s.brier_event)} | {fmt(s.brier_baseline)} | {diff} |')
     lines += ['', '**How to read it.** Difference = event Brier minus baseline Brier; negative '
               'means the event base rate did better. Only an interval entirely below 0 is evidence '
-              'of skill, and even then: there are 12 comparisons here, so one or two will look '
-              'good by luck alone.', '',
-              '**Limits.** 10 to 13 predictions per row is very few. The event list was picked by '
+              f'of skill, and even then: there are {comparisons} comparisons here, so one or two will '
+              'look good by luck alone.', '',
+              f'**Limits.** {min(rows_n, default=0)} to {max(rows_n, default=0)} predictions per '
+              'row is very few. The event list was picked by '
               'hand with hindsight (see `data/events/README.md`), which can make event base rates '
               'look better than they would be live. The live prediction log is the real test.', '',
               '_Historical backtest, not a forecast or advice._', '']
