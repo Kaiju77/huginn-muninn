@@ -27,6 +27,14 @@ def fmt(x):
     return 'n/a' if x is None else f'{x:.3f}'
 
 
+def list_note(events_path):
+    if Path(events_path).resolve() == Path(EVENTS).resolve():
+        return ('The event list was picked by hand with hindsight (see `data/events/README.md`), '
+                'which can make event base rates look better than they would be live.')
+    return ('This event list comes from a fixed rule, not hand-picking, so hindsight bias is '
+            'smaller, but the rule itself was chosen by us (see `data/events/README.md`).')
+
+
 def build(entry='after_news', prices_dir=None, events_path=EVENTS):
     events = [e.to_event() for e in first_per_episode(load_catalog(events_path))]
     lines = ['# Is the tool right? Walk-forward backtest', '',
@@ -60,9 +68,8 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
               f'of skill, and even then: there are {comparisons} comparisons here, so one or two will '
               'look good by luck alone.', '',
               f'**Limits.** {min(rows_n, default=0)} to {max(rows_n, default=0)} predictions per '
-              'row is very few. The event list was picked by '
-              'hand with hindsight (see `data/events/README.md`), which can make event base rates '
-              'look better than they would be live. The live prediction log is the real test.', '',
+              'row is very few. ' + list_note(events_path) + ' The live prediction log is the '
+              'real test.', '',
               '_Historical backtest, not a forecast or advice._', '']
     return '\n'.join(lines)
 
@@ -70,10 +77,15 @@ def build(entry='after_news', prices_dir=None, events_path=EVENTS):
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument('--entry', choices=ENTRY_RULES, default='after_news')
+    p.add_argument('--events', type=Path, default=EVENTS,
+                   help='event catalog CSV (default: the hand-picked list)')
     a = p.parse_args(argv)
-    text = build(a.entry)
-    OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(text, encoding='utf-8')
+    text = build(a.entry, events_path=a.events)
+    # Another catalog never overwrites the main report.
+    out = OUT if a.events.resolve() == EVENTS.resolve() else \
+        OUT.with_name(f'calibration-{a.events.stem}.md')
+    out.parent.mkdir(exist_ok=True)
+    out.write_text(text, encoding='utf-8')
     print(text)
     return 0
 

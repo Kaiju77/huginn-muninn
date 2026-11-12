@@ -42,7 +42,8 @@ jobs:
             git reset -q --hard origin/main
             mkdir -p data/ucdp && cp -r /tmp/ucdp/ucdp/. data/ucdp/
             cp /tmp/ucdp/mideast-conflict-ucdp.csv data/events/
-            git add -A data/ucdp data/events/mideast-conflict-ucdp.csv
+            python scripts/compare_catalogs.py > /dev/null || echo 'Comparison failed; data still saved.'
+            git add -A data/ucdp data/events/mideast-conflict-ucdp.csv reports/catalog-comparison.md
             if git diff --cached --quiet; then echo 'Nothing new.'; exit 0; fi
             git commit -q -m "UCDP events $(date -u +%F)"
             if git push -q origin HEAD:main; then exit 0; fi

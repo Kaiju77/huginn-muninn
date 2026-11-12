@@ -31,7 +31,7 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 14f. Kai: request a UCDP API token (UCDP sends it by email; see ucdp.uu.se/apidocs) and add it as the repo secret `UCDP_TOKEN`.
 14f2. Done: review round 9 (Fable 5.2), 11 findings fixed. The prediction log can no longer be backfilled into the live file and predicts each crisis once.
 14f3. Done: review rounds 10 and 11 (Fable 5.2). Core numbers verified clean in round 11. The keyword screen is recall-first by decision (false alarms accepted).
-14g. Next: run the study and backtest on the UCDP catalog next to the hand-picked one. Review round 9 runs on Fable 5.2.
+14g. Done 2026-11-12: `scripts/compare_catalogs.py` writes `reports/catalog-comparison.md` (matched crises within 7 days, hand-only, rule-only, base rates and backtest for both lists). `backtest.py --events PATH` writes `reports/calibration-<name>.md`. Runs weekly in `fetch-ucdp` once `UCDP_TOKEN` exists; until then the report says the rule-based list is missing. Review round 12 pending.
 14e. Earlier next: prediction log (record each live base rate and score it when its horizon has passed); more independent events, because n=13 is too small to tell skill from luck. (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 
