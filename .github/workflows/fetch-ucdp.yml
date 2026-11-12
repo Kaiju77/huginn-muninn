@@ -42,9 +42,14 @@ jobs:
             git reset -q --hard origin/main
             mkdir -p data/ucdp && cp -r /tmp/ucdp/ucdp/. data/ucdp/
             cp /tmp/ucdp/mideast-conflict-ucdp.csv data/events/
-            python scripts/compare_catalogs.py > /dev/null || echo 'Comparison failed; data still saved.'
-            git add -A data/ucdp data/events/mideast-conflict-ucdp.csv reports/catalog-comparison.md
+            git add -A data/ucdp data/events/mideast-conflict-ucdp.csv
             if git diff --cached --quiet; then echo 'Nothing new.'; exit 0; fi
+            # The report is only rebuilt when the UCDP data changed. A failed
+            # comparison leaves a stub, never an old report next to new data.
+            if ! python scripts/compare_catalogs.py > /dev/null; then
+              printf '# Crisis lists compared\n\nThe comparison failed on %s; see the fetch-ucdp run log.\n' "$(date -u +%F)" > reports/catalog-comparison.md
+            fi
+            git add reports/catalog-comparison.md
             git commit -q -m "UCDP events $(date -u +%F)"
             if git push -q origin HEAD:main; then exit 0; fi
             sleep 10

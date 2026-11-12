@@ -1,5 +1,19 @@
 # Review log
 
+## 2026-11-12: review round 12 (Fable 5.2; crisis-list comparison; 451 tests ran, all OK)
+
+No P1 found: no price look-ahead, no double counting, and `--events` cannot overwrite `reports/calibration.md`. All 9 findings fixed, with regression tests in `tests/test_compare.py` (`test_round12_*`, and a test that builds the UCDP list through `to_catalog_rows`).
+
+1. P2: matching ran on episode openers only, so real agreements (Lebanon 2006, Desert Storm 1991) showed as misses. Matching is now per episode: any event of one within 7 days of any event of the other.
+2. P2: matching used dates only, so unrelated crises (Kuwait 1990 vs an Israel onset) counted as agreement. Countries must now overlap (Gulf/Red Sea/Gaza mapped to GED countries). The report also prints how many agreements the same test finds with UCDP dates moved 2-12 months (luck).
+3. P2: hand events outside UCDP coverage (1988; 2025-26 after final GED) counted as "rule misses". Counts now use the common window, stated in the report; outside events are listed separately.
+4. P3: `list_note` called every non-default list rule-based. It now goes by the rows' category, and the UCDP note mentions that death counts are revised later.
+5. P3: titles and ids went raw into markdown. Escaped now.
+6. P3: a failed comparison left an old report next to new data, and the report was committed every week. It is now rebuilt only when UCDP data changed, with a stub on failure.
+7. P3: greedy matching could let one close pair block two agreements. Replaced by a maximum one-to-one matching.
+8. P3: empty or tiny lists gave odd text ("0 comparisons"). Now "too few events" / "no price files" / "list is empty".
+9. P3: `--events` with a missing file gave a traceback. Now a clean usage error.
+
 ## 2026-11-12: review round 11 (Fable 5.2; 438 tests ran, all OK)
 
 The reviewer verified the core numbers as clean: no look-ahead or double counting in `study.py`, `calibration.py`, `daily_report.py` or `predictions.score`, and no data loss in the workflows.
