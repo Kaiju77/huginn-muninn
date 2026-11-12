@@ -200,7 +200,9 @@ class ScriptTest(unittest.TestCase):
         self.tmp.cleanup()
 
     def run_on(self, today):
-        return script.run(today, self.log, self.report, self.dir / 'prices', self.events)
+        # These tests simulate a live run on ``today`` (the real date is injected).
+        return script.run(today, self.log, self.report, self.dir / 'prices', self.events,
+                          now=today)
 
     def test_creates_log_with_header(self):
         script.read_log(self.log)
@@ -234,7 +236,7 @@ class ScriptTest(unittest.TestCase):
         self.assertEqual(sorted(os.listdir(self.log.parent)), ['log.csv'])
 
     def test_report_has_n_and_caveat(self):
-        _, text = self.run_on(nth_after(LIVE_DAY, 20))
+        _, text = self.run_on(nth_after(LIVE_DAY, 3))
         self.assertIn('n=10', text)
         self.assertIn('95% CI', text)
         self.assertIn('range', text)

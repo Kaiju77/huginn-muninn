@@ -12,7 +12,7 @@ import argparse
 import os
 import sys
 import tempfile
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -146,11 +146,28 @@ def report(rows, today):
     return '\n'.join(lines)
 
 
-def run(today, log_path=LOG, report_path=REPORT, prices_dir=None, events_path=EVENTS):
+class BackfillRefused(ValueError):
+    pass
+
+
+def run(today, log_path=LOG, report_path=REPORT, prices_dir=None, events_path=EVENTS,
+        allow_backfill=False, now=None):
+    """Record and score. A live log only moves forward in real time: ``today``
+    must be the actual UTC date and not before the newest row. Backfills
+    (``allow_backfill``) must write to a separate file, never the live log,
+    because they use a catalog picked with hindsight (review round 9)."""
+    now = now or datetime.now(timezone.utc).date()
     rows = read_log(log_path)
+    newest = max((r.made_on for r in rows), default=None)
+    if newest is not None and today < newest:
+        raise BackfillRefused(f'--today {today} is before the newest row ({newest})')
+    if today != now and not allow_backfill:
+        raise BackfillRefused(f'--today {today} is not today ({now}); use --backfill-to FILE')
+    if allow_backfill and Path(log_path).resolve() == LOG.resolve():
+        raise BackfillRefused('a backfill must not write to the live log')
     closes = load_prices(today, prices_dir)
     catalog = [e for e in load_catalog(events_path) if e.date_public <= today]
-    recent = daily.recent_events(catalog, today, RECENT_DAYS)
+    recent = pr.first_of_episodes(daily.recent_events(catalog, today, RECENT_DAYS), catalog)
     rows = pr.record(rows, today, recent, lambda e: pr.comparables(catalog, e), closes)
     rows = pr.score(rows, closes, today)
     write_atomic(log_path, pr.to_csv(rows))
@@ -161,9 +178,21 @@ def run(today, log_path=LOG, report_path=REPORT, prices_dir=None, events_path=EV
 
 def main(argv=None):
     p = argparse.ArgumentParser()
-    p.add_argument('--today', type=date.fromisoformat, default=date.today())
+    p.add_argument('--today', type=date.fromisoformat,
+                   default=datetime.now(timezone.utc).date())
+    p.add_argument('--backfill-to', type=Path, metavar='FILE',
+                   help='write a backfill (past --today) to FILE instead of the live log')
     a = p.parse_args(argv)
-    _rows, text = run(a.today)
+    try:
+        if a.backfill_to:
+            _rows, text = run(a.today, log_path=a.backfill_to,
+                              report_path=a.backfill_to.with_suffix('.md'), allow_backfill=True)
+            text = '**BACKFILL, not live: uses a catalog picked with hindsight.**\n\n' + text
+        else:
+            _rows, text = run(a.today)
+    except BackfillRefused as err:
+        print(f'Refused: {err}', file=sys.stderr)
+        return 2
     print(text)
     return 0
 

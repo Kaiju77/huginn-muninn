@@ -214,15 +214,15 @@ class MainTest(unittest.TestCase):
             def read(self):
                 return b'{}'
 
-        def fake_urlopen(request, timeout):
-            captured['url'] = request.full_url
-            captured['headers'] = {k.lower(): v for k, v in request.header_items()}
-            return Resp()
+        class Opener:
+            def open(self, request, timeout):
+                captured['url'] = request.full_url
+                captured['headers'] = {k.lower(): v for k, v in request.header_items()}
+                return Resp()
 
         original = fetch_ucdp.urllib.request.urlopen
-        fetch_ucdp.urllib.request.urlopen = fake_urlopen
         try:
-            fetch_ucdp.http_get(first_url('26.1', 10), SECRET)
+            fetch_ucdp.http_get(first_url('26.1', 10), SECRET, opener=Opener())
         finally:
             fetch_ucdp.urllib.request.urlopen = original
         self.assertEqual(captured['headers'][TOKEN_HEADER], SECRET)
@@ -267,7 +267,10 @@ class OnsetRuleTest(unittest.TestCase):
     def test_calm_period_must_be_observed(self):
         early = [row('1989-02-01', 40)]
         self.assertEqual(find_onsets(early), [])
-        self.assertEqual(len(find_onsets([row('1989-04-01', 40)])), 1)
+        # The calm check needs window sums back to calm_start - (window - 1), so
+        # the first allowed onset is 1989-01-01 + 90 + 6 days (review round 9).
+        self.assertEqual(find_onsets([row('1989-04-06', 40)]), [])
+        self.assertEqual(len(find_onsets([row('1989-04-07', 40)])), 1)
 
     def test_multiple_countries_are_independent(self):
         rows = [row('2006-07-12', 30, 666, 'Israel', i=1),
@@ -309,7 +312,7 @@ class CatalogOutputTest(unittest.TestCase):
         self.assertEqual(first['category'], CATEGORY)
         self.assertEqual(first['region'], 'Israel')
         self.assertEqual(first['source_url'], 'https://ucdp.uu.se/country/666')
-        self.assertEqual(first['source_checked'], 'yes')
+        self.assertEqual(first['source_checked'], 'no')  # generated, not checked by a person
         self.assertIn('30 deaths', first['notes'])
         self.assertIn('>=25', first['notes'])
         self.assertIn('GED 26.1', first['notes'])

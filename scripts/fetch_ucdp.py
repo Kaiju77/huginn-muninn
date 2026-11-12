@@ -54,6 +54,7 @@ UNCONFIRMED (configurable):
 
 import argparse
 import csv
+import http.client
 import json
 import os
 import sys
@@ -92,22 +93,37 @@ def first_url(version, pagesize, country_ids=MIDEAST_COUNTRY_IDS):
             + urllib.parse.urlencode(params, safe=','))
 
 
-def http_get(url, token, retries=3):
-    """GET with the token in a header. Errors never contain the token."""
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuse redirects: urllib would forward the token header to any host,
+    even over plain http (review round 9)."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise urllib.error.HTTPError(req.full_url, code, 'redirect refused', headers, fp)
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
+def http_get(url, token, retries=3, opener=None):
+    """GET with the token in a header, no redirects. Errors never contain the token."""
+    opener = opener or _OPENER
     headers = {'Accept': 'application/json', 'User-Agent': 'huginn-muninn-fetch'}
     if token:
         headers[TOKEN_HEADER] = token
     request = urllib.request.Request(url, headers=headers)
     for attempt in range(retries):
         try:
-            with urllib.request.urlopen(request, timeout=120) as resp:
+            with opener.open(request, timeout=120) as resp:
                 return resp.read()
         except urllib.error.HTTPError as err:
             if err.code in (401, 403):
                 raise RuntimeError(f'HTTP {err.code}: access denied (check UCDP_TOKEN)') from None
+            if 300 <= err.code < 400:
+                raise RuntimeError(f'HTTP {err.code}: redirect refused') from None
             if attempt == retries - 1:
                 raise RuntimeError(f'HTTP {err.code}') from None
-        except (urllib.error.URLError, TimeoutError) as err:
+        except (urllib.error.URLError, TimeoutError, http.client.HTTPException, OSError) as err:
+            # HTTPException covers IncompleteRead (a truncated body).
             if attempt == retries - 1:
                 raise RuntimeError(f'request failed: {type(err).__name__}') from None
         time.sleep(2 ** attempt * 5)

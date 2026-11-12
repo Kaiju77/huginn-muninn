@@ -1,5 +1,21 @@
 # Review log
 
+## 2026-11-12: review round 9 (independent reviewer on Fable 5.2; 410 tests ran, all OK)
+
+1. P1: `--today` in the past filled the live log with fake "live" predictions built on a hindsight catalog (Brier 0.136 vs 0.294). The live log now only moves forward in real time. A backfill needs `--backfill-to FILE`, can never write the live log, and its report is labelled BACKFILL.
+2. P1: one crisis was predicted and scored several times (the Twelve-Day War and the US strikes share an episode). Only the event that opens its episode is predicted (`first_of_episodes`).
+3. P2: rows were recorded when most of the outcome was already known (late first run or late approval). Not recorded if the entry close is more than 10 days old.
+4. P2: "Israel strikes Gaza despite ceasefire deal" was vetoed as a business deal. Words like despite, after, amid, on and over between "strike" and "deal" now keep it an escalation.
+5. P2: one story spanning midnight or the 12:00 cutoff became two candidates. Same-story detection now looks at this region within 2 days either side.
+6. P2: urllib forwarded the UCDP token header on a redirect to any host. Redirects are refused.
+7. P3: a truncated UCDP response crashed with a traceback. `IncompleteRead`/`HTTPException` now give a clean, retried error.
+8. P3: a damaged prediction log failed silently behind `|| true`. The failure is now flagged, and the run turns red after committing everything else.
+9. P3: "strikes twice", "strikes gold" and "oil price rockets" passed. These are handled as sport or price phrases; "rockets fired at Israel" still counts.
+10. P3: the 1989 truncation was 6 days short. The first allowed onset is `data_start + calm + window - 1`.
+11. P3: imprecise GED rows were dropped before the calm check, so a noisy month looked calm. Imprecise rows with deaths now block a "calm" onset. Generated rows are `source_checked=no`.
+
+Regression tests: `tests/test_review_round9.py`. The builders' tests were updated where behaviour changed on purpose.
+
 ## 2026-11-12: review round 8 (independent reviewer agent; 349 tests ran, all OK)
 
 Three of the round 7 fixes held. Round 8 found new problems in the rest, and the fix is simpler rather than more patches:

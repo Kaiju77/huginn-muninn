@@ -35,12 +35,17 @@ REGIONS = {
 
 # Words that make "strike"/"offensive" mean labour or business, not military.
 # Only applied when those two are the sole escalation words in the headline.
-AMBIGUOUS = {'strike', 'strikes', 'striking', 'struck', 'offensive'}
+AMBIGUOUS = {'strike', 'strikes', 'striking', 'struck', 'offensive', 'rocket', 'rockets'}
 # Phrases where those words are labour or business, matched near the word itself,
 # so "Israel strikes Hezbollah targets as investors flee" still counts.
 NOT_MILITARY_STRIKE = re.compile(
-    r'\b(strik(e|es|ing)|struck)\s+(\S+\s+){0,4}?(deals?|agreements?|accords?|pacts?|'
+    r'\b(strik(e|es|ing)|struck)\s+'
+    r'((?!despite\b|after\b|amid\b|as\b|following\b|ignoring\b|violat|breach|over\b|'
+    r'against\b|on\b|in\b)\S+\s+){0,4}?(deals?|agreements?|accords?|pacts?|'
     r'partnerships?|contracts?|balance|chord)\b|'
+    r'\bstrik(e|es)\s+(gold|silver|bronze|twice|again|late|first|back)\b|'
+    r'\b(price|prices|stocks?|shares|oil|brent|crude|bonds?|yields?|index)\s+'
+    r'(sky)?rockets?\b|'
     r'\b(workers?|unions?|staff|employees|pilots|dockers|drivers|nurses)\s+(\w+\s+){0,2}'
     r'(strike|strikes|striking|walk\s*out)|'
     r'\b(on|general|labou?r|national)\s+strike\b|\bstrike\s+(action|ballot|pay)\b|'
@@ -50,7 +55,8 @@ NOT_MILITARY_STRIKE = re.compile(
 # review round 6: "Arab League condemns...", "UN aid team" are real news.
 NON_MILITARY = re.compile(
     r'\b(football|soccer|fifa|olympics?|striker|tournament|championship|qualifiers?|'
-    r'world cup|premier league|champions league|kick-?off)\b', re.I)
+    r'world cup|premier league|champions league|kick-?off|asian games|medals?|'
+    r'grand prix)\b', re.I)
 # Words that make a headline military even if it mentions sport
 # ("Israeli strike hits football stadium in Gaza, killing 12").
 # (Not "rockets"/"drones"/"missiles": sport uses them as verbs, "striker rockets...".)

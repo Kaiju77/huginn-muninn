@@ -96,9 +96,14 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
         slot = [r for r in rows if r['candidate_id'] == base
                 or re.fullmatch(re.escape(base) + r'-\d+', r['candidate_id'])]
         mine = _urls(c)
-        # Same story = at least one supporting article in common (or same title);
-        # robust to a new earliest headline or an AI re-title (review round 8).
-        same = [r for r in slot if (_urls(r) & mine) or r['title'] == c['title']]
+        # Same story = at least one supporting article in common (or same title),
+        # in this region within two days either side: robust to a new earliest
+        # headline, an AI re-title (round 8) and a story spanning midnight or the
+        # 12:00 cutoff (round 9).
+        near = [r for r in rows if r['region'] == c['region'] and r.get('date_public')
+                and abs((date.fromisoformat(r['date_public'])
+                         - date.fromisoformat(c['date_public'])).days) <= 2]
+        same = [r for r in near if (_urls(r) & mine) or r['title'] == c['title']]
         if same:
             old = same[0]
             if (old['status'] == 'rejected' and old.get('method') == 'keyword'

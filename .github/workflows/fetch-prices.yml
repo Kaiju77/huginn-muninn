@@ -79,7 +79,8 @@ jobs:
             python scripts/suggest_events.py || true
             python scripts/daily_report.py > /dev/null
             python scripts/backtest.py > /dev/null || true
-            python scripts/prediction_log.py > /dev/null || true
+            rm -f /tmp/predlog_failed
+            python scripts/prediction_log.py > /dev/null || { echo '::error::prediction log failed'; touch /tmp/predlog_failed; }
             git add -A data/prices data/news data/events/candidates.csv data/predictions reports
             if git diff --cached --quiet; then echo 'Nothing new.'; exit 0; fi
             git commit -q -m "Daily data and brief $(date -u +%F)"
@@ -88,6 +89,12 @@ jobs:
             sleep 10
           done
           exit 1
+      - name: Fail the run if the prediction log failed
+        run: |
+          if [ -f /tmp/predlog_failed ]; then
+            echo 'The prediction log did not update; see the commit step.'
+            exit 1
+          fi
       - name: Fail the run if any asset failed
         if: steps.fetch.outcome == 'failure'
         run: |

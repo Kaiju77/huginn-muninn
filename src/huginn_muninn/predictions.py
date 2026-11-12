@@ -90,6 +90,25 @@ def entry_index(closes, day, max_gap_days=DEFAULT_MAX_GAP_DAYS):
     return i
 
 
+# A prediction is only recorded while its entry close is recent. EIA publishes a
+# few days late, so a few known closes after the entry are unavoidable; an entry
+# older than this means a late first run or a late approval, and most of the
+# path would already be known (review round 9).
+MAX_ENTRY_AGE_DAYS = 10
+
+
+def first_of_episodes(recent_events, catalog):
+    """Only events that open their episode (no earlier catalog event in the same
+    episode), so one crisis is predicted once (review round 9)."""
+    out = []
+    for e in recent_events:
+        earlier = [c for c in catalog if c.episode == e.episode
+                   and (c.date_public, c.event_id) < (e.date_public, e.event_id)]
+        if not earlier:
+            out.append(e)
+    return out
+
+
 def record(existing_rows, today, recent_events, comparable_fn, closes_by_asset,
            horizons=HORIZONS, assets=BRIEF_ASSETS):
     """Rows plus one new open row per (event, asset, horizon, entry rule) not
@@ -116,6 +135,8 @@ def record(existing_rows, today, recent_events, comparable_fn, closes_by_asset,
             i = entry_index(closes, event.date_public)
             if i is None:
                 continue
+            if i >= 0 and (today - closes[i].on).days > MAX_ENTRY_AGE_DAYS:
+                continue             # too late: much of the outcome is already known
             ctx = daily.event_context(event, comparable, closes, horizons)
             for res in ctx.results:
                 key = (event.event_id, asset_id, res.horizon, AFTER_NEWS)
