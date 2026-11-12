@@ -5,3 +5,4 @@ __pycache__/
 codex-review-output.txt
 codex-review-status.json
 codex-review.lock
+site/

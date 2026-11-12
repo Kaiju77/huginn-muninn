@@ -2,6 +2,8 @@
 
 Event study and historical base rates for market-moving events. Example: "In 18 comparable conflicts, Brent rose within 20 days in 11 (61%, 95% CI 39-80%)." You make the decisions; the tool reports history. See `PROJECT_STATE.md` and `ROADMAP.md`.
 
+**Live page:** [kaiju77.github.io/huginn-muninn](https://kaiju77.github.io/huginn-muninn/): the daily brief, the backtest, the live prediction log and the crisis-list comparison, rebuilt after every scheduled run.
+
 ## Quick start
 
     python scripts/event_study.py                 # base rates for every asset, printed

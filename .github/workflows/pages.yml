@@ -1,0 +1,49 @@
+name: pages
+
+# Publishes the daily brief and the method reports (scripts/build_site.py)
+# to GitHub Pages. Runs after the data workflows, because their bot pushes
+# do not trigger push events.
+on:
+  workflow_run:
+    workflows: [fetch-prices, fetch-ucdp, approve-event]
+    types: [completed]
+  push:
+    branches: [main]
+    paths: ['reports/**', 'scripts/build_site.py', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/build_site.py --out site
+      - uses: actions/configure-pages@v5
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./site
+          destination: ./_site
+      - uses: actions/upload-pages-artifact@v3
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
