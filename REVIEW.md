@@ -1,5 +1,17 @@
 # Review log
 
+## 2026-11-12: review round 11 (Fable 5.2; 438 tests ran, all OK)
+
+The reviewer verified the core numbers as clean: no look-ahead or double counting in `study.py`, `calibration.py`, `daily_report.py` or `predictions.score`, and no data loss in the workflows.
+
+1. P1: the round 10 fix for finding 3 skipped an episode once the event itself had rows. The krone is published before oil, so oil and gas would never have been logged. Now an episode is skipped only if a *different* event of it is logged.
+2. P2: many small imprecise UCDP rows, judged one by one, never blocked a "calm" onset. Imprecise rows are spread over their range and added to the precise deaths; the calm check uses the combined window sums.
+3. and 4. P2: labour, sport, price and business vetoes still dropped real strikes. Following the recall-first principle, the sport veto is removed, and only phrases that cannot describe an attack still veto ("strikes $20bn LNG deal", "go on strike", "strikes gold", "price rockets" unless followed by fired/hit/launched, "charm offensive"). Football false alarms are accepted.
+5. and 6. P2/P3: same-story detection was either too loose (one shared round-up link) or too strict (a rejected story revived). Same story now means 2 or more shared links, or the only link of a single-link row.
+7. P3: a late EIA batch dropped a horizon with no trace. It is now a visible void row.
+
+Regression tests: `tests/test_review_round11.py`. Earlier tests were updated where round 11 deliberately changed behaviour.
+
 ## 2026-11-12: review round 10 (Fable 5.2; 425 tests ran, all OK; 6 of 11 round-9 fixes held)
 
 **Principle adopted for the keyword screen:** prefer a false alarm (Kai ignores it with one click) to a missed attack. Only clear labour, business, price and sport phrases veto an ambiguous word. The AI screen and Kai do the precise sorting. This ends the vocabulary back-and-forth of rounds 6-10.

@@ -141,9 +141,11 @@ class Finding6KeywordVocabulary(unittest.TestCase):
 
 class Finding7NonMilitary(unittest.TestCase):
     def test_codex_example_football(self):
+        # Round 11: no sport veto (recall first). A football false alarm is
+        # accepted; Kai ignores it, and the AI screen does not suggest it.
         arts = [art('Iran football team launches offensive against Qatar', d)
                 for d in ('a.com', 'b.com', 'c.com')]
-        self.assertEqual(suggest(arts, ON, []), [])
+        self.assertEqual(len(suggest(arts, ON, [])), 1)
 
 
 class Finding8NorwegianSupplyNews(unittest.TestCase):

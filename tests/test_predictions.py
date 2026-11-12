@@ -89,7 +89,9 @@ class RecordTest(unittest.TestCase):
     def test_known_outcome_not_recorded(self):
         late = nth_after(LIVE_DAY, 5)    # 5-day exit is published on this day
         rows = pr.record([], late, [LIVE], comp, {'brent': CLOSES})
-        self.assertEqual([r.horizon for r in rows], [20, 60])
+        # Since round 11 the known horizon is kept as a visible void row.
+        self.assertEqual([(r.horizon, r.status) for r in rows],
+                         [(5, pr.VOID), (20, pr.OPEN), (60, pr.OPEN)])
 
     def test_weekend_event_waits_for_monday(self):
         saturday = date(2020, 10, 3)

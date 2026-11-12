@@ -106,10 +106,16 @@ def first_of_episodes(recent_events, catalog, logged_event_ids=()):
     predicted once even if its opener was approved after a follow-up
     (review rounds 9 and 10)."""
     episode_of = {c.event_id: c.episode for c in catalog}
-    logged = {episode_of[i] for i in logged_event_ids if i in episode_of}
+    logged = {}
+    for i in logged_event_ids:
+        if i in episode_of:
+            logged.setdefault(episode_of[i], set()).add(i)
     out = []
     for e in recent_events:
-        if e.episode in logged:
+        # Skip only if ANOTHER event of this crisis is already logged. The same
+        # event must stay eligible: its oil and gas closes arrive days after the
+        # krone's (review round 11: only USD/NOK was ever logged).
+        if logged.get(e.episode, set()) - {e.event_id}:
             continue
         earlier = [c for c in catalog if c.episode == e.episode
                    and (c.date_public, c.event_id) < (e.date_public, e.event_id)]
@@ -152,7 +158,16 @@ def record(existing_rows, today, recent_events, comparable_fn, closes_by_asset,
                 if key in have:
                     continue
                 if i >= 0 and i + res.horizon < len(closes):
-                    continue         # outcome already known: not a prediction
+                    # Outcome already known at the first chance to record (a late
+                    # EIA batch): keep a visible void row, not a silent gap.
+                    s, b = res.events, res.baseline
+                    rows.append(Row(
+                        today, event.event_id, asset_id, res.horizon, AFTER_NEWS,
+                        s.n, s.rises, s.share, s.ci_low, s.ci_high, s.median, s.low, s.high,
+                        b.share, b.n, b.rises, closes[i].on, closes[i].value, VOID,
+                        scored_on=today))
+                    have.add(key)
+                    continue
                 s, b = res.events, res.baseline
                 entry = closes[i] if i >= 0 else None
                 rows.append(Row(

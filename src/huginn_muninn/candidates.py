@@ -43,33 +43,29 @@ AMBIGUOUS = {'strike', 'strikes', 'striking', 'struck', 'offensive', 'rocket', '
 # price and sport phrases veto an ambiguous word; anything in doubt passes.
 _DEAL_WORD = (r'(\$\S+|\d\S*|a|an|the|new|major|landmark|historic|record|preliminary|'
               r'framework|in-principle|long-term|multi-?billion(-dollar)?|billion|lng|gas|'
-              r'oil|arms|supply|energy|trade|export|import|purchase|defen[cs]e|\w+-year)')
+              r'oil|arms|supply|energy|trade|export|import|purchase|\w+-year)')
+# Only phrases that cannot describe an attack veto an ambiguous word (review
+# rounds 10-11: every broader veto dropped real strikes). No sport veto at all:
+# a football false alarm costs one click; a missed attack cannot be undone.
 NOT_MILITARY_STRIKE = re.compile(
     r'\b(strik(e|es|ing)|struck)\s+(' + _DEAL_WORD + r'\s+){0,4}'
-    r'(deals?|agreements?|accords?|pacts?|partnerships?|contracts?|balance|chord)\b|'
-    r'\b(workers?|unions?|staff|employees|pilots|dockers|drivers|nurses)\s+(\w+\s+){0,2}'
-    r'(strike|strikes|striking|walk\s*out)|'
-    r'\b(on|general|labou?r|national)\s+strike\b|\bstrike\s+(action|ballot|pay)\b|'
+    r'(deals?|agreements?|accords?|pacts?|partnerships?)\b(?!\s+(factory|plant|site|office))|'
+    r'\b(go|goes|went|are|is|remain|remains|staged?)\s+on\s+strike\b|'
+    r'\b(workers?|unions?|employees|dockers)\s+(strike|walk\s*out)\s+(at|over|for|in)\b|'
+    r'\bgeneral\s+strike\b|\bstrike\s+(action|ballot)\b|'
     r'\bstrik(e|es)\s+(gold|silver|bronze)\b|'
-    r'\b(price|prices|stocks?|shares|brent|crude|bonds?|yields?|index)\s+(sky)?rockets?\b|'
-    r'\bcharm\s+offensive\b|\boffensive\s+(on|in)\s+(sales|pricing|markets?)\b', re.I)
+    r'\b(price|prices|stocks?|shares|brent|bonds?|yields?|index)\s+(sky)?rockets?\b'
+    r'(?!\s+(fired|hit|launched|land|struck))|'
+    r'\bcharm\s+offensive\b', re.I)
 
-# Sport only. Generic words (team, league, match, cup, goal) were removed after
-# review round 6: "Arab League condemns...", "UN aid team" are real news.
+# Kept only for the AI screen's support filter; not used by is_escalation.
 NON_MILITARY = re.compile(
-    r'\b(football|soccer|fifa|olympics?|striker|tournament|championship|qualifiers?|'
+    r'\b(football|soccer|fifa|olympics?|tournament|championship|qualifiers?|'
     r'world cup|premier league|champions league|kick-?off|asian games)\b', re.I)
-# Words that make a headline military even if it mentions sport
-# ("Israeli strike hits football stadium in Gaza, killing 12").
-# (Not "rockets"/"drones"/"missiles": sport uses them as verbs, "striker rockets...".)
-CASUALTY = re.compile(r'\b(kill(s|ed|ing)?|dead|deaths?|wounded|injur(ed|ies)|'
-                      r'airstrikes?|bomb(s|ed|ing)?|casualties)\b', re.I)
 
 
 def is_escalation(title):
     if not ESCALATION.search(title):
-        return False
-    if NON_MILITARY.search(title) and not CASUALTY.search(title):
         return False
     # Escalation unless every match is an ambiguous word inside a labour or
     # business phrase ("Israel strikes Gaza as unions call general strike" counts).

@@ -40,9 +40,13 @@ def _days_apart(row, cand):
 
 
 def _mostly_shared(a, b):
+    """Same story: at least two shared article links, or the only link of a
+    single-link row. One shared link between multi-link rows is a round-up page
+    or coincidence (review round 11)."""
     if not a or not b:
         return False
-    return len(a & b) >= max(1, (min(len(a), len(b)) + 1) // 2)
+    shared = len(a & b)
+    return shared >= 2 or (shared == 1 and min(len(a), len(b)) == 1)
 
 
 def _urls(row):
