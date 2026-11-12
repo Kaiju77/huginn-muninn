@@ -24,7 +24,9 @@ Done: product redefined as event study and historical base rates. `PROJECT_STATE
 13e. 2026-11-12: the scheduled 06:23 run did not start; a backup schedule was added at 10:47 UTC. Keyword screen: removed "war" and "mine(s)" after two false alarms (analysis of "the Iran war"). Those two candidates are marked rejected.
 14. Done: Codex round 5, 9 findings fixed (see `REVIEW.md`). The AI screen now supports Groq (free plan) first and GitHub Models second.
 14b. Done 2026-11-12: `GROQ_API_KEY` added. The AI screen works (groq openai/gpt-oss-120b, 34 headlines). Fixed: a rejected candidate id no longer blocks a different new candidate for the same region and day.
-14c. Kai: Codex round 6 (`docs/REVIEW_REQUEST.md`).
+14c. Done 2026-11-12: review round 6 by an independent reviewer agent; 10 findings fixed (see `REVIEW.md`). Reviews are now done by the agent automatically; Codex is optional.
+14d. Done 2026-11-12: walk-forward backtest (`scripts/backtest.py`, `reports/calibration.md`), run daily. First result: mostly no better than the normal-period baseline or 50% (n=10-13 per cell). Exception: USD/NOK 5 days, 12/13 right, Brier 0.151 vs 0.256 baseline.
+14e. Next: prediction log (record each live base rate and score it when its horizon has passed); more independent events, because n=13 is too small to tell skill from luck. (`docs/REVIEW_REQUEST.md`).
 15. Options: (a) AI classification of headlines (better titles, fewer false alarms) through GitHub Models (free tier, uses GITHUB_TOKEN) or the Anthropic API (paid, needs Kai's OK); (b) rule-based history from UCDP; (c) central bank decisions.
 
 ## Historical

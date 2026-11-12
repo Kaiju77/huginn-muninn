@@ -10,9 +10,9 @@ from datetime import date, timedelta
 from typing import NamedTuple
 
 ESCALATION = re.compile(
-    r'\b(attack(s|ed|ing)?|strik(e|es|ed|ing)|airstrikes?|missiles?|drones?|rockets?|'
+    r'\b(attack(s|ed|ing)?|strik(e|es|ed|ing)|struck|airstrikes?|missiles?|drones?|rockets?|'
     r'invad(e|es|ed|ing)|invasion|seiz(e|es|ed|ing|ure)|hijack(s|ed|ing)?|blockade|'
-    r'bomb(s|ed|ing)?|explosions?|'
+    r'bomb(s|ed|ing)?|explosions?|shell(ing|ed)|raid(s|ed)?|'
     r'assassinat(e|ed|ion)|offensive|shot down)\b', re.I)
 # Not included: "war" (names an ongoing situation, e.g. analysis of "the Iran war",
 # not something new today) and "mine(s)" (also mining news). Found 2026-11-12:
@@ -33,14 +33,36 @@ REGIONS = {
     'libya': ('libya', 'libyan', 'tripoli', 'benghazi'),
 }
 
-# Headlines about sport use war words ("offensive", "strike", "attack").
+# Words that make "strike"/"offensive" mean labour or business, not military.
+# Only applied when those two are the sole escalation words in the headline.
+AMBIGUOUS = {'strike', 'strikes', 'striking', 'offensive'}
+NOT_MILITARY_STRIKE = re.compile(
+    r'\b(deals?|agreements?|accords?|workers?|unions?|labou?r|walkouts?|wages?|pay|'
+    r'charm|sales|marketing|investors?)\b', re.I)
+
+# Sport only. Generic words (team, league, match, cup, goal) were removed after
+# review round 6: "Arab League condemns...", "UN aid team" are real news.
 NON_MILITARY = re.compile(
-    r'\b(football|soccer|match|cup|league|team|tournament|olympics?|fifa|striker|'
-    r'goal|coach|championship|qualifier)\b', re.I)
+    r'\b(football|soccer|fifa|olympics?|striker|tournament|championship|qualifiers?|'
+    r'world cup|premier league|champions league|kick-?off)\b', re.I)
 
 
 def is_escalation(title):
-    return bool(ESCALATION.search(title)) and not NON_MILITARY.search(title)
+    words = {m.group(0).lower() for m in ESCALATION.finditer(title)}
+    if not words or NON_MILITARY.search(title):
+        return False
+    if words <= AMBIGUOUS and NOT_MILITARY_STRIKE.search(title):
+        return False
+    return True
+
+
+def seen_day(article, fallback):
+    """UTC date of a GDELT seendate ('20261111T080000Z'), else ``fallback``."""
+    s = (article.get('seendate') or '')[:8]
+    try:
+        return date(int(s[:4]), int(s[4:6]), int(s[6:8]))
+    except ValueError:
+        return fallback
 
 
 COLUMNS = ('candidate_id', 'date_public', 'title', 'region', 'episode_hint',
@@ -65,10 +87,13 @@ def regions_of(title):
 
 
 def suggest(articles, on, catalog, min_domains=3, recent_days=60):
-    """Candidates for ``on`` from the day's articles.
+    """Candidates from the day's articles.
 
-    ``episode_hint`` names a catalog episode from the last ``recent_days``
-    whose title mentions the same region, so a follow-up event can join it.
+    The candidate's date is the UTC day of its earliest report (not the fetch
+    day), so the first day's market reaction is not lost. One headline that
+    names several regions ("Iranian missile attack on Israel") yields one
+    candidate: regions are taken by number of sites, and a region whose
+    articles were mostly used already is skipped.
     """
     groups = {}
     for a in articles:
@@ -77,16 +102,23 @@ def suggest(articles, on, catalog, min_domains=3, recent_days=60):
             continue
         for region in regions_of(title):
             groups.setdefault(region, []).append(a)
-    out = []
-    for region, items in sorted(groups.items()):
+    ranked = sorted(groups.items(),
+                    key=lambda kv: (-len({a.get('domain') for a in kv[1]}), kv[0]))
+    used, out = set(), []
+    for region, items in ranked:
         domains = {a.get('domain', '') for a in items if a.get('domain')}
         if len(domains) < min_domains:
             continue
+        ids = {id(a) for a in items}
+        if len(ids & used) * 2 >= len(ids):
+            continue  # same story as a region already chosen
+        used |= ids
         top = sorted(items, key=lambda a: a.get('seendate', ''))[0]  # earliest report
-        recent = [e for e in catalog if 0 <= (on - e.date_public).days <= recent_days
+        day = seen_day(top, on)
+        recent = [e for e in catalog if 0 <= (day - e.date_public).days <= recent_days
                   and region in regions_of(e.title + ' ' + e.region.replace('/', ' '))]
         hint = max(recent, key=lambda e: e.date_public).episode if recent else ''
         out.append(Candidate(
-            f'c-{on.strftime("%Y%m%d")}-{region}', on, top['title'].strip(), region,
+            f'c-{day.strftime("%Y%m%d")}-{region}', day, top['title'].strip(), region,
             hint, top.get('url', ''), len(domains)))
-    return out
+    return sorted(out, key=lambda c: c.candidate_id)

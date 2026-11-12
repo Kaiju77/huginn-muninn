@@ -1,5 +1,22 @@
 # Review log
 
+## 2026-11-12: review round 6 (independent reviewer agent; 317 tests ran, all OK)
+
+From now on, reviews are done by an independent reviewer agent in the cloud workspace: fresh context, all tests run, no temp-dir limits.
+
+1. P1: a candidate was dated by the fetch day, not the first report, so the first day's reaction was lost. Candidates are now dated by their earliest `seendate`, the brief lists candidates from today and yesterday, and approval takes an optional `--date`.
+2. P1: weekends were never screened (weekday cron with a 24-hour news window). The workflow now runs every day.
+3. P2: the sport filter matched "League", "team" and "match" in real news, and one such headline sank a whole AI event. The filter now uses sport-only words, and sport headlines are dropped from support instead of rejecting the event.
+4. P2: the keyword list missed "struck", "shelling" and "raid", and raised false alarms on labour strikes, "strikes deal" and "charm offensive". These are added or handled.
+5. P2: a rejected candidate came back when the earliest headline changed. Only an AI candidate replaces a rejected keyword one.
+6. P2: approvals shared a concurrency group and could be cancelled silently. The group is removed; the approval retries up to 3 times if `main` moved.
+7. P2: one story naming two regions became two candidates. Regions whose articles were mostly used already are skipped.
+8. P3: a hand-made event with the same id was treated as a resumed approval. This is now an error.
+9. P3: candidate and note titles could inject markdown links. They are escaped.
+10. P3: "24 hours" wording was wrong (the window is 36h), and a `fetched_at` without a zone crashed. Both fixed, and the suggest step is `continue-on-error`.
+
+Regression tests: `tests/test_review_round6.py`.
+
 ## 2026-11-12: Codex review round 5 (event screen, AI screen, approval)
 
 1. P2: old or future articles could appear as today's headlines and candidates. `daily.in_window` now keeps only articles seen in the 36 hours before the fetch, everywhere (brief, keyword screen, AI screen).

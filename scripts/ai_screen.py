@@ -28,6 +28,7 @@ if str(ROOT) not in sys.path:
 
 from src.huginn_muninn.ai_screen import messages, numbered, parse  # noqa: E402
 from src.huginn_muninn.catalog import load_catalog  # noqa: E402
+from src.huginn_muninn.daily import parse_fetched  # noqa: E402
 
 NEWS = ROOT / 'data' / 'news' / 'latest.json'
 OUT = ROOT / 'data' / 'news' / 'ai_screen.json'
@@ -112,7 +113,7 @@ def screen_all(news, provider_list, catalog):
 
 
 def screen(news, token, catalog, call=call, models=MODELS):
-    fetched = datetime.fromisoformat(news['fetched_at']).astimezone(timezone.utc)
+    fetched = parse_fetched(news['fetched_at'])
     on = fetched.date()
     items = numbered(news['articles'], fetched)
     status = {'date': on.isoformat(), 'ok': False, 'model': '', 'headlines': len(items),

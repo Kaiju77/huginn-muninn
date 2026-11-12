@@ -88,9 +88,17 @@ def seen_at(article):
         return None
 
 
+def parse_fetched(text):
+    """``fetched_at`` as an aware UTC datetime; a value without a zone is UTC."""
+    dt = datetime.fromisoformat(text)
+    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)
+
+
 def in_window(articles, fetched, hours=36):
     """Only articles seen in the ``hours`` before ``fetched`` (plus one hour of
     clock slack). Undated, old and future articles are dropped."""
+    if fetched.tzinfo is None:
+        fetched = fetched.replace(tzinfo=timezone.utc)
     out = []
     for a in articles:
         seen = seen_at(a) if isinstance(a, dict) else None

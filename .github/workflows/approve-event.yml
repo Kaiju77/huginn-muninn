@@ -14,13 +14,16 @@ on:
       episode:
         description: 'Optional episode (leave empty to use the suggestion)'
         required: false
+      date:
+        description: 'Optional corrected public date YYYY-MM-DD (leave empty to keep)'
+        required: false
 
 permissions:
   contents: write
 
-concurrency:
-  group: fetch-prices   # never runs at the same time as the daily job
-  cancel-in-progress: false
+# No concurrency group: GitHub keeps only one pending run per group and cancels
+# the rest, which could silently drop an approval. Races with the daily job are
+# handled by the retry loop below.
 
 jobs:
   approve:
@@ -30,26 +33,29 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Approve
+      - name: Approve, test, rewrite the brief, commit (retries if main moved)
         env:
           CANDIDATE_ID: ${{ inputs.candidate_id }}
           TITLE: ${{ inputs.title }}
           EPISODE: ${{ inputs.episode }}
+          EVENT_DATE: ${{ inputs.date }}
         run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           args=("$CANDIDATE_ID")
           [ -n "$TITLE" ] && args+=(--title "$TITLE")
           [ -n "$EPISODE" ] && args+=(--episode "$EPISODE")
-          python scripts/approve_event.py "${args[@]}"
-      - name: Tests still pass
-        run: python -m unittest discover -s tests
-      - name: Rewrite the brief and commit
-        run: |
-          python scripts/daily_report.py > /dev/null
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A data/events reports
-          git commit -m "Approve event ${CANDIDATE_ID}"
-          git pull --rebase origin main
-          git push
-        env:
-          CANDIDATE_ID: ${{ inputs.candidate_id }}
+          [ -n "$EVENT_DATE" ] && args+=(--date "$EVENT_DATE")
+          for attempt in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            python scripts/approve_event.py "${args[@]}"
+            python -m unittest discover -s tests
+            python scripts/daily_report.py > /dev/null
+            git add -A data/events reports
+            git commit -q -m "Approve event ${CANDIDATE_ID}"
+            if git push -q origin HEAD:main; then exit 0; fi
+            echo "main moved during the approval; retrying ($attempt)"
+            sleep 10
+          done
+          exit 1

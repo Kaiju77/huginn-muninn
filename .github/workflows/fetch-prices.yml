@@ -7,8 +7,8 @@ name: fetch-prices
 on:
   workflow_dispatch:
   schedule:
-    - cron: '23 6 * * 1-5'   # 06:23 UTC on weekdays
-    - cron: '47 10 * * 1-5'  # backup: GitHub sometimes delays or skips scheduled runs;
+    - cron: '23 6 * * *'     # 06:23 UTC every day: weekends too, so Saturday news is screened
+    - cron: '47 10 * * *'    # backup: GitHub sometimes delays or skips scheduled runs;
                              # a second run on the same day is harmless (same data, fresh brief)
 
 permissions:
@@ -56,11 +56,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python scripts/ai_screen.py
       - name: Suggest new events from headlines
+        continue-on-error: true   # never block the day's commit
         run: python scripts/suggest_events.py
       - name: Write the daily brief
         run: |
           mkdir -p data/news reports
           python scripts/daily_report.py > /dev/null
+      - name: Backtest (is the tool right?)
+        continue-on-error: true
+        run: python scripts/backtest.py > /dev/null
       - name: Commit prices, news and brief
         run: |
           git config user.name 'github-actions[bot]'

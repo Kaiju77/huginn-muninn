@@ -56,7 +56,8 @@ class SuggestTest(unittest.TestCase):
         self.assertEqual(suggest(arts, date(2026, 11, 11), []), [])
 
     def test_episode_hint_links_to_recent_catalog_episode(self):
-        found = suggest(ESCALATION_DAY, date(2026, 3, 10), load_catalog(EVENTS))
+        march = [dict(a, seendate='20260310T080000Z') for a in ESCALATION_DAY]
+        found = suggest(march, date(2026, 3, 10), load_catalog(EVENTS))
         self.assertEqual(found[0].episode_hint, '2026-iran-war')
         later = suggest(ESCALATION_DAY, date(2026, 11, 11), load_catalog(EVENTS))
         self.assertEqual(later[0].episode_hint, '')

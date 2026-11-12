@@ -8,6 +8,7 @@ Event study and historical base rates for market-moving events. Example: "In 18 
     pip install -r requirements-app.txt
     streamlit run app/streamlit_app.py            # the results page
     python scripts/daily_report.py                # the daily brief -> reports/latest.md
+    python scripts/backtest.py                    # is it right? -> reports/calibration.md
 
 Every weekday the `fetch-prices` GitHub workflow fetches prices (EIA: Brent, WTI, Henry Hub; Norges Bank: USD/NOK) and headlines (GDELT), and writes the brief to [`reports/latest.md`](reports/latest.md).
 

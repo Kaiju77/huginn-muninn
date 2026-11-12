@@ -10,7 +10,7 @@ output can never do more than add a pending candidate for Kai to judge.
 import json
 from datetime import date
 
-from src.huginn_muninn.candidates import NON_MILITARY, REGIONS, Candidate, regions_of
+from src.huginn_muninn.candidates import NON_MILITARY, REGIONS, Candidate, regions_of, seen_day
 from src.huginn_muninn.daily import in_window, relevant
 
 ESCALATION_TYPES = ('attack', 'airstrike', 'invasion', 'seizure', 'blockade',
@@ -44,7 +44,7 @@ def numbered(articles, fetched=None):
 
 def messages(items, on):
     lines = '\n'.join(f'[{n}] {a["title"].strip()} ({a.get("domain", "")})' for n, a in items)
-    user = f"""Headlines from the 24 hours up to {on.isoformat()}:
+    user = f"""Headlines from the 36 hours up to {on.isoformat()}:
 
 {lines}
 
@@ -57,7 +57,7 @@ Return JSON: {{"events": [{{
   "region": one of {sorted(REGIONS)},
   "event_type": one of {list(ESCALATION_TYPES + OTHER_TYPES)},
   "headlines": [numbers of the headlines that report it],
-  "happened_today": true if the event itself happened in these 24 hours,
+  "happened_today": true if the event itself happened in these 36 hours,
   "relevance": "high" | "medium" | "low"
 }}]}}
 Return {{"events": []}} if there is nothing."""
@@ -97,12 +97,11 @@ def parse(text, items, on, catalog=(), min_sites=2):
             rejected += 1
             continue
         support = [n for n in cited if region in regions_of(by_n[n]['title'])]
+        if etype in ESCALATION_TYPES:
+            # Drop sport headlines from the support instead of rejecting the event.
+            support = [n for n in support if not NON_MILITARY.search(by_n[n]['title'])]
         sites = {by_n[n].get('domain') for n in support if by_n[n].get('domain')}
         if not support:
-            rejected += 1
-            continue
-        if etype in ESCALATION_TYPES and any(NON_MILITARY.search(by_n[n]['title'])
-                                            for n in support):
             rejected += 1
             continue
         first = min((by_n[n] for n in support), key=lambda a: a.get('seendate', ''))
@@ -117,7 +116,8 @@ def parse(text, items, on, catalog=(), min_sites=2):
         recent = [e for e in catalog if 0 <= (on - e.date_public).days <= 60
                   and region in _regions(e)]
         hint = max(recent, key=lambda e: e.date_public).episode if recent else ''
-        cand = Candidate(f'c-{on.strftime("%Y%m%d")}-{region}', on, title, region, hint,
+        day = seen_day(first, on)  # the day it was first reported, not the fetch day
+        cand = Candidate(f'c-{day.strftime("%Y%m%d")}-{region}', day, title, region, hint,
                          first.get('url', ''), len(sites))
         if region not in best or cand.n_sites > best[region][0].n_sites:
             best[region] = (cand, etype)

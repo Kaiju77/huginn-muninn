@@ -10,7 +10,7 @@ Missing inputs are reported in the brief, not raised.
 import argparse
 import json
 import sys
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -51,7 +51,7 @@ def news_lines(today, news_path):
     either a failed refresh or a past brief, and is said plainly."""
     try:
         news = json.loads(news_path.read_text(encoding='utf-8'))
-        fetched = datetime.fromisoformat(news['fetched_at'])
+        fetched = daily.parse_fetched(news['fetched_at'])
         articles = news['articles']
     except (OSError, ValueError, KeyError, TypeError):
         return ['News unavailable.']
@@ -62,16 +62,29 @@ def news_lines(today, news_path):
     items = daily.headlines(daily.in_window(articles, fetched))
     if not items:
         return ['News unavailable (the fetch returned no usable headlines).']
-    out = [f'Fetched {fetched.strftime("%Y-%m-%d %H:%M")} UTC, covering the previous 24 hours.', '']
+    out = [f'Fetched {fetched.strftime("%Y-%m-%d %H:%M")} UTC, covering the previous 36 hours.', '']
     for title, domain, link, _seen in items:
-        safe = title.replace('[', '(').replace(']', ')')
-        out.append(f'- [{safe}]({link}) ({domain})')
+        out.append(f'- [{md(title)}]({url(link)}) ({md(domain)})')
     return out
 
 
+def md(text):
+    """Untrusted text (headlines, model output) made safe inside a markdown link."""
+    return (str(text).replace('[', '(').replace(']', ')').replace('\n', ' ')
+            .replace('`', "'"))
+
+
+def url(text):
+    text = str(text)
+    return text.replace(')', '%29').replace(' ', '%20') if text.startswith('http') else ''
+
+
 def candidate_lines(today, path, ai_path=AI):
+    # Pending candidates first reported today or yesterday (a candidate is dated
+    # by its earliest report, which can be the day before the fetch).
+    days = {today.isoformat(), (today - timedelta(days=1)).isoformat()}
     rows = [r for r in read_candidates(path)
-            if r['status'] == 'pending' and r['date_public'] == today.isoformat()]
+            if r['status'] == 'pending' and r['date_public'] in days]
     ai = ai_status(today, ai_path)
     out = ['## Event screen', '']
     if ai is not None:
@@ -86,8 +99,8 @@ def candidate_lines(today, path, ai_path=AI):
         for r in rows:
             hint = f', may belong to episode `{r["episode_hint"]}`' if r['episode_hint'] else ''
             kind = f'{r.get("event_type")}, ' if r.get('event_type') else ''
-            out.append(f'- `{r["candidate_id"]}`: [{r["title"]}]({r["source_url"]}) '
-                       f'({kind}{r["n_sites"]} sites{hint})')
+            out.append(f'- `{md(r["candidate_id"])}`: [{md(r["title"])}]({url(r["source_url"])}) '
+                       f'({md(kind)}{md(r["n_sites"])} sites{md(hint)})')
         out += ['', 'To add one: GitHub, then Actions, then **approve-event**, then Run '
                 'workflow, and paste the id.', '']
     else:
@@ -95,8 +108,8 @@ def candidate_lines(today, path, ai_path=AI):
     if ai is not None and ai.get('notes'):
         out += ['**Also noted** (not conflict escalations, so no base rates yet):', '']
         for n in ai['notes']:
-            out.append(f'- {n["title"]} ({n["event_type"].replace("_", "-")}, {n["region"]}, '
-                       f'[source]({n["url"]}))')
+            out.append(f'- {md(n["title"])} ({md(n["event_type"]).replace("_", "-")}, '
+                       f'{md(n["region"])}, [source]({url(n["url"])}))')
         out.append('')
     return out
 

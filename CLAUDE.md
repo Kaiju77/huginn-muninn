@@ -8,4 +8,5 @@
 - Tests: `python -m unittest discover -s tests`.
 - The parked ledger code (`ledger.py`, `onboarding.py`, `prototype.py`, `desk.py`) stays and keeps its tests passing. Build no new features on it.
 - Pushing to `main` in this repo: standing OK from Kai (2026-11-11). Every push must pass the tests first. Still ask before deleting data, force-pushing, deploying, publishing or using paid APIs.
+- Reviews: after each change set, run an independent reviewer agent (fresh context, runs all tests, tries to break things), fix every finding with a regression test, and log it in `REVIEW.md`. Codex on Kai's PC is optional, for an outside check (`docs/CODEX_AUTOMATION.md`).
 - End each session by updating `NEXT.md`.

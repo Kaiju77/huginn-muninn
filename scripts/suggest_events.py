@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
 
 from src.huginn_muninn.candidates import COLUMNS, suggest  # noqa: E402
 from src.huginn_muninn.catalog import load_catalog  # noqa: E402
-from src.huginn_muninn.daily import in_window  # noqa: E402
+from src.huginn_muninn.daily import in_window, parse_fetched  # noqa: E402
 
 NEWS = ROOT / 'data' / 'news' / 'latest.json'
 AI = ROOT / 'data' / 'news' / 'ai_screen.json'
@@ -58,12 +58,12 @@ def ai_status(today, path=AI):
 def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
     try:
         news = json.loads(news_path.read_text(encoding='utf-8'))
-        fetched = datetime.fromisoformat(news['fetched_at']).astimezone(timezone.utc).date()
+        fetched = parse_fetched(news['fetched_at']).date()
     except (OSError, ValueError, KeyError):
         return []
     if fetched != today:
         return []
-    fetched_at = datetime.fromisoformat(news['fetched_at'])
+    fetched_at = parse_fetched(news['fetched_at'])
     articles = in_window(news['articles'], fetched_at)
     keyword = [{'candidate_id': c.candidate_id, 'date_public': c.date_public.isoformat(),
                 'title': c.title, 'region': c.region, 'episode_hint': c.episode_hint,
@@ -88,10 +88,11 @@ def run(today, news_path=NEWS, events_path=EVENTS, out=CANDIDATES, ai_path=AI):
         if old is None:
             rows.append({k: c.get(k, '') for k in COLUMNS})
             new.append(c)
-        elif old['status'] == 'rejected' and old['title'] != c['title']:
-            # A rejected suggestion must not hide a different one for the same
-            # region and day (found 2026-11-12: a rejected keyword false alarm
-            # blocked a later AI candidate).
+        elif (old['status'] == 'rejected' and old.get('method') == 'keyword'
+              and c.get('method') == 'ai'):
+            # A rejected keyword false alarm must not hide an AI candidate for the
+            # same region and day (2026-11-12). A rejected candidate is never
+            # revived by the same screen with a different headline (review 6).
             old.update({k: c.get(k, '') for k in COLUMNS})
             new.append(c)
     if new or not out.exists():

@@ -11,6 +11,7 @@ import argparse
 import csv
 import os
 import sys
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -23,17 +24,21 @@ from src.huginn_muninn.catalog import COLUMNS, load_catalog  # noqa: E402
 EVENTS = ROOT / 'data' / 'events' / 'mideast-conflict.csv'
 
 
-def approve(candidate_id, title=None, episode=None, events=EVENTS, candidates=CANDIDATES):
+def approve(candidate_id, title=None, episode=None, events=EVENTS, candidates=CANDIDATES,
+            day=None):
     rows = read_candidates(candidates)
     match = [r for r in rows if r['candidate_id'] == candidate_id]
     if not match:
         raise ValueError(f'no candidate {candidate_id}')
     cand = match[0]
-    day = cand['date_public']
+    day = day or cand['date_public']
     event_id = f'me-{day[:4]}-{cand["region"]}-{day[5:7]}{day[8:10]}'
     with events.open(encoding='utf-8-sig', newline='') as handle:
         existing = list(csv.DictReader(handle))
     already = [r for r in existing if r['event_id'] == event_id]
+    if already and candidate_id not in already[0].get('notes', ''):
+        raise ValueError(f'{event_id} already exists in the catalog and was not added from '
+                         f'{candidate_id}; add it by hand with a different event_id')
     if already and cand['status'] == 'pending':
         # An earlier run added the event but stopped before marking the
         # candidate: finish that run instead of failing.
@@ -81,9 +86,12 @@ def main(argv=None):
     p.add_argument('candidate_id')
     p.add_argument('--title')
     p.add_argument('--episode')
+    p.add_argument('--date', help='YYYY-MM-DD, to correct the public date')
     a = p.parse_args(argv)
     try:
-        row = approve(a.candidate_id.strip(), a.title, a.episode)
+        if a.date:
+            date.fromisoformat(a.date)
+        row = approve(a.candidate_id.strip(), a.title, a.episode, day=a.date)
     except ValueError as err:
         print(f'Not approved: {err}', file=sys.stderr)
         return 1
