@@ -1,531 +1,531 @@
 {
- "fetched_at": "2026-11-11T22:30:09+00:00",
+ "fetched_at": "2026-11-12T08:22:46+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya) sourcelang:english",
  "articles": [
   {
-   "title": "Sensex zooms 1 , 100 pts , Nifty crosses 25 , 300 mark on positive global cues",
-   "url": "https://www.businesstoday.in/markets/stocks/story/sensex-zooms-1100-pts-nifty-crosses-25300-mark-on-positive-global-cues-566767-2026-11-11",
-   "domain": "businesstoday.in",
-   "seendate": "20261111T063000Z",
+   "title": "After midterm setback , JD Vance weighs direct talks with Iranian official amid US push for peace : Report",
+   "url": "https://news.webindia123.com/news/Articles/World/20261112/4518650.html",
+   "domain": "news.webindia123.com",
+   "seendate": "20261112T070000Z",
    "sourcecountry": "India"
   },
   {
-   "title": "Tanker involved in incident in Strait of Hormuz : united kingdom maritime agency",
-   "url": "https://tribune.com.pk/story/2639736/tanker-involved-in-incident-in-strait-of-hormuz-uk-maritime-agency",
-   "domain": "tribune.com.pk",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "Pakistan"
+   "title": "Does principle still matter ? ",
+   "url": "https://www.guardian.co.tt/opinion/does-principle-still-matter-6.2.2708471.d478839e39",
+   "domain": "guardian.co.tt",
+   "seendate": "20261112T070000Z",
+   "sourcecountry": "Trinidad and Tobago"
   },
   {
-   "title": "Hussein Describes Possible Hormuz Route for Iraqi Oil Tankers",
-   "url": "https://econotimes.com/Hussein-Describes-Possible-Hormuz-Route-for-Iraqi-Oil-Tankers-1775002",
-   "domain": "econotimes.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
+   "title": "Iran tells COP31 it wants compensation for environmental damage from US - Israeli strikes",
+   "url": "https://www.asiaone.com:443/asia/iran-tells-cop31-it-wants-compensation-environmental-damage-us-israeli-strikes",
+   "domain": "asiaone.com",
+   "seendate": "20261112T070000Z",
+   "sourcecountry": "Singapore"
   },
   {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.thehindubusinessline.com/news/world/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article71688233.ece",
-   "domain": "thehindubusinessline.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
+   "title": "Saudi Arabia intercepts Houthi missiles , drones ; group denies targeting Mecca",
+   "url": "https://www.asiaone.com:443/asia/saudi-arabia-intercepts-houthi-missiles-drones-group-denies-targeting-mecca",
+   "domain": "asiaone.com",
+   "seendate": "20261112T070000Z",
+   "sourcecountry": "Singapore"
   },
   {
-   "title": "Asian shares mostly rise on AI chip demand despite Wall Street retreat on inflation data",
-   "url": "http://www.cecildaily.com/ap/world/asian-shares-mostly-rise-on-ai-chip-demand-despite-wall-streets-retreat-on-inflation-data/article_522e22f1-f96b-5d57-9825-639aa30d192d.html",
-   "domain": "cecildaily.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Indian Benchmarks Hit Eight - Month Highs as Nifty 50 and Sensex Rise",
-   "url": "https://econotimes.com/Indian-Benchmarks-Hit-Eight-Month-Highs-as-Nifty-50-and-Sensex-Rise-1775003",
-   "domain": "econotimes.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Asian shares mostly rise on AI chip demand despite Wall Street retreat on inflation data",
-   "url": "http://www.leadertelegram.com/news/world/asian-shares-mostly-rise-on-ai-chip-demand-despite-wall-streets-retreat-on-inflation-data/article_dcf8bf1e-c136-5e88-8e37-a353004663cd.html",
-   "domain": "leadertelegram.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "As Washington - Colombo ties strengthen , China exits Sri Lankan port project",
-   "url": "https://www.wsws.org/en/articles/2026/11/11/jzel-n11.html",
-   "domain": "wsws.org",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Sensex Surges 1 , 350 Points , Nifty Tops 25 , 400 To Hit Eight - Month Highs",
-   "url": "https://www.freepressjournal.in/business/sensex-surges-1350-points-nifty-tops-25400-to-hit-eight-month-highs",
-   "domain": "freepressjournal.in",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Markets surge after Diwali ; Nifty crosses 25 , 350 as FII inflows hit ₹53 , 170 crore this month",
-   "url": "https://www.thehindubusinessline.com/markets/markets-surge-after-diwali-nifty-crosses-25350-as-fii-inflows-hit-53170-crore-this-month/article71688274.ece",
-   "domain": "thehindubusinessline.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "http://www.stardem.com/ap/nation/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_5566cdc0-5324-5d5b-8ebc-0f3b67184cf6.html",
-   "domain": "stardem.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Bond yields spike most since tariff meltdown on rate - hike bets",
-   "url": "https://www.thehindubusinessline.com/markets/bond-yields-spike-most-since-tariff-meltdown-on-rate-hike-bets/article71688251.ece",
-   "domain": "thehindubusinessline.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Stock Market Today Live , Nov 11 : Sensex up 1 . 5 %, Nifty crosses 25 , 360 on record FII inflows ; IndiGo , M & M lead gainers",
-   "url": "https://www.thehindubusinessline.com/markets/sensex-nifty50-today-stock-market-live-updates-11-november-2026/article71682389.ece",
-   "domain": "thehindubusinessline.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.gjsentinel.com/news/us/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_dd0cd797-ba1e-5a7e-9fda-dd0052a66e05.html",
-   "domain": "gjsentinel.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "IndiGo extends flight suspensions to 4 Saudi cities amid security concerns",
-   "url": "http://www.indiagazette.com/news/279425121/indigo-extends-flight-suspensions-to-4-saudi-cities-amid-security-concerns",
-   "domain": "indiagazette.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Crude oil price today : Brent futures rise as US industry data shows decline in inventories",
-   "url": "https://www.thehindubusinessline.com/markets/commodities/crude-oil-futures-rise-as-us-industry-data-shows-decline-in-inventories/article71688277.ece",
-   "domain": "thehindubusinessline.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "http://www.postregister.com/news/national/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_a62db377-0647-5ddf-9217-d309e0df0c03.html",
-   "domain": "postregister.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "http://www.cecildaily.com/ap/nation/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_b7bfdb4b-d3b9-552f-85e6-e435c18e45db.html",
-   "domain": "cecildaily.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Asian shares mostly rise on AI chip demand despite Wall Street retreat on inflation data",
-   "url": "http://www.stardem.com/ap/world/asian-shares-mostly-rise-on-ai-chip-demand-despite-wall-streets-retreat-on-inflation-data/article_57759624-6372-5494-a610-d5160afe115a.html",
-   "domain": "stardem.com",
-   "seendate": "20261111T063000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Oil Price Falls Below $90 First Time in 4 Months as Trump Signals Iran De - escalation – THISDAYLIVE",
-   "url": "https://www.thisdaylive.com/2026/11/11/oil-price-falls-below-90-first-time-in-4-months-as-trump-signals-iran-de-escalation/",
-   "domain": "thisdaylive.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "Nigeria"
-  },
-  {
-   "title": "US stocks fall on hot inflation report as Nvidia tumbles again",
-   "url": "https://www.manilatimes.net/2026/11/11/business/foreign-business/us-stocks-fall-on-hot-inflation-report-as-nvidia-tumbles-again/2467219",
-   "domain": "manilatimes.net",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "Philippines"
-  },
-  {
-   "title": "AP News Summary at 11 : 01 p . m . EST",
-   "url": "http://www.hngnews.com/nation_world/ap-news-summary-at-11-01-p-m-est/article_d0c372cc-a31d-5646-beda-9e5f35a51466.html",
-   "domain": "hngnews.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Russia claims interception of 146 drones in Leningrad region",
-   "url": "https://www.aljazeera.com/news/2026/11/11/russia-claims-interception-of-146-drones-in-leningrad-region",
-   "domain": "aljazeera.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Tech Sell - Off : 3 Stocks Most Vulnerable and 3 Built to Hold Up",
-   "url": "https://www.fool.com/investing/2026/11/11/tech-sell-off-3-stocks-most-vulnerable-and-3-built/?source=iedfolrf0000001",
-   "domain": "fool.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "N2 . 45tn Liquidity Inflow Expected in Banking System as DMO Plans N800bn T - bills – THISDAYLIVE",
-   "url": "https://www.thisdaylive.com/2026/11/11/n2-45tn-liquidity-inflow-expected-in-banking-system-as-dmo-plans-n800bn-t-bills/",
-   "domain": "thisdaylive.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "Nigeria"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow - Las Vegas Sun News",
-   "url": "https://lasvegassun.com/news/2026/nov/10/world-leaders-begin-talks-at-un-climate-conference/",
-   "domain": "lasvegassun.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "FPIs pump ₹56 , 771 cr into equities in 8 days ; biggest inflow since Dec 2020",
-   "url": "https://www.business-standard.com/markets/news/fpis-pump-56-771-cr-into-equities-in-8-days-biggest-inflow-since-dec-2020-126111100201_1.html",
-   "domain": "business-standard.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Bulls in action ! Sensex zooms 1 , 300 pts intraday ; oil , FII buying aid rally",
-   "url": "https://www.business-standard.com/markets/news/bulls-in-action-sensex-zooms-1-300-pts-intraday-oil-fii-buying-aid-rally-126111100243_1.html",
-   "domain": "business-standard.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Nine Energy ( NINE ) Q3 2026 Earnings Call Transcript",
-   "url": "https://www.fool.com/earnings/call-transcripts/2026/11/10/nine-energy-nine-q3-2026-earnings-call-transcript/?source=iedfolrf0000001",
-   "domain": "fool.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Asian shares mostly rise on AI chip demand despite Wall Street retreat on inflation data",
-   "url": "https://www.wsls.com/business/2026/11/11/asian-shares-mostly-rise-on-ai-chip-demand-despite-wall-streets-retreat-on-inflation-data/",
-   "domain": "wsls.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.wsls.com/news/world/2026/11/11/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/",
-   "domain": "wsls.com",
-   "seendate": "20261111T053000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Dialogue the way to end Middle East conflicts : China Daily",
-   "url": "https://asianews.network/dialogue-the-way-to-end-middle-east-conflicts-china-daily/",
-   "domain": "asianews.network",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "China"
-  },
-  {
-   "title": "US interest rates : The Federal Reserve set to anger Trump with likely decision to raise rates by 25 basis point or higher",
-   "url": "https://www.watoday.com.au/business/the-economy/trump-s-fed-nightmare-rates-won-t-be-slashed-they-could-surge-now-20261111-p61d55.html",
-   "domain": "watoday.com.au",
-   "seendate": "20261111T050000Z",
+   "title": "Strait of Hormuz Latest : Iran Vows Waterway Will Never Return to Pre - War Status as More Tankers Hit Mines",
+   "url": "https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
+   "domain": "ibtimes.com.au",
+   "seendate": "20261112T070000Z",
    "sourcecountry": "Australia"
   },
   {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.news4jax.com/news/world/2026/11/11/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/",
-   "domain": "news4jax.com",
-   "seendate": "20261111T050000Z",
+   "title": "Please Stop Blaming Israel and Jews for Your Being a Loser",
+   "url": "https://townhall.com/columnists/alanjosephbauer/2026/11/12/please-stop-blaming-israel-and-jews-for-your-being-a-loser-n2686297",
+   "domain": "townhall.com",
+   "seendate": "20261112T070000Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Why is market rising today ? Sensex soars 1 , 300 pts , Nifty above 25 , 400 as explosive rally continues . 4 factors behind Rs 6 lakh cr gains",
-   "url": "https://economictimes.indiatimes.com/markets/stocks/news/why-is-market-rising-today-sensex-soars-1200-pts-nifty-above-25300-as-explosive-rally-continues-4-factors-behind-rs-5-lakh-cr-gains/articleshow/135725125.cms",
-   "domain": "economictimes.indiatimes.com",
-   "seendate": "20261111T050000Z",
+   "title": "Strait of Hormuz Crisis : Iran Rejects Pre - War Status Amid US Peace Talks Stalemate",
+   "url": "https://openthemagazine.com/world/strait-of-hormuz-crisis-iran-says-key-oil-route-will-never-return-to-pre-war-status-as-us-peace-talks-stall",
+   "domain": "openthemagazine.com",
+   "seendate": "20261112T070000Z",
    "sourcecountry": "India"
   },
   {
-   "title": "US Treasury chief Scott Bessent relocates to military base amid Iran threats : Report",
-   "url": "https://aninews.in/news/world/us/us-treasury-chief-scott-bessent-relocates-to-military-base-amid-iran-threats-report20261111080506/",
-   "domain": "aninews.in",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Asian Markets Trade Mixed",
-   "url": "https://www.finanzen.ch/nachrichten/aktien/asian-markets-trade-mixed-1036745734",
-   "domain": "finanzen.ch",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "Switzerland"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.stcatharinesstandard.ca/life/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_39300afb-6cbf-5327-8583-957799ea9042.html",
-   "domain": "stcatharinesstandard.ca",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "Canada"
-  },
-  {
-   "title": "A new US Congress , but little relief for Bangladesh and developing Asia",
-   "url": "https://asianews.network/a-new-us-congress-but-little-relief-for-bangladesh-and-developing-asia/",
-   "domain": "asianews.network",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "China"
-  },
-  {
-   "title": "Trump and Netanyahu in  shouting match from hell  during Iran call",
-   "url": "http://www.middleeaststar.com/news/279425439/trump-and-netanyahu-in-houting-match-from-hell-during-iran-call-media",
-   "domain": "middleeaststar.com",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "Syria"
-  },
-  {
-   "title": "Gas prices continue downward trend in Washington state",
-   "url": "http://www.chronline.com/stories/gas-prices-continue-downward-trend-in-washington-state,411658",
-   "domain": "chronline.com",
-   "seendate": "20261111T050000Z",
+   "title": "Oil slicks seen from space : the devastating impact of boat strikes on fragile Gulf ecosystems",
+   "url": "https://peakoil.com/enviroment/oil-slicks-seen-from-space-the-devastating-impact-of-boat-strikes-on-fragile-gulf-ecosystems",
+   "domain": "peakoil.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Trump remains wild card after Democrat midterm win",
-   "url": "https://www.citizen.co.za/news/opinion/trump-remains-wild-card-after-democrat-midterm-win/",
-   "domain": "citizen.co.za",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "South Africa"
-  },
-  {
-   "title": "Iran : US treasury secretary Scott Bessent moves to military base after alleged Iranian threats",
-   "url": "https://timesofindia.indiatimes.com/world/us/us-treasury-secretary-scott-bessent-moves-to-military-base-after-alleged-iranian-threats/articleshow/135724620.cms",
-   "domain": "timesofindia.indiatimes.com",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.dailygazette.com/ap/national/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_467dbc4b-0ed3-5d6a-9a91-d4432316f774.html",
-   "domain": "dailygazette.com",
-   "seendate": "20261111T050000Z",
+   "title": "UAE Business : Oil slips as hopes of Iran peace efforts weigh on markets",
+   "url": "https://www.gdnonline.com:443/Details/1412618",
+   "domain": "gdnonline.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "IndiGo extends flight suspensions to 4 Saudi cities amid security concerns",
-   "url": "http://www.middleeaststar.com/news/279425121/indigo-extends-flight-suspensions-to-4-saudi-cities-amid-security-concerns",
-   "domain": "middleeaststar.com",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "Syria"
+   "title": "Cyprus Business Now : foreign investment , banks , energy , tourism , Keve , AI",
+   "url": "https://cyprus-mail.com/2026/11/12/cyprus-business-now-foreign-investment-banks-energy-tourism-keve-ai",
+   "domain": "cyprus-mail.com",
+   "seendate": "20261112T064500Z",
+   "sourcecountry": "Cyprus"
   },
   {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.dailygazette.com/ade/ap/national/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_467dbc4b-0ed3-5d6a-9a91-d4432316f774.html",
-   "domain": "dailygazette.com",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "United States"
+   "title": "Report Warns World Near Irreversible Climate Warming Overshoot - Jowhar News Leader",
+   "url": "https://jowhar.com/report-warns-world-near-irreversible-climate-warming-overshoot/",
+   "domain": "jowhar.com",
+   "seendate": "20261112T064500Z",
+   "sourcecountry": "Somalia"
   },
   {
-   "title": "Important lessons from US and Israel elections",
-   "url": "https://asianews.network/important-lessons-from-us-and-israel-elections/",
-   "domain": "asianews.network",
-   "seendate": "20261111T050000Z",
-   "sourcecountry": "China"
+   "title": "Azeri Light price exceeds $100 per barrel at Augusta port",
+   "url": "https://www.trend.az/azerbaijan/4245468.html",
+   "domain": "trend.az",
+   "seendate": "20261112T064500Z",
+   "sourcecountry": "Azerbaijan"
   },
   {
-   "title": "A Venezuelan Billionaire Just Shared The Details Behind Trump  Biggest Oil Deal In World History . Here What It Means For A 68 Year Old With A $2 . 4M Portfolio Heavily Invested In Energy Stocks",
-   "url": "https://www.aol.com/articles/venezuelan-billionaire-just-shared-details-024347000.html",
-   "domain": "aol.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "US Treasury Secretary Scott Bessent moves to military base amid Iranian threats to his safety : Report",
-   "url": "https://economictimes.indiatimes.com/news/defence/us-treasury-secretary-scott-bessent-moves-to-military-base-amid-iranian-threats-to-his-safety-report/articleshow/135724400.cms",
-   "domain": "economictimes.indiatimes.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Calfrac Reports Third Quarter 2026 Results",
-   "url": "https://www.northernnews.ca/press-releases/globe-newswire/calfrac-reports-third-quarter-2026-results/",
-   "domain": "northernnews.ca",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "Canada"
-  },
-  {
-   "title": "Oil rises from 2 - month low as Hormuz shipping attacks offset truce hopes",
-   "url": "https://www.business-standard.com/markets/commodities/oil-rises-from-2-month-low-as-hormuz-shipping-attacks-offset-truce-hopes-126111100088_1.html",
-   "domain": "business-standard.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "A Venezuelan Billionaire Just Shared The Details Behind Trump  Biggest Oil Deal In World History . Here What It Means For A 68 Year Old With A $2 . 4M Portfolio Heavily Invested In Energy Stocks",
-   "url": "https://247wallst.com/investing/2026/11/10/a-venezuelan-billionaire-just-shared-the-details-behind-trumps-biggest-oil-deal-in-world-history-heres-what-it-means-for-a-68-year-old-with-a-2-4m-portfolio-heavily-invested-in-energy-stocks/",
-   "domain": "247wallst.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Calfrac Reports Third Quarter 2026 Results",
-   "url": "https://www.owensoundsuntimes.com/press-releases/globe-newswire/calfrac-reports-third-quarter-2026-results/",
-   "domain": "owensoundsuntimes.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "Canada"
-  },
-  {
-   "title": "House Republicans quash effort to impeach Defense Secretary Hegseth",
-   "url": "https://www.wpsdlocal6.com/news/house-republicans-quash-effort-to-impeach-defense-secretary-hegseth/article_850690ca-b637-456a-b067-0f3d20690416.html",
-   "domain": "wpsdlocal6.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Making sense of the midterm election - Ceres Courier",
-   "url": "https://www.cerescourier.com/opinion/editorial/making-sense-of-the-midterm-election/",
-   "domain": "cerescourier.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "New England governors seek more money for heating aid",
-   "url": "https://www.nbcconnecticut.com/news/local/new-england-governors-seek-more-money-for-heating-aid/3794553/",
-   "domain": "nbcconnecticut.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Asian Markets Trade Mixed",
-   "url": "https://www.finanznachrichten.de/nachrichten-2026-11/70094452-asian-markets-trade-mixed-020.htm",
-   "domain": "finanznachrichten.de",
-   "seendate": "20261111T040000Z",
+   "title": "US war in Iran : How midterms put pressure on Donald Trump",
+   "url": "https://www.dw.com/en/where-the-uss-war-with-iran-stands-after-the-midterms/a-79918176",
+   "domain": "dw.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "Germany"
   },
   {
-   "title": "Sudan Burhan Leaves Saudi Arabia Alone On The Yemen Front  - OpEd",
-   "url": "https://www.eurasiareview.com/10112026-sudans-burhan-leaves-saudi-arabia-alone-on-the-yemen-front-oped/",
-   "domain": "eurasiareview.com",
-   "seendate": "20261111T040000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Obsolete And Overdue : Withdrawing US Forces From The Gulf",
-   "url": "https://www.scoop.co.nz/stories/HL2611/S00028/obsolete-and-overdue-withdrawing-us-forces-from-the-gulf.htm",
-   "domain": "scoop.co.nz",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "New Zealand"
-  },
-  {
-   "title": "Broad inflation persists across the economy , October CPI shows",
-   "url": "https://www.marketplace.org/story/2026/11/10/broad-inflation-persists-across-the-economy-october-cpi-shows",
-   "domain": "marketplace.org",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Could Iran - Linked Cyberattacks Reach Europe Homes And Critical Infrastructure ? - Analysis",
-   "url": "https://www.eurasiareview.com/11112026-could-iran-linked-cyberattacks-reach-europes-homes-and-critical-infrastructure-analysis/",
-   "domain": "eurasiareview.com",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "New England governors urge Congress to provide $3 billion in additional heating assistance",
-   "url": "https://www.foxbangor.com/news/new-england-governors-urge-congress-to-provide-3-billion-in-additional-heating-assistance/article_863b0ecf-a6e3-4396-8915-236f03d55294.html",
-   "domain": "foxbangor.com",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Japanese Market Notably Higher",
-   "url": "https://www.rttnews.com/3712775/japanese-market-notably-higher.aspx",
-   "domain": "rttnews.com",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://www.yakimaherald.com/news/nation_and_world/nation/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_4affd10c-faf0-54e5-a262-e57a3cecd504.html",
-   "domain": "yakimaherald.com",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Inflation just wont quit",
-   "url": "https://www.marketplace.org/episode/2026/11/10/inflation-just-wont-quit",
-   "domain": "marketplace.org",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Crude cools off : Oil prices hold near $90 per barrel as US - Iran war tensions ease",
-   "url": "https://timesofindia.indiatimes.com/business/international-business/crude-cools-off-oil-prices-hold-near-90-per-barrel-as-us-iran-war-tensions-ease/articleshow/135722706.cms",
-   "domain": "timesofindia.indiatimes.com",
-   "seendate": "20261111T030000Z",
+   "title": "Indian bonds drift as US debt rout saps oil relief before CPI",
+   "url": "https://economictimes.indiatimes.com/markets/bonds/indian-bonds-drift-as-us-debt-rout-saps-oil-relief-before-cpi/articleshow/135758028.cms",
+   "domain": "economictimes.indiatimes.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "India"
   },
   {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://kdhnews.com/news/nation/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/article_982327b7-5cd2-5d3c-9dc9-969b570d2992.html",
-   "domain": "kdhnews.com",
-   "seendate": "20261111T030000Z",
+   "title": "Iran Warns It May Target U . S . Military Bases Across Europe - Jowhar News Leader",
+   "url": "https://jowhar.com/iran-warns-it-may-target-u-s-military-bases-across-europe/",
+   "domain": "jowhar.com",
+   "seendate": "20261112T064500Z",
+   "sourcecountry": "Somalia"
+  },
+  {
+   "title": "Oil slips as hopes of Iran peace efforts weigh on markets",
+   "url": "https://tradearabia.com:443/News/489620/Oil-slips-as-hopes-of-Iran-peace-efforts-weigh-on-markets",
+   "domain": "tradearabia.com",
+   "seendate": "20261112T064500Z",
+   "sourcecountry": "United Arab Emirates"
+  },
+  {
+   "title": "Oil slips as hopes of Iran peace efforts weigh on markets",
+   "url": "https://tradearabia.com:443/News/489620/Oil-slips-as-hopes-of-Iran-peace-efforts-weigh-on-markets/OGN",
+   "domain": "tradearabia.com",
+   "seendate": "20261112T064500Z",
+   "sourcecountry": "United Arab Emirates"
+  },
+  {
+   "title": "This Beirut family has sold falafel for 100 years , through war and crisis . It has no plan to stop",
+   "url": "http://www.reflector.com/news/national/this-beirut-family-has-sold-falafel-for-100-years-through-war-and-crisis-it-has/article_924ae7dc-648d-53da-bc3c-d7c1f9ccb7e3.html",
+   "domain": "reflector.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Republican - led House rejects Hegseth impeachment effort",
-   "url": "https://www.nbcphiladelphia.com/news/politics/house-vote-impeaching-hegseth/4495077/",
-   "domain": "nbcphiladelphia.com",
-   "seendate": "20261111T030000Z",
+   "title": "Hoax Bomb Threats Against European Schools Add to Hybrid Warfare Risks",
+   "url": "https://foreignpolicy.com/2026/11/11/hoax-bomb-threats-schools-italy-europe-hybrid-warfare-russia-iran/?tpcc=recirc_trending062921",
+   "domain": "foreignpolicy.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Australian Market Slightly Lower",
-   "url": "https://www.rttnews.com/3712765/australian-market-slightly-lower.aspx",
-   "domain": "rttnews.com",
-   "seendate": "20261111T030000Z",
+   "title": "Trump , Long term help or hurt Climate Change ? : Peak Oil Discussion - Peak Oil News and Message Boards",
+   "url": "https://peakoil.com/forums/viewtopic.php?p=1505496",
+   "domain": "peakoil.com",
+   "seendate": "20261112T064500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "House Republicans quash effort to impeach Defense Secretary Hegseth",
-   "url": "https://www.wmur.com/article/defense-secretary-hegseth-impeachment-house/74393214",
-   "domain": "wmur.com",
-   "seendate": "20261111T030000Z",
-   "sourcecountry": "United States"
+   "title": "Refiners , Marketers To FCCPC : Understand Market Before Petrol Price Cut Demand",
+   "url": "https://leadership.ng/refiners-marketers-to-fccpc-understand-market-before-petrol-price-cut-demand/",
+   "domain": "leadership.ng",
+   "seendate": "20261112T053000Z",
+   "sourcecountry": "Nigeria"
   },
   {
-   "title": "Pete Hegseth : House vote down impeachment resolution",
-   "url": "https://www.cp24.com/news/world/2026/11/10/us-house-republicans-quash-effort-to-impeach-defense-secretary-hegseth/",
-   "domain": "cp24.com",
-   "seendate": "20261111T030000Z",
+   "title": "LNG opportunities abound in Canada , but also challenges , study finds",
+   "url": "https://www.theglobeandmail.com/business/article-lng-opportunities-abound-in-canada-but-also-challenges-study-finds/",
+   "domain": "theglobeandmail.com",
+   "seendate": "20261112T053000Z",
    "sourcecountry": "Canada"
   },
   {
-   "title": "Consumer prices increased 0 . 4 % in October , higher than expected",
-   "url": "https://abc7.com/story/consumer-prices-increased-04-october-higher-expected/20029965/",
-   "domain": "abc7.com",
-   "seendate": "20261111T030000Z",
+   "title": "Qatar Buys 25 % of Chevron Namibia Block",
+   "url": "https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/",
+   "domain": "riotimesonline.com",
+   "seendate": "20261112T053000Z",
+   "sourcecountry": "Brazil"
+  },
+  {
+   "title": "Why India and Pakistan stock markets are rallying after the US midterms",
+   "url": "https://www.channelnewsasia.com/asia/why-india-and-pakistans-stock-markets-are-rallying-after-us-midterms-6544681",
+   "domain": "channelnewsasia.com",
+   "seendate": "20261112T040000Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Signing of Non - Binding Memorandum of Understanding for Small - Scale LNG Development in Abu Dhabi",
-   "url": "https://www.manilatimes.net/2026/11/11/tmt-newswire/pr-newswire/signing-of-non-binding-memorandum-of-understanding-for-small-scale-lng-development-in-abu-dhabi/2467161",
-   "domain": "manilatimes.net",
-   "seendate": "20261111T030000Z",
+   "title": "Why are gas prices dropping and how low will they go ? ",
+   "url": "https://www.ketv.com/article/why-are-gas-prices-dropping-and-how-low-will-they-go/74404165",
+   "domain": "ketv.com",
+   "seendate": "20261112T040000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Turkmenistan foreign trade growth accelerates to 9 . 5 % in January - October",
+   "url": "https://www.trend.az/casia/turkmenistan/4245446.html",
+   "domain": "trend.az",
+   "seendate": "20261112T040000Z",
+   "sourcecountry": "Azerbaijan"
+  },
+  {
+   "title": "  Shouting Match From Hell : Trump And Netanyahu Bitterly Disagree About New Military Action Against Iran",
+   "url": "http://theeconomiccollapseblog.com/shouting-match-from-hell-trump-and-netanyahu-bitterly-disagree-about-new-military-action-against-iran/",
+   "domain": "theeconomiccollapseblog.com",
+   "seendate": "20261112T040000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Why are gas prices dropping and how low will they go ? ",
+   "url": "https://www.wdsu.com/article/why-are-gas-prices-dropping-and-how-low-will-they-go/74404165",
+   "domain": "wdsu.com",
+   "seendate": "20261112T040000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Iran tells COP31 it wants compensation for environmental damage from US - Israeli strikes",
+   "url": "https://www.rappler.com/world/global-affairs/iran-compensation-environmental-damage-us-israeli-strikes-cop31/",
+   "domain": "rappler.com",
+   "seendate": "20261112T040000Z",
    "sourcecountry": "Philippines"
   },
   {
-   "title": "World leaders begin talks at UN climate conference amid concerns that actions are inadequate , slow",
-   "url": "https://toronto.citynews.ca/2026/11/10/world-leaders-begin-talks-at-un-climate-conference-amid-concerns-that-actions-are-inadequate-slow/",
-   "domain": "toronto.citynews.ca",
-   "seendate": "20261111T030000Z",
+   "title": "Why are gas prices dropping and how low will they go ? ",
+   "url": "https://www.wbaltv.com/article/why-are-gas-prices-dropping-and-how-low-will-they-go/74404165",
+   "domain": "wbaltv.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "UN says 150 , 000 tents await Israeli approval outside Gaza",
+   "url": "https://www.freemalaysiatoday.com/category/world/2026/11/12/un-says-150-000-tents-await-israeli-approval-outside-gaza",
+   "domain": "freemalaysiatoday.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "Malaysia"
+  },
+  {
+   "title": "The Illegality Of Houthi Attacks That Threatened Holy Cities - OpEd",
+   "url": "https://www.eurasiareview.com/12112026-the-illegality-of-houthi-attacks-that-threatened-holy-cities-oped/",
+   "domain": "eurasiareview.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "COP31 : India slips five places to 28th in global climate action ranking , finds CCPI 2027 report",
+   "url": "https://www.downtoearth.org.in/climate-change/cop31-india-slips-five-places-to-28th-in-global-climate-action-ranking-finds-ccpi-2027-report",
+   "domain": "downtoearth.org.in",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Economic Sanctions , State Power , And Cuba : A Rothbardian Critique Of U . S . Interventionism - OpEd",
+   "url": "https://www.eurasiareview.com/12112026-economic-sanctions-state-power-and-cuba-a-rothbardian-critique-of-u-s-interventionism-oped/",
+   "domain": "eurasiareview.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
+   "url": "https://www.wxyz.com/science-and-tech/energy/gas-prices-fall-below-4-as-more-oil-flows-but-experts-warn-relief-may-not-last",
+   "domain": "wxyz.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Who Will Buy Sable Oil if California Keeps Closing Refineries ? ",
+   "url": "https://oilprice.com/Energy/Crude-Oil/Who-Will-Buy-Sables-Oil-if-California-Keeps-Closing-Refineries.html",
+   "domain": "oilprice.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "CBA Chambers sees room for higher US 10 - year yields despite the slide in oil prices",
+   "url": "https://investinglive.com/stocks/cba-s-chambers-sees-room-for-higher-us-10-year-yields-despite-the-slide-in-oil-prices/",
+   "domain": "investinglive.com",
+   "seendate": "20261112T034500Z",
    "sourcecountry": ""
   },
   {
-   "title": "Rubio says  no need  to attack Iran as diplomacy gathers pace",
-   "url": "https://www.thehindu.com/news/international/rubio-says-no-need-to-attack-iran-as-diplomacy-gathers-pace/article71688168.ece",
-   "domain": "thehindu.com",
-   "seendate": "20261111T030000Z",
+   "title": "Oil slicks seen from space : the devastating impact of boat strikes on fragile Gulf ecosystems",
+   "url": "https://www.theguardian.com/world/2026/nov/12/oil-slicks-seen-from-space-the-devastating-impact-of-boat-strikes-on-fragile-gulf-ecosystems",
+   "domain": "theguardian.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.clydebankpost.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "clydebankpost.co.uk",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Global Power Grid Expansion Surges 50 % to Record High",
+   "url": "https://oilprice.com/Energy/Energy-General/Global-Power-Grid-Expansion-Surges-50-to-Record-High.html",
+   "domain": "oilprice.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit | East London and West Essex Guardian Series",
+   "url": "https://www.guardian-series.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "guardian-series.co.uk",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Republicans quash effort to impeach Defense Secretary Hegseth",
+   "url": "http://www.minnpost.com/national/washington/2026/11/house-republicans-quash-effort-to-impeach-defense-secretary-pete-hegseth/",
+   "domain": "minnpost.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "China Pledges Support for Cuba Days After US Sanctions",
+   "url": "https://www.hngn.com/articles/273798/20261111/china-pledges-support-cuba-days-after-us-sanctions.htm",
+   "domain": "hngn.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Saudi Arabia Gives Preliminary Nod to Revive Iraq ‑ Saudi Oil Pipeline",
+   "url": "https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/",
+   "domain": "kenya-today.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "Kenya"
+  },
+  {
+   "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
+   "url": "https://www.kpax.com/science-and-tech/energy/gas-prices-fall-below-4-as-more-oil-flows-but-experts-warn-relief-may-not-last",
+   "domain": "kpax.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "North Texas gas prices drop to $3 . 15 per gallon as national average dips below $4",
+   "url": "https://www.fox4news.com/news/north-texas-gas-prices-drop-3-15-per-gallon-national-average-dips-below-4",
+   "domain": "fox4news.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.theargus.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "theargus.co.uk",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.whtimes.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "whtimes.co.uk",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
+   "url": "https://www.kxlh.com/science-and-tech/energy/gas-prices-fall-below-4-as-more-oil-flows-but-experts-warn-relief-may-not-last",
+   "domain": "kxlh.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Jasper Community Honors Veterans at Annual Veterans Day Luncheon",
+   "url": "https://www.kjas.com/news/local_news/article_8a31e616-f544-4f1a-8b15-e261072bd0bb.html",
+   "domain": "kjas.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
+   "url": "https://www.wtxl.com/science-and-tech/energy/gas-prices-fall-below-4-as-more-oil-flows-but-experts-warn-relief-may-not-last",
+   "domain": "wtxl.com",
+   "seendate": "20261112T034500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Why are gas prices dropping and how low will they go ? ",
+   "url": "https://www.wjcl.com/article/why-are-gas-prices-dropping-and-how-low-will-they-go/74404165",
+   "domain": "wjcl.com",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Oil Price Today ( November 12 ): Brent crude falls below $92 amid hopes for US - Iran , Russia - Ukraine peace talks",
+   "url": "https://economictimes.indiatimes.com/markets/commodities/news/oil-price-today-november-12-brent-crude-falls-below-92-amid-hopes-for-us-iran-russia-ukraine-peace-talks/articleshow/135752615.cms",
+   "domain": "economictimes.indiatimes.com",
+   "seendate": "20261112T033000Z",
    "sourcecountry": "India"
+  },
+  {
+   "title": "Why are gas prices dropping and how low will they go ? ",
+   "url": "https://www.wcvb.com/article/why-are-gas-prices-dropping-and-how-low-will-they-go/74404165",
+   "domain": "wcvb.com",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Oil slicks seen from space : the devastating impact of boat strikes on fragile Gulf ecosystems",
+   "url": "https://www.aol.co.uk/articles/oil-slicks-seen-space-devastating-030007000.html",
+   "domain": "aol.co.uk",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Oil is stuck in limbo with no Iran war but no peace",
+   "url": "https://www.thestar.com.my/business/insight/2026/11/12/oil-is-stuck-in-limbo-with-no-iran-war-but-no-peace",
+   "domain": "thestar.com.my",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "Malaysia"
+  },
+  {
+   "title": "  The world we know is over  without urgent climate action , leaders tell COP31",
+   "url": "https://pina.com.fj/2026/11/12/the-world-we-know-is-over-without-urgent-climate-action-leaders-tell-cop31/",
+   "domain": "pina.com.fj",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "Fiji"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.richmondandtwickenhamtimes.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "richmondandtwickenhamtimes.co.uk",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "US election results could be positive for Lebanon , Hezbollah chief says - Grenada Chronicle – Daily Grenada And Caribbean News",
+   "url": "https://grenadachronicle.com/us-election-results-could-be-positive-for-lebanon-hezbollah-chief-says/",
+   "domain": "grenadachronicle.com",
+   "seendate": "20261112T033000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Gas prices fall below $4 as more oil flows , but experts warn relief may not last",
+   "url": "https://www.wtvr.com/science-and-tech/energy/gas-prices-fall-below-4-as-more-oil-flows-but-experts-warn-relief-may-not-last",
+   "domain": "wtvr.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "  Shouting Match From Hell : Trump And Netanyahu Bitterly Disagree About New Military Action Against Iran",
+   "url": "https://www.investmentwatchblog.com/shouting-match-from-hell-trump-and-netanyahu-bitterly-disagree-about-new-military-action-against-iran/",
+   "domain": "investmentwatchblog.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Stock Market LIVE : GIFT Nifty signals positive open ; Asian markets advance ; Nvidia drops 7 % ",
+   "url": "https://www.business-standard.com/markets/news/stock-market-live-november-12-gift-nifty-nse-bse-sensex-today-nifty50-crude-oil-prices-q2-results-today-126111200066_1.html",
+   "domain": "business-standard.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Peace talk hopes pressure oil market - Shafaqna English | International Shia News & Fatwas",
+   "url": "https://en.shafaqna.com/491244/peace-talk-hopes-pressure-oil-market/",
+   "domain": "en.shafaqna.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "Saudi Arabia"
+  },
+  {
+   "title": "What in a jobless claim ? ",
+   "url": "https://www.marketplace.org/episode/2026/11/11/whats-in-a-jobless-claim",
+   "domain": "marketplace.org",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.dorsetecho.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "dorsetecho.co.uk",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "The Iran War is transforming liquefied natural gas deals",
+   "url": "https://www.marketplace.org/story/2026/11/11/the-iran-war-is-transforming-liquefied-natural-gas-deals",
+   "domain": "marketplace.org",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Capital Region gas prices going down . But why ? ",
+   "url": "https://cbs6albany.com/news/local/capital-region-gas-prices-going-down-but-why",
+   "domain": "cbs6albany.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "November 11th , 2026",
+   "url": "https://www.marklevinshow.com/2026/11/11/november-11th-2026/",
+   "domain": "marklevinshow.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "2026 US Congress Midterm : Power , Policy and Global Impact",
+   "url": "https://www.dailyexcelsior.com/2026-us-congress-midterm-power-policy-and-global-impact/",
+   "domain": "dailyexcelsior.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Every American will see heating bills rise 7 %, leaving millions at risk this winter",
+   "url": "https://www.independent.co.uk/us/money/winter-heating-costs-increase-inflation-b3083429.html",
+   "domain": "independent.co.uk",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Is more oil going through Hormuz than before the Iran war , as Byron Donalds said ? No . – PolitiFact",
+   "url": "https://politifact.com/factchecks/2026/nov/11/byron-donalds/florida-byron-donalds-iran-war-strait-hormuz-oil/",
+   "domain": "politifact.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Could next week meeting of this century  Big Three  end divide - and - conquer  forever war ? – World Tribune : U . S . Politics and Culture , Geostrategy , China , North Korea , Corporate Watch , Media Watch",
+   "url": "https://worldtribune.com/could-next-weeks-meeting-of-this-centurys-big-three-end-divide-and-conquer-forever-wars/",
+   "domain": "worldtribune.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.hexham-courant.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "hexham-courant.co.uk",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Middle East - Casino & Gambling",
+   "url": "https://www.worldcasinodirectory.com/region/middle-east",
+   "domain": "worldcasinodirectory.com",
+   "seendate": "20261112T030000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Andy Burnham pledges  new era of British climate leadership  at Cop31 summit",
+   "url": "https://www.cotswoldjournal.co.uk/news/national/26721762.andy-burnham-pledges-new-era-british-climate-leadership-cop31-summit/",
+   "domain": "cotswoldjournal.co.uk",
+   "seendate": "20261112T013000Z",
+   "sourcecountry": "United Kingdom"
   }
  ]
 }

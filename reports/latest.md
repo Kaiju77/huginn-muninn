@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-11
+# Daily market brief, 2026-11-12
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -21,19 +21,24 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 AI screen unavailable today; the keyword screen was used (an escalation word plus a region, 3+ sites).
 
-No new conflict escalation found today.
+**Possible new events (need your approval):**
+
+- `c-20261112-hormuz-gulf`: [Is more oil going through Hormuz than before the Iran war , as Byron Donalds said ? No . – PolitiFact](https://politifact.com/factchecks/2026/nov/11/byron-donalds/florida-byron-donalds-iran-war-strait-hormuz-oil/) (3 sites)
+- `c-20261112-iran`: [The Iran War is transforming liquefied natural gas deals](https://www.marketplace.org/story/2026/11/11/the-iran-war-is-transforming-liquefied-natural-gas-deals) (8 sites)
+
+To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-11 22:30 UTC, covering the previous 24 hours.
+Fetched 2026-11-12 08:22 UTC, covering the previous 24 hours.
 
-- [Tanker involved in incident in Strait of Hormuz : united kingdom maritime agency](https://tribune.com.pk/story/2639736/tanker-involved-in-incident-in-strait-of-hormuz-uk-maritime-agency) (tribune.com.pk)
-- [Hussein Describes Possible Hormuz Route for Iraqi Oil Tankers](https://econotimes.com/Hussein-Describes-Possible-Hormuz-Route-for-Iraqi-Oil-Tankers-1775002) (econotimes.com)
-- [IndiGo extends flight suspensions to 4 Saudi cities amid security concerns](http://www.indiagazette.com/news/279425121/indigo-extends-flight-suspensions-to-4-saudi-cities-amid-security-concerns) (indiagazette.com)
-- [Crude oil price today : Brent futures rise as US industry data shows decline in inventories](https://www.thehindubusinessline.com/markets/commodities/crude-oil-futures-rise-as-us-industry-data-shows-decline-in-inventories/article71688277.ece) (thehindubusinessline.com)
-- [Oil Price Falls Below $90 First Time in 4 Months as Trump Signals Iran De - escalation – THISDAYLIVE](https://www.thisdaylive.com/2026/11/11/oil-price-falls-below-90-first-time-in-4-months-as-trump-signals-iran-de-escalation/) (thisdaylive.com)
-- [Bulls in action ! Sensex zooms 1 , 300 pts intraday ; oil , FII buying aid rally](https://www.business-standard.com/markets/news/bulls-in-action-sensex-zooms-1-300-pts-intraday-oil-fii-buying-aid-rally-126111100243_1.html) (business-standard.com)
-- [Nine Energy ( NINE ) Q3 2026 Earnings Call Transcript](https://www.fool.com/earnings/call-transcripts/2026/11/10/nine-energy-nine-q3-2026-earnings-call-transcript/?source=iedfolrf0000001) (fool.com)
-- [US Treasury chief Scott Bessent relocates to military base amid Iran threats : Report](https://aninews.in/news/world/us/us-treasury-chief-scott-bessent-relocates-to-military-base-amid-iran-threats-report20261111080506/) (aninews.in)
+- [After midterm setback , JD Vance weighs direct talks with Iranian official amid US push for peace : Report](https://news.webindia123.com/news/Articles/World/20261112/4518650.html) (news.webindia123.com)
+- [Iran tells COP31 it wants compensation for environmental damage from US - Israeli strikes](https://www.asiaone.com:443/asia/iran-tells-cop31-it-wants-compensation-environmental-damage-us-israeli-strikes) (asiaone.com)
+- [Saudi Arabia intercepts Houthi missiles , drones ; group denies targeting Mecca](https://www.asiaone.com:443/asia/saudi-arabia-intercepts-houthi-missiles-drones-group-denies-targeting-mecca) (asiaone.com)
+- [Strait of Hormuz Latest : Iran Vows Waterway Will Never Return to Pre - War Status as More Tankers Hit Mines](https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465) (ibtimes.com.au)
+- [Please Stop Blaming Israel and Jews for Your Being a Loser](https://townhall.com/columnists/alanjosephbauer/2026/11/12/please-stop-blaming-israel-and-jews-for-your-being-a-loser-n2686297) (townhall.com)
+- [Strait of Hormuz Crisis : Iran Rejects Pre - War Status Amid US Peace Talks Stalemate](https://openthemagazine.com/world/strait-of-hormuz-crisis-iran-says-key-oil-route-will-never-return-to-pre-war-status-as-us-peace-talks-stall) (openthemagazine.com)
+- [Oil slicks seen from space : the devastating impact of boat strikes on fragile Gulf ecosystems](https://peakoil.com/enviroment/oil-slicks-seen-from-space-the-devastating-impact-of-boat-strikes-on-fragile-gulf-ecosystems) (peakoil.com)
+- [UAE Business : Oil slips as hopes of Iran peace efforts weigh on markets](https://www.gdnonline.com:443/Details/1412618) (gdnonline.com)
 
 Headlines from the same day are context. They do not prove why a price moved.
