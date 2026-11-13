@@ -7,7 +7,7 @@
   {
    "candidate_id": "c-20261112-hormuz-gulf",
    "date_public": "2026-11-12",
-   "title": "Iran vows Hormuz stays disrupted as tankers hit mines",
+   "title": "Iran threatens Hormuz, mines hit tankers, vows no pre‑war status",
    "region": "hormuz-gulf",
    "episode_hint": "",
    "source_url": "https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
@@ -15,11 +15,23 @@
    "status": "pending",
    "urls": "https://openthemagazine.com/world/strait-of-hormuz-crisis-iran-says-key-oil-route-will-never-return-to-pre-war-status-as-us-peace-talks-stall|https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
    "event_type": "attack"
+  },
+  {
+   "candidate_id": "c-20261112-yemen-red-sea",
+   "date_public": "2026-11-12",
+   "title": "Saudi Arabia intercepts Houthi missiles and drones in Red Sea",
+   "region": "yemen-red-sea",
+   "episode_hint": "",
+   "source_url": "https://www.eurasiareview.com/12112026-the-illegality-of-houthi-attacks-that-threatened-holy-cities-oped/",
+   "n_sites": 2,
+   "status": "pending",
+   "urls": "https://www.asiaone.com:443/asia/saudi-arabia-intercepts-houthi-missiles-drones-group-denies-targeting-mecca|https://www.eurasiareview.com/12112026-the-illegality-of-houthi-attacks-that-threatened-holy-cities-oped/",
+   "event_type": "attack"
   }
  ],
  "notes": [
   {
-   "title": "US politician JD Vance explores direct talks with Iran",
+   "title": "US‑Iran peace talks intensify with JD Vance involvement",
    "region": "iran",
    "event_type": "talks",
    "url": "https://news.webindia123.com/news/Articles/World/20261112/4518650.html",
@@ -31,16 +43,9 @@
    "event_type": "talks",
    "url": "https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/",
    "sites": 1
-  },
-  {
-   "title": "Qatar acquires 25% stake in Chevron Namibia oil block",
-   "region": "qatar-uae-kuwait",
-   "event_type": "other",
-   "url": "https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/",
-   "sites": 1
   }
  ],
- "rejected": 2,
+ "rejected": 1,
  "error": "",
  "provider": "groq"
 }

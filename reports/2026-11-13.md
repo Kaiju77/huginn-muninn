@@ -9,7 +9,7 @@ _Historical base rates and headlines. Not a forecast or advice. You make the dec
 | Brent | 2026-11-11 | 92.14 USD/barrel | +2.2% | +0.3% | normal |
 | WTI | 2026-11-11 | 89.62 USD/barrel | +0.0% | -2.3% | normal |
 | Henry Hub gas | 2026-11-11 | 3 USD/MMBtu | +0.0% | +14.1% | normal |
-| USD/NOK | 2026-11-12 | 9.5325 NOK per USD | -0.1% | +2.5% | normal |
+| USD/NOK | 2026-11-13 | 9.5634 NOK per USD | +0.3% | +1.4% | normal |
 
 EIA publishes a few days late, so the latest close can be several days old.
 
