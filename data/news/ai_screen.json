@@ -7,7 +7,7 @@
   {
    "candidate_id": "c-20261112-hormuz-gulf",
    "date_public": "2026-11-12",
-   "title": "Iran threatens Hormuz, tankers hit mines",
+   "title": "Iran vows Hormuz stays disrupted as tankers hit mines",
    "region": "hormuz-gulf",
    "episode_hint": "",
    "source_url": "https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465",
@@ -19,35 +19,28 @@
  ],
  "notes": [
   {
-   "title": "JD Vance considers direct talks with Iranian official",
+   "title": "US politician JD Vance explores direct talks with Iran",
    "region": "iran",
    "event_type": "talks",
    "url": "https://news.webindia123.com/news/Articles/World/20261112/4518650.html",
    "sites": 1
   },
   {
-   "title": "Iran warns it may target US bases in Europe",
-   "region": "iran",
-   "event_type": "other",
-   "url": "https://jowhar.com/iran-warns-it-may-target-u-s-military-bases-across-europe/",
-   "sites": 1
-  },
-  {
-   "title": "Saudi Arabia approves revival of Iraq‑Saudi oil pipeline",
+   "title": "Saudi Arabia preliminarily approves revival of Iraq‑Saudi oil pipeline",
    "region": "iraq",
-   "event_type": "other",
+   "event_type": "talks",
    "url": "https://kenya-today.com/report-saudi-arabia-gives-preliminary-nod-to-revive-iraqsaudi-oil-pipeline-25761/",
    "sites": 1
   },
   {
-   "title": "Qatar acquires 25% stake in Chevron Namibia block",
+   "title": "Qatar acquires 25% stake in Chevron Namibia oil block",
    "region": "qatar-uae-kuwait",
    "event_type": "other",
    "url": "https://www.riotimesonline.com/qatarenergy-chevron-namibia-pel82-25-percent-stake/",
    "sites": 1
   }
  ],
- "rejected": 1,
+ "rejected": 2,
  "error": "",
  "provider": "groq"
 }

@@ -1,4 +1,4 @@
-# Prediction log, 2026-11-12
+# Prediction log, 2026-11-13
 
 _Live log of historical base rates. Very few predictions so far, and rows for the same event (other assets, other horizons) are not independent. Not a forecast or advice. You make the decisions._
 
