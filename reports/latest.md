@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-13
+# Daily market brief, 2026-11-14
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -19,16 +19,16 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 ## Event screen
 
-AI screen unavailable today; the keyword screen was used (an escalation word plus a region, 3+ sites).
+AI screen (groq openai/gpt-oss-120b) read 3 relevant headlines; every result is checked by code (region, cited headlines, 2+ sites).
 
-**Possible new events (need your approval):**
-
-- `c-20261112-hormuz-gulf`: [Iran threatens Hormuz, tankers hit mines](https://www.ibtimes.com.au/iran-strait-hormuz-prewar-status-shipping-concerns-1878465) (supply_disruption, 2 sites)
-
-To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
+No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
-No headlines fetched on 2026-11-13 (the latest fetch is from 2026-11-12; today's fetch failed or has not run).
+Fetched 2026-11-14 13:39 UTC, covering the previous 36 hours.
+
+- [US military denies Iran claim of attack on radar in Bahrain , says it shot down two drones](https://www.hindustantimes.com/world-news/us-military-denies-iran-s-claim-of-attack-on-radar-in-bahrain-says-it-shot-down-two-drones-101794581485752.html) (hindustantimes.com)
+- [Russia Oil Revenues Hit Five - Month High on Crude Rally , IEA Says](https://gcaptain.com/russia-oil-revenues-hit-five-month-high-on-crude-rally-iea-says/) (gcaptain.com)
+- [World Oil Market is Returning to Surplus as Gulf Exports Recover](https://gcaptain.com/world-oil-market-is-returning-to-surplus-as-gulf-exports-recover/) (gcaptain.com)
 
 Headlines from the same day are context. They do not prove why a price moved.
