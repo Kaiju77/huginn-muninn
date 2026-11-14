@@ -32,14 +32,24 @@ jobs:
         with:
           python-version: '3.12'
       - run: python scripts/build_site.py --out site
-      - uses: actions/configure-pages@v5
-      - uses: actions/jekyll-build-pages@v1
+      # Until Pages is switched on in the repo settings, skip instead of failing.
+      - id: pages
+        continue-on-error: true
+        uses: actions/configure-pages@v5
+      - if: steps.pages.outcome != 'success'
+        run: echo '::notice::GitHub Pages is not enabled yet (Settings, Pages, Source = GitHub Actions). Nothing published.'
+      - if: steps.pages.outcome == 'success'
+        uses: actions/jekyll-build-pages@v1
         with:
           source: ./site
           destination: ./_site
-      - uses: actions/upload-pages-artifact@v3
+      - if: steps.pages.outcome == 'success'
+        uses: actions/upload-pages-artifact@v3
+    outputs:
+      enabled: ${{ steps.pages.outcome == 'success' }}
   deploy:
     needs: build
+    if: needs.build.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

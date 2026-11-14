@@ -1,17 +1,44 @@
 # Huginn & Muninn
 
-Event study and historical base rates for market-moving events. Example: "In 18 comparable conflicts, Brent rose within 20 days in 11 (61%, 95% CI 39-80%)." You make the decisions; the tool reports history. See `PROJECT_STATE.md` and `ROADMAP.md`.
+What did prices do after events like this one? Huginn & Muninn collects market-moving events, finds comparable past events, and reports what prices did afterwards as a historical base rate:
+
+> 5 trading days: in 21 comparable events, Brent rose in 11 (52%, 95% CI 32-72%). Median +1.0%, range -6.5% to +22.2%. Baseline: 2003 non-overlapping 5-day windows, 1057 rose (53%, 95% CI 51-55%).
+
+It reports history. It does not forecast, recommend or trade; the reader makes the decisions.
 
 **Live page:** [kaiju77.github.io/huginn-muninn](https://kaiju77.github.io/huginn-muninn/): the daily brief, the backtest, the live prediction log and the crisis-list comparison, rebuilt after every scheduled run.
 
+## What it does today
+
+- **Event study.** Middle East conflict onsets since 1988 against Brent, WTI, Henry Hub gas and USD/NOK, at 5, 20 and 60 trading days. Every figure has n, a Wilson 95% CI, a range and a normal-period baseline.
+- **Daily brief** ([`reports/latest.md`](reports/latest.md)). Price moves, base rates for recent events, same-day headlines, and suggested new events found by a keyword screen and an AI screen. A person approves each new event.
+- **Honest scoring.** A walk-forward backtest ([`reports/calibration.md`](reports/calibration.md)) "predicts" each past event from earlier events only and scores it with the Brier score against the baseline. So far the event base rates are mostly no better than the baseline, and the report says so.
+- **Live prediction log** ([`reports/prediction-log.md`](reports/prediction-log.md)). Each new crisis is logged once with only the prices known that day, and scored when its horizon has passed. It cannot be backfilled.
+- **Two crisis lists.** The hand-picked list is biased towards famous crises. A second list comes from a fixed rule on UCDP conflict-death data, and [`reports/catalog-comparison.md`](reports/catalog-comparison.md) shows how far the two agree.
+
+## Method rules
+
+1. **No look-ahead.** An event counts from the first close on or after the day it was public. News first seen after 12:00 UTC counts from the next day.
+2. **Always n, 95% CI and range**, for the events and for the baseline. Fewer than 8 events gives no percentage.
+3. **One event per crisis.** Follow-up events in the same episode are not counted as independent.
+4. **Non-overlapping baseline windows.**
+5. **Backtest before trusting a probability.**
+
+Details and the decision log are in [`PROJECT_STATE.md`](PROJECT_STATE.md). Every review round and its fixes are in [`REVIEW.md`](REVIEW.md).
+
 ## Quick start
 
+Python 3.12, standard library only (Streamlit is needed only for the page).
+
+    python -m unittest discover -s tests          # all tests
     python scripts/event_study.py                 # base rates for every asset, printed
-    pip install -r requirements-app.txt
-    streamlit run app/streamlit_app.py            # the results page
     python scripts/daily_report.py                # the daily brief -> reports/latest.md
     python scripts/backtest.py                    # is it right? -> reports/calibration.md
-    python scripts/compare_catalogs.py            # hand-picked vs UCDP rule list -> reports/catalog-comparison.md
+    python scripts/compare_catalogs.py            # hand-picked vs UCDP rule list
+    pip install -r requirements-app.txt
+    streamlit run app/streamlit_app.py            # interactive results page
+
+Live fetches run in GitHub Actions with keys stored as repository secrets (`EIA_API_KEY`, `GROQ_API_KEY`, `UCDP_TOKEN`). The price files in `data/prices/` are committed, so everything above runs without keys.
 
 ## Architecture
 
@@ -65,44 +92,22 @@ flowchart LR
 
 Rules that hold everywhere: no look-ahead (an event counts from the first close after it was public), one event per crisis episode, and every probability comes with n, a 95% CI, a range and a normal-period baseline.
 
-Every day the `fetch-prices` GitHub workflow fetches prices (EIA: Brent, WTI, Henry Hub; Norges Bank: USD/NOK) and headlines (GDELT), and writes the brief to [`reports/latest.md`](reports/latest.md).
+## Repository layout
 
-The sections below describe the parked ledger prototype, which is kept and tested.
+| Path | Contents |
+|---|---|
+| `src/huginn_muninn/` | `study.py` (event study), `calibration.py` (backtest), `predictions.py` (live log), `candidates.py` and `ai_screen.py` (event screens), `ucdp_events.py` (rule-based onsets), `compare.py` |
+| `scripts/` | Command-line entry points and fetchers |
+| `data/` | Prices, event catalogs, candidates, news, prediction log |
+| `reports/` | Generated reports |
+| `.github/workflows/` | Scheduled fetches, tests, event approval, the public page |
+| `tests/` | Unit and regression tests |
 
-Local implementation repository for the ChatGPT project **HUGIIN & MUNIN**.
+## Limits
 
-This repository is prepared for the shared AI development harness. Product scope and implementation decisions should be captured in `PROJECT_STATE.md` before feature work begins.
+- Few events (about 20 independent crises), so the intervals are wide.
+- EIA prices arrive a few days late.
+- Same-day headlines are context. They do not prove why a price moved.
+- One category so far. Planned next: more event types (see [`ROADMAP.md`](ROADMAP.md) and `ideas.md`).
 
-This isolated `cursor/hm-01` branch preserves the accepted HM-01 slice: discoverable synthetic tests and an explicit known Decimal subtotal with completeness. The HM-01 `Portfolio` still does not qualify currency, as-of, or provenance. The separate HM-02 snapshot does. Conversion and coverage qualification remain unfinished. The branch is not merged into the canonical Huginn & Muninn repository.
-
-## Entered portfolio
-
-`GET /portfolio` and `POST /portfolio` are the entered book. A person adds an institution and account name, an instrument, and an activity in ordinary words. The page says: "This is your entered portfolio. Northline and Harbor on the other pages are a synthetic demo." The entered store is `var/entered-portfolio/book.json`. It is not the synthetic fixture. Reporting currency is NOK. Foreign currency stays in the currency that was entered. Manual balances are snapshots. The page says: "Manual balances are snapshots. They are not a full performance record." Resetting the demo overlay does not delete this book. The listening desk process was not restarted, so the new route is not on that process until a later explicit restart. Connecting a bank or broker is not part of onboarding. Independent review on 2026-10-11 approved ONBOARD-01. Reviewer `4290b454-c3f9-4657-aaa3-858d55e48ad3`. The product path is `ROADMAP.md`.
-
-`GET /portfolio/valuation` is linked from that page. A person records an amount, a currency, a valuation date, an evidence date, and where the price came from. The currency must match the listing currency. Valuation on the selected date uses cash at face, one same-date price times quantity, or the manual balance when its as-of date is that date. A missing price stays unknown. The page says: "This valuation is not a recommendation." It also says: "A missing price stays unknown." And: "A manual balance is a snapshot on its date. It is not a price and it is not a full performance record." It does not convert currencies. Allocation shares are shown only when every line is known, every line is in NOK, and the known NOK subtotal is not zero. Otherwise, including a known NOK subtotal of zero and an empty date, the page says "Allocation is incomplete." and shows no shares. A known NOK subtotal of zero stays labeled known NOK subtotal. Independent review on 2026-10-11 approved ONBOARD-02. Reviewer `7f37206a-eb44-4416-b904-0ac8267e14b3`. `GET /portfolio/performance` separates contributions, withdrawals, fees, and dividends from the price change when both dates are known NOK and the book has no manual balance. Otherwise it says "Attribution is unavailable." Independent review on 2026-10-11 approved VALUE-01. Reviewer `8e1b27f5-d9e5-48d4-afad-f638572be7c4`. `POST /portfolio/price` is the only way to accept one stored observation as an entered price. GET does not store a price. USD/NOK, EUR/NOK, the policy rate, NOWA, CPI, and a synthetic row are refused. Independent review on 2026-10-11 approved PRICE-01. Reviewer `205dc4e4-7f9f-48cc-a38e-8a79d0059c51`. The listening desk was not restarted.
-
-## End-to-end check
-
-`python scripts/e2e_portfolio.py` drives the entered-portfolio workflow over HTTP with synthetic data and prints PASS/FAIL per step. See `docs/E2E_PORTFOLIO.md`.
-
-## Run the HM-01 walkthrough
-
-From the checkout root, `python scripts/hm01_walkthrough.py` prints the synthetic demonstration. What the output means, and the offline sandbox command, are in `docs/HM01_WALKTHROUGH.md`.
-
-`docs/HM02_SNAPSHOT.md` describes the separate qualified snapshot in this checkout. Independent review approved that snapshot on this branch. It is not merged.
-
-## Run the accounting walkthrough
-
-From the checkout root, `python scripts/accounting_walkthrough.py` prints the synthetic ledger trace. The journal rules are in `docs/ACCOUNTING_LEDGER.md`.
-
-## Run the local prototype
-
-From the checkout root, `python scripts/serve_prototype.py` binds `127.0.0.1:8765` and prints `http://127.0.0.1:8765/`. The paper pages and the synthetic fixture are described in `docs/LOCAL_PROTOTYPE.md`. Decimal precision is in `docs/DECIMAL_RULES.md`. The figures are synthetic. The page is not a recommendation.
-
-## Desk
-
-`GET /` is the night desk from DESK-01. Average-cost performance, arithmetic gaps, the conversation form, and the still waveform are described in `docs/DESK.md`. The hosted FastAPI, React, and PostgreSQL target remains deferred because this milestone cannot install dependencies. The desk does not recommend a transaction, forecast a return, or recognize speech. Independent review on 2026-10-11 approved DESK-01. Reviewer `a9e2c765-84f1-45a7-8305-122f1f424958`.
-
-## Evidence
-
-`GET /evidence` is linked from the desk. It reads `fixtures/source_registry.json`, the recorded synthetic fixture in `fixtures/evidence_observations.json`, and any stored public refresh under `var/ingest-cache/`. Norges Bank, the ECB, and Statistics Norway are connected. An explicit refresh can store USD/NOK, EUR/NOK, the policy rate, NOWA, ECB NOK/EUR, and one Statistics Norway CPI cell, table 14700 for 2026M07 total. The evidence page draws stored NOWA points and, where both EUR/NOK observations exist for a date, shows the Norges Bank minus ECB difference. That difference is not a recommendation and is not copied into the ledger. When `ssb-cpi-total-2026M07` is visible, the page says: "The CPI date is the first day of 2026M07. Stale in October means the monthly index is older than 7 days. It is not a failed daily refresh." The freshness rule is unchanged, and that row stays stale against 2026-10-11. The page also lists each stored subject once, with its source id, the latest observation date among visible rows, the value on that date, and the retrieval dates of the rows on that date, in the same order as the values. If two rows share the latest date, both values and both retrieval dates are shown and the line says the date has more than one row. The inventory is computed from stored rows only. It does not fetch. The page also names the six series a manual refresh requests, in the order the refresh requests them: Norges Bank USD/NOK, Norges Bank EUR/NOK, the policy rate, NOWA, ECB NOK/EUR, and the one Statistics Norway CPI cell for table 14700, 2026M07, total. That list is text. The page says: "This list is not a refresh." `GET /evidence` does not call the network to produce it. Independent review on 2026-10-11 approved INGEST-06. Reviewer `836d93f4-c13a-499b-879f-5a9daf50a79f`. The page also keeps the policy rate and NOWA apart. When a policy-rate row is visible, it shows the latest policy-rate observation date and the value on that date. When a nowa row is visible, it shows the latest nowa observation date and the value on that date. If several rows of one subject share that latest date, both values are shown and the line says the date has more than one row. If a subject is absent, the page says that subject is not visible. The page says: "The policy rate and NOWA are not combined." The values are not added and not averaged. The page lists the hosts in `ALLOWLIST` from `src/huginn_muninn/ingest/client.py`, imported from that constant and shown in sorted order. It says: "These hosts are the allowlist. This page does not open a connection." `GET /evidence` does not call the transport. Independent review on 2026-10-11 approved INGEST-07. Reviewer `93b4999a-71c0-4cca-9ca6-522a66b33861`. When the newest stored USD/NOK observation is visible and its value is present, the page shows that stored value minus Decimal('10.25'). Exact zero renders as 0. The page says: "The USD/NOK gap is not a recommendation and is not copied into the ledger." If no USD/NOK row is visible, the difference is omitted and the existing empty-state sentence remains. If the stored value is missing, the difference is omitted and the page says the stored value is missing. Each stored-series line also states the freshness flag of each row on the latest observation date, against the selected page date, using `freshness_flags`. That function is unchanged. A line with two rows on the latest date states both flags, in the same order as the values. The flags are labels. A stale or future row is not marked fresh. Independent review on 2026-10-11 approved INGEST-08. Reviewer `05ef935a-e39b-4b92-990a-0807c762b6bc`. Beside each of the six series a manual refresh requests, the page shows the due or current label `due_status` returns for the source that owns that series, against the selected page date. Norges Bank USD/NOK, Norges Bank EUR/NOK, the policy rate, and NOWA use `norges-bank-open-data`. ECB NOK/EUR uses `ecb-sdw`. The CPI cell uses `ssb-statbank`. A source with no fresh non-synthetic row stays due. The page does not invent a third label. The page includes this sentence once, whether or not a refresh is stored: "A later calendar day is not a scheduled refresh." No scheduler was added. Independent review on 2026-10-11 approved INGEST-09. Reviewer `1b77f2bb-714f-4adf-9e95-67699efad7cf`. The page also shows the count of observations stored in the refresh cache beside the existing cap of 500. The count is read from the cache the page already loads. An empty cache shows 0. The synthetic fixture rows are not added to that count. The page says, in that section: "The synthetic fixture is not part of the cache count." The page says: "The cap drops the oldest observation dates that are absent from a new batch." The cap behavior is unchanged. For each of the six series a manual refresh requests, the page shows the quality flags of the visible rows on the newest observation date for that series. Norges Bank USD/NOK uses USD/NOK. Norges Bank EUR/NOK uses EUR/NOK and does not include a row whose observation id starts with `ecb-exr-NOK-EUR-`. The policy rate uses policy-rate. NOWA uses nowa. The CPI cell uses cpi-total. ECB NOK/EUR is identified by that observation-id prefix. If several rows share the newest date, each row's flags are shown and the page says the date has more than one row. If none are stored, the page says that series is not stored. The page says once: "A quality flag is a label." It does not invent a flag. From those same visible rows, the page counts how many of the six requested series are not stored. The page says once: "A missing series is not a zero." A series with no stored row is not filled with 0. `GET /evidence` does not fetch. Independent review on 2026-10-11 approved INGEST-10. Reviewer `8a53642d-f76a-4fcd-985c-3f1fd545f043`. Independent review on 2026-10-11 approved INGEST-11. Reviewer `03aa61c5-c3d3-44ef-9f33-332065d20934`. Independent review on 2026-10-11 approved INGEST-05. Reviewer `a3090eaf-710a-40ca-8a86-d26c3075a5c4`. INGEST-05 adds one section that reads stored rows. It shows the newest USD/NOK observation beside the synthetic ledger rate 10.25: the stored value, the observation date, and the quality flags. When several USD/NOK rows share that date, the section uses the first visible row and says the date has more than one row. It states whether the stored value equals 10.25. The sentence in both cases is: "A match and a gap are not a ledger update." If no USD/NOK row is visible, the page says that no stored USD/NOK observation is visible and still shows 10.25 with that sentence. The observation is not copied into the ledger. When a visible row's freshness flags include `future_observation` or `future_retrieval`, the page includes this sentence once: "A row later than the selected date stays on the page. It was not dropped." Those flags are unchanged, and the row is not marked fresh. If no visible row has either flag, that sentence is omitted. Independent review on 2026-10-11 approved INGEST-04. Reviewer `20fd508e-2a5f-49a3-a4fb-f8c2d0ce9594`. Each connected source is printed as current or due from stored rows only. Other SSB tables remain unconnected. SEC EDGAR is prepared. FRED is blocked. Social is excluded. The page is not a recommendation. See `docs/EVIDENCE.md`, `docs/INGEST.md`, and `HUMAN_TASKS.md`. Independent review on 2026-10-11 approved EVIDENCE-01. Reviewer `607f9f92-2ef6-49c8-a699-0e3e8ab9e120`. Independent review on 2026-10-11 approved INGEST-01. Reviewer `d9738456-8e9c-486d-9b05-cab7ecd21d30`. Independent review on 2026-10-11 approved INGEST-02. Reviewer `b892e214-6e19-40b9-a2e4-bf70978f63ff`. Independent review on 2026-10-11 approved INGEST-03. Reviewer `b30fc8b7-9c31-4500-837a-3243f3be9cc5`. A stored public observation is not copied into the ledger.
+The repository also holds a parked ledger prototype from an earlier direction: [`docs/LEDGER_PROTOTYPE.md`](docs/LEDGER_PROTOTYPE.md).

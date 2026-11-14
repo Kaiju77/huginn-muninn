@@ -51,22 +51,35 @@ def parse(body):
     return keep
 
 
-def get(target, retries=3):
-    for attempt in range(retries):
+WAITS = (20, 60, 150)   # seconds; GDELT rate-limits shared runner addresses (HTTP 429)
+
+
+def get(target, waits=WAITS, opener=urllib.request.urlopen, sleep=time.sleep):
+    """The parsed articles. A failed call, a rate-limit page or an unusable body
+    is retried after each wait in ``waits``; the last error is raised."""
+    for attempt in range(len(waits) + 1):
         try:
-            with urllib.request.urlopen(target, timeout=60) as resp:
-                return resp.read()
-        except (urllib.error.URLError, TimeoutError):
-            if attempt == retries - 1:
+            with opener(target, timeout=60) as resp:
+                return parse(resp.read())
+        except (urllib.error.URLError, TimeoutError, ValueError) as err:
+            if attempt == len(waits):
                 raise
-            time.sleep(10 * (attempt + 1))  # GDELT asks for a pause between calls
+            print(f'GDELT attempt {attempt + 1} failed: {describe(err)}; retrying',
+                  file=sys.stderr)
+            sleep(waits[attempt])
+
+
+def describe(err):
+    """Error class plus the HTTP status. Never the URL or the body."""
+    code = getattr(err, 'code', None)
+    return f'{type(err).__name__} {code}' if isinstance(code, int) else type(err).__name__
 
 
 def main():
     try:
-        articles = parse(get(url()))
-    except (urllib.error.URLError, TimeoutError, ValueError, json.JSONDecodeError) as err:
-        print(f'news not written: {type(err).__name__}', file=sys.stderr)
+        articles = get(url())
+    except (urllib.error.URLError, TimeoutError, ValueError) as err:
+        print(f'news not written: {describe(err)}', file=sys.stderr)
         return 1
     OUT.parent.mkdir(parents=True, exist_ok=True)
     payload = {'fetched_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
