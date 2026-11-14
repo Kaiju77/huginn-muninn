@@ -14,8 +14,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -24,6 +22,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,25 +32,40 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      # A failing commit is never published.
+      - run: python -m unittest discover -s tests
       - run: python scripts/build_site.py --out site
-      # Until Pages is switched on in the repo settings, skip instead of failing.
+      # Until Pages is switched on in the repo settings (404), skip instead of
+      # failing. Any other answer is a real error and fails the run.
       - id: pages
-        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${{ github.repository }}/pages")
+          case "$code" in
+            200) echo 'enabled=true' >> "$GITHUB_OUTPUT" ;;
+            404) echo 'enabled=false' >> "$GITHUB_OUTPUT"
+                 echo '::notice::GitHub Pages is not enabled yet (Settings, Pages, Source = GitHub Actions). Nothing published.' ;;
+            *)   echo "::error::Pages status check returned HTTP $code"; exit 1 ;;
+          esac
+      - if: steps.pages.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
-      - if: steps.pages.outcome != 'success'
-        run: echo '::notice::GitHub Pages is not enabled yet (Settings, Pages, Source = GitHub Actions). Nothing published.'
-      - if: steps.pages.outcome == 'success'
+      - if: steps.pages.outputs.enabled == 'true'
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./site
           destination: ./_site
-      - if: steps.pages.outcome == 'success'
+      - if: steps.pages.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v3
     outputs:
-      enabled: ${{ steps.pages.outcome == 'success' }}
+      enabled: ${{ steps.pages.outputs.enabled }}
   deploy:
     needs: build
     if: needs.build.outputs.enabled == 'true'
+    permissions:
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages

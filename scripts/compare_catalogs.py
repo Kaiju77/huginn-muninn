@@ -7,7 +7,6 @@ Skips cleanly (exit 0, short report) until data/events/mideast-conflict-ucdp.csv
 exists; that file is built weekly by the fetch-ucdp workflow.
 """
 
-import re
 import sys
 from datetime import timedelta
 from pathlib import Path
@@ -21,6 +20,7 @@ from src.huginn_muninn.assets import ASSETS  # noqa: E402
 from src.huginn_muninn.catalog import load_catalog  # noqa: E402
 from src.huginn_muninn.compare import (  # noqa: E402
     chance_matches, coverage_window, episodes, in_window, match_episodes)
+from src.huginn_muninn.mdsafe import md as safe_md  # noqa: E402
 from src.huginn_muninn.prices import load_closes  # noqa: E402
 from src.huginn_muninn.study import format_result, run_study  # noqa: E402
 from src.huginn_muninn.ucdp_events import OnsetRule  # noqa: E402
@@ -34,9 +34,7 @@ DISCLAIMER = '_Historical base rates, not a forecast or advice._'
 
 def md(text):
     """Catalog text made safe for one markdown line or table cell."""
-    text = re.sub(r'\s+', ' ', str(text)).strip()
-    text = text.replace('|', '/').replace('<', '&lt;').replace('`', "'")
-    return text.lstrip('#>-*+ ') or '?'
+    return safe_md(text).lstrip('#>-*+ ') or '?'
 
 
 def ged_end(ged_path, ucdp_events, rule):

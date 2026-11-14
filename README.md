@@ -6,7 +6,7 @@ What did prices do after events like this one? Huginn & Muninn collects market-m
 
 It reports history. It does not forecast, recommend or trade; the reader makes the decisions.
 
-**Live page:** [kaiju77.github.io/huginn-muninn](https://kaiju77.github.io/huginn-muninn/): the daily brief, the backtest, the live prediction log and the crisis-list comparison, rebuilt after every scheduled run.
+**Public page (not live yet; it starts when GitHub Pages is switched on):** [kaiju77.github.io/huginn-muninn](https://kaiju77.github.io/huginn-muninn/): the daily brief, the backtest, the live prediction log and the crisis-list comparison, rebuilt after every scheduled run.
 
 ## What it does today
 
@@ -14,11 +14,11 @@ It reports history. It does not forecast, recommend or trade; the reader makes t
 - **Daily brief** ([`reports/latest.md`](reports/latest.md)). Price moves, base rates for recent events, same-day headlines, and suggested new events found by a keyword screen and an AI screen. A person approves each new event.
 - **Honest scoring.** A walk-forward backtest ([`reports/calibration.md`](reports/calibration.md)) "predicts" each past event from earlier events only and scores it with the Brier score against the baseline. So far the event base rates are mostly no better than the baseline, and the report says so.
 - **Live prediction log** ([`reports/prediction-log.md`](reports/prediction-log.md)). Each new crisis is logged once with only the prices known that day, and scored when its horizon has passed. It cannot be backfilled.
-- **Two crisis lists.** The hand-picked list is biased towards famous crises. A second list comes from a fixed rule on UCDP conflict-death data, and [`reports/catalog-comparison.md`](reports/catalog-comparison.md) shows how far the two agree.
+- **Two crisis lists.** The hand-picked list is biased towards famous crises. A second list will come from a fixed rule on UCDP conflict-death data. The code is ready; the data is waiting for a UCDP API token (`UCDP_TOKEN`). [`reports/catalog-comparison.md`](reports/catalog-comparison.md) will then show how far the two lists agree.
 
 ## Method rules
 
-1. **No look-ahead.** An event counts from the first close on or after the day it was public. News first seen after 12:00 UTC counts from the next day.
+1. **No look-ahead.** An event counts from the first close on or after the day it was public. News first seen at or after 12:00 UTC counts from the next day.
 2. **Always n, 95% CI and range**, for the events and for the baseline. Fewer than 8 events gives no percentage.
 3. **One event per crisis.** Follow-up events in the same episode are not counted as independent.
 4. **Non-overlapping baseline windows.**
@@ -90,7 +90,7 @@ flowchart LR
   E --> CC
 ```
 
-Rules that hold everywhere: no look-ahead (an event counts from the first close after it was public), one event per crisis episode, and every probability comes with n, a 95% CI, a range and a normal-period baseline.
+Rules that hold everywhere: no look-ahead (an event counts from the first close on or after the day it was public), one event per crisis episode, and every probability comes with n, a 95% CI, a range and a normal-period baseline.
 
 ## Repository layout
 

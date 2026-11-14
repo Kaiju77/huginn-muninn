@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.huginn_muninn import daily  # noqa: E402
+from src.huginn_muninn.mdsafe import md, url  # noqa: E402
 from src.huginn_muninn.assets import ASSETS, BY_ID  # noqa: E402
 from src.huginn_muninn.catalog import first_per_episode, load_catalog  # noqa: E402
 from src.huginn_muninn.prices import load_closes  # noqa: E402
@@ -66,17 +67,6 @@ def news_lines(today, news_path):
     for title, domain, link, _seen in items:
         out.append(f'- [{md(title)}]({url(link)}) ({md(domain)})')
     return out
-
-
-def md(text):
-    """Untrusted text (headlines, model output) made safe inside a markdown link."""
-    return (str(text).replace('[', '(').replace(']', ')').replace('\n', ' ')
-            .replace('`', "'"))
-
-
-def url(text):
-    text = str(text)
-    return text.replace(')', '%29').replace(' ', '%20') if text.startswith('http') else ''
 
 
 def candidate_lines(today, path, ai_path=AI):
@@ -144,14 +134,14 @@ def build(today, prices_dir=None, events_path=EVENTS, news_path=NEWS, recent_day
     recent = daily.recent_events(catalog, today, recent_days)
     if not recent:
         earlier = [e for e in catalog if e.date_public <= today]  # no future events
-        latest = (f' Latest: {max(earlier, key=lambda e: e.date_public).title} '
+        latest = (f' Latest: {md(max(earlier, key=lambda e: e.date_public).title)} '
                   f'({max(e.date_public for e in earlier).isoformat()}).') if earlier else ''
         lines += [f'No catalog events in the last {recent_days} days.{latest}', '']
     for event in recent:
         comparable = [e for e in first_per_episode(catalog)
                       if e.episode != event.episode and e.date_public < event.date_public]
-        lines += [f'### {event.title} ({event.date_public.isoformat()})', '',
-                  f'Source: {event.source_url}', '']
+        lines += [f'### {md(event.title)} ({event.date_public.isoformat()})', '',
+                  f'Source: {url(event.source_url)}', '']
         for asset_id in ('brent', 'wti', 'henry_hub', 'usd_nok'):
             if asset_id not in loaded:
                 continue

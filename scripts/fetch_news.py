@@ -7,6 +7,7 @@ No key needed. On failure the old file is kept and the exit code is 1;
 the report then says news is unavailable.
 """
 
+import http.client
 import json
 import sys
 import time
@@ -51,6 +52,9 @@ def parse(body):
     return keep
 
 
+# OSError covers URLError, timeouts, resets and TLS errors.
+FAILURES = (OSError, http.client.HTTPException, ValueError)
+PERMANENT = (400, 401, 403, 404)   # retrying cannot help
 WAITS = (20, 60, 150)   # seconds; GDELT rate-limits shared runner addresses (HTTP 429)
 
 
@@ -61,8 +65,11 @@ def get(target, waits=WAITS, opener=urllib.request.urlopen, sleep=time.sleep):
         try:
             with opener(target, timeout=60) as resp:
                 return parse(resp.read())
-        except (urllib.error.URLError, TimeoutError, ValueError) as err:
-            if attempt == len(waits):
+        except FAILURES as err:
+            code = getattr(err, 'code', None)
+            if hasattr(err, 'close'):
+                err.close()
+            if attempt == len(waits) or code in PERMANENT:
                 raise
             print(f'GDELT attempt {attempt + 1} failed: {describe(err)}; retrying',
                   file=sys.stderr)
@@ -78,7 +85,7 @@ def describe(err):
 def main():
     try:
         articles = get(url())
-    except (urllib.error.URLError, TimeoutError, ValueError) as err:
+    except FAILURES as err:
         print(f'news not written: {describe(err)}', file=sys.stderr)
         return 1
     OUT.parent.mkdir(parents=True, exist_ok=True)

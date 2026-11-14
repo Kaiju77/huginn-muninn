@@ -1,5 +1,17 @@
 # Review log
 
+## 2026-11-14: review round 13 (Fable 5.2; public page, news retry, README; 466 tests ran, all OK)
+
+All 10 findings fixed; regression tests in `tests/test_review_round13.py`.
+
+1. P1: a news headline could inject HTML, a kramdown attribute list or Liquid into the public page (and a stray Liquid tag would stop the site building). One shared escaper (`src/huginn_muninn/mdsafe.py`) now covers headlines, model output, catalog titles and links in every report, and the site wraps each report in Liquid `raw`.
+2. P2: low-level network errors (cut-off reads, resets, TLS) skipped the GDELT retry and ended in a traceback. They are retried and reported now.
+3. and 4. P2: the README described the UCDP list and the public page as if they existed. It now says both are pending.
+5. and 6. P3: README wording on the 12:00 UTC cutoff and "on or after" made consistent with the code.
+7. P3: the Pages guard hid every failure. It now skips only when Pages is not enabled (HTTP 404) and fails on anything else.
+8. P3: a failing commit could be published, and the write permissions were workflow-wide. The pages job runs the tests first; write permissions are on the deploy job only.
+9. and 10. P3: permanent HTTP errors (400/401/403/404) are no longer retried; error responses are closed.
+
 ## 2026-11-12: review round 12 (Fable 5.2; crisis-list comparison; 451 tests ran, all OK)
 
 No P1 found: no price look-ahead, no double counting, and `--events` cannot overwrite `reports/calibration.md`. All 9 findings fixed, with regression tests in `tests/test_compare.py` (`test_round12_*`, and a test that builds the UCDP list through `to_catalog_rows`).

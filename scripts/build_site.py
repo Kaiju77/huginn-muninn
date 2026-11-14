@@ -8,6 +8,7 @@ the site, even though the repo itself is public.
 """
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -33,6 +34,12 @@ def menu(current):
     return ' · '.join(link(page, label) for _, page, label in PAGES)
 
 
+def no_liquid(body):
+    """The report as literal text for Liquid: nothing in it is run as a tag."""
+    body = re.sub(r'\{%-?\s*endraw\s*-?%\}', '', body)
+    return '{% raw %}\n' + body + '\n{% endraw %}'
+
+
 def build(out, reports=REPORTS):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -42,7 +49,7 @@ def build(out, reports=REPORTS):
     for src, page, _ in PAGES:
         path = Path(reports) / src
         body = path.read_text(encoding='utf-8') if path.exists() else '# Not generated yet\n'
-        text = f'{menu(page)}\n\n{body.rstrip()}\n\n---\n\n{FOOTER}\n'
+        text = f'{menu(page)}\n\n{no_liquid(body.rstrip())}\n\n---\n\n{FOOTER}\n'
         (out / page).write_text(text, encoding='utf-8')
         written.append(page)
     return written

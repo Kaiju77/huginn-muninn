@@ -140,7 +140,7 @@ class ReportTest(unittest.TestCase):
         self.assertIn('Too few events', text)
 
     def test_round12_markdown_escaping(self):
-        self.assertEqual(md('a\n\n## Base rates|x'), 'a ## Base rates/x')
+        self.assertEqual(md('a\n\n## Base rates|x'), 'a ## Base rates&#124;x')
         self.assertEqual(md('## fake'), 'fake')
         self.assertNotIn('<', md('<script>'))
 
