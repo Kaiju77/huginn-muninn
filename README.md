@@ -6,7 +6,7 @@ What did prices do after events like this one? Huginn & Muninn collects market-m
 
 It reports history. It does not forecast, recommend or trade; the reader makes the decisions.
 
-**Public page (not live yet; it starts when GitHub Pages is switched on):** [kaiju77.github.io/huginn-muninn](https://kaiju77.github.io/huginn-muninn/): the daily brief, the backtest, the live prediction log and the crisis-list comparison, rebuilt after every scheduled run.
+**Live page:** [kaiju77.github.io/huginn-muninn](https://kaiju77.github.io/huginn-muninn/): the daily brief, the backtest, the live prediction log and the crisis-list comparison, rebuilt after every scheduled run.
 
 ## What it does today
 
