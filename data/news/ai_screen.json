@@ -1,11 +1,10 @@
 {
  "date": "2026-11-14",
- "ok": true,
- "model": "openai/gpt-oss-120b",
+ "ok": false,
+ "model": "",
  "headlines": 3,
  "candidates": [],
  "notes": [],
- "rejected": 1,
- "error": "",
- "provider": "groq"
+ "rejected": 0,
+ "error": "github-models: openai/gpt-4.1-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4.1-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4o-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' '' | openai/gpt-4o-mini: ValueError: HTTP 200 non-JSON response: 'OK\\n' ''"
 }
