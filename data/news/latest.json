@@ -1,76 +1,55 @@
 {
- "fetched_at": "2026-11-14T13:39:58+00:00",
+ "fetched_at": "2026-11-16T16:11:41+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
   {
-   "title": "Chris Van Hollen eyes Senate Majority Leader post - The Washington Informer",
-   "url": "https://www.washingtoninformer.com/maryland-democrats-congressional-majorities/",
-   "domain": "washingtoninformer.com",
-   "seendate": "20261113T180000Z",
+   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
+   "url": "https://www.gazetteherald.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
+   "domain": "gazetteherald.co.uk",
+   "seendate": "20261116T081500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
+   "url": "https://www.worcesternews.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
+   "domain": "worcesternews.co.uk",
+   "seendate": "20261116T081500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "China Turns to Iraqi Oil as U . S . Blockade Chokes Iranian Supply",
+   "url": "https://oilprice.com/Latest-Energy-News/World-News/China-Turns-to-Iraqi-Oil-as-US-Blockade-Chokes-Iranian-Supply.html",
+   "domain": "oilprice.com",
+   "seendate": "20261116T081500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Wholesale inflation declined in October yet remains elevated",
-   "url": "https://www.orlandosentinel.com/2026/11/13/wholesale-inflation-declined-october/",
-   "domain": "orlandosentinel.com",
-   "seendate": "20261113T180000Z",
+   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
+   "url": "https://www.lancashiretelegraph.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
+   "domain": "lancashiretelegraph.co.uk",
+   "seendate": "20261116T081500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Almanac for Nov . 16 , 2026 - Daily Press",
+   "url": "https://www.dailypress.net/opinion/local-columns/2026/11/almanac-for-nov-16-2026/",
+   "domain": "dailypress.net",
+   "seendate": "20261116T081500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Wholesale inflation declined in October yet remains elevated",
-   "url": "https://www.fortmorgantimes.com/2026/11/13/wholesale-inflation-declined-october/",
-   "domain": "fortmorgantimes.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
+   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
+   "url": "https://www.edp24.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
+   "domain": "edp24.co.uk",
+   "seendate": "20261116T081500Z",
+   "sourcecountry": "United Kingdom"
   },
   {
-   "title": "newsroomamerica . com",
-   "url": "https://newsroomamerica.com/?before=121952",
-   "domain": "newsroomamerica.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "US military denies Iran claim of attack on radar in Bahrain , says it shot down two drones",
-   "url": "https://www.hindustantimes.com/world-news/us-military-denies-iran-s-claim-of-attack-on-radar-in-bahrain-says-it-shot-down-two-drones-101794581485752.html",
-   "domain": "hindustantimes.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Russia Oil Revenues Hit Five - Month High on Crude Rally , IEA Says",
-   "url": "https://gcaptain.com/russia-oil-revenues-hit-five-month-high-on-crude-rally-iea-says/",
-   "domain": "gcaptain.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "World Oil Market is Returning to Surplus as Gulf Exports Recover",
-   "url": "https://gcaptain.com/world-oil-market-is-returning-to-surplus-as-gulf-exports-recover/",
-   "domain": "gcaptain.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "CMA CGM Net Profit More Than Triples to $2 . 32 Billion as Freight Rates Surge",
-   "url": "https://gcaptain.com/cma-cgm-net-profit-more-than-triples-to-2-32-billion-as-freight-rates-surge/",
-   "domain": "gcaptain.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "On Wall Street , stocks sway as market aims for a winning week",
-   "url": "https://www.fortmorgantimes.com/2026/11/13/wall-street-futures-nvidia-microsoft/",
-   "domain": "fortmorgantimes.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "On Wall Street , stocks sway as market aims for a winning week",
-   "url": "https://www.orlandosentinel.com/2026/11/13/wall-street-futures-nvidia-microsoft/",
-   "domain": "orlandosentinel.com",
-   "seendate": "20261113T180000Z",
-   "sourcecountry": "United States"
+   "title": "Business confidence says nothing about small business survival",
+   "url": "https://it-online.co.za/2026/11/16/business-confidence-says-nothing-about-small-business-survival/",
+   "domain": "it-online.co.za",
+   "seendate": "20261116T081500Z",
+   "sourcecountry": "South Africa"
   }
  ]
 }
