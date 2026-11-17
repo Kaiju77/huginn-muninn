@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-16
+# Daily market brief, 2026-11-17
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -9,7 +9,7 @@ _Historical base rates and headlines. Not a forecast or advice. You make the dec
 | Brent | 2026-11-11 | 92.14 USD/barrel | +2.2% | +0.3% | normal |
 | WTI | 2026-11-11 | 89.62 USD/barrel | +0.0% | -2.3% | normal |
 | Henry Hub gas | 2026-11-11 | 3 USD/MMBtu | +0.0% | +14.1% | normal |
-| USD/NOK | 2026-11-16 | 9.6005 NOK per USD | +0.4% | +2.0% | normal |
+| USD/NOK | 2026-11-17 | 9.6237 NOK per USD | +0.2% | +1.7% | normal |
 
 EIA publishes a few days late, so the latest close can be several days old.
 
@@ -25,8 +25,6 @@ No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-16 16:11 UTC, covering the previous 36 hours.
-
-- [China Turns to Iraqi Oil as U . S . Blockade Chokes Iranian Supply](https://oilprice.com/Latest-Energy-News/World-News/China-Turns-to-Iraqi-Oil-as-US-Blockade-Chokes-Iranian-Supply.html) (oilprice.com)
+No headlines fetched on 2026-11-17 (the latest fetch is from 2026-11-16; today's fetch failed or has not run).
 
 Headlines from the same day are context. They do not prove why a price moved.
