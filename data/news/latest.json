@@ -1,55 +1,41 @@
 {
- "fetched_at": "2026-11-16T16:11:41+00:00",
+ "fetched_at": "2026-11-19T15:55:54+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
   {
-   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
-   "url": "https://www.gazetteherald.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
-   "domain": "gazetteherald.co.uk",
-   "seendate": "20261116T081500Z",
-   "sourcecountry": "United Kingdom"
+   "title": "Petrol Price in Pakistan to Drop to Rs322 Per Litre as another relief likely tonight",
+   "url": "https://pakobserver.net/petrol-price-in-pakistan-to-drop-to-rs322-per-litre-as-another-relief-likely-tonight/",
+   "domain": "pakobserver.net",
+   "seendate": "20261118T173000Z",
+   "sourcecountry": "Pakistan"
   },
   {
-   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
-   "url": "https://www.worcesternews.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
-   "domain": "worcesternews.co.uk",
-   "seendate": "20261116T081500Z",
-   "sourcecountry": "United Kingdom"
+   "title": "Saudis prepare for Houthi war to last well into 2027",
+   "url": "https://www.thehindu.com/news/international/saudis-prepare-for-houthi-war-to-last-well-into-2027/article71717227.ece",
+   "domain": "thehindu.com",
+   "seendate": "20261118T173000Z",
+   "sourcecountry": "India"
   },
   {
-   "title": "China Turns to Iraqi Oil as U . S . Blockade Chokes Iranian Supply",
-   "url": "https://oilprice.com/Latest-Energy-News/World-News/China-Turns-to-Iraqi-Oil-as-US-Blockade-Chokes-Iranian-Supply.html",
-   "domain": "oilprice.com",
-   "seendate": "20261116T081500Z",
+   "title": "Iran protests erupt over bus crash killing 13 oil workers in Abdanan",
+   "url": "https://www.foxnews.com/world/protesters-call-regime-change-iran-following-deadly-crash-killed-13-oil-gas-workers",
+   "domain": "foxnews.com",
+   "seendate": "20261118T173000Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
-   "url": "https://www.lancashiretelegraph.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
-   "domain": "lancashiretelegraph.co.uk",
-   "seendate": "20261116T081500Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Almanac for Nov . 16 , 2026 - Daily Press",
-   "url": "https://www.dailypress.net/opinion/local-columns/2026/11/almanac-for-nov-16-2026/",
-   "domain": "dailypress.net",
-   "seendate": "20261116T081500Z",
+   "title": "Diesel : The fuel that affects everything",
+   "url": "https://hpr1.com/diesel-the-fuel-that-affects-everything/",
+   "domain": "hpr1.com",
+   "seendate": "20261118T173000Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Greens to use Holyrood debate to force a vote on drilling at Rosebank",
-   "url": "https://www.edp24.co.uk/news/national/26730943.greens-use-holyrood-debate-force-vote-drilling-rosebank/",
-   "domain": "edp24.co.uk",
-   "seendate": "20261116T081500Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Business confidence says nothing about small business survival",
-   "url": "https://it-online.co.za/2026/11/16/business-confidence-says-nothing-about-small-business-survival/",
-   "domain": "it-online.co.za",
-   "seendate": "20261116T081500Z",
-   "sourcecountry": "South Africa"
+   "title": "Is another US - Iran war looming ? ",
+   "url": "http://www.middleeaststar.com/news/279440849/is-another-us-iran-war-looming",
+   "domain": "middleeaststar.com",
+   "seendate": "20261118T173000Z",
+   "sourcecountry": "Syria"
   }
  ]
 }
