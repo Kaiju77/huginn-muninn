@@ -25,11 +25,8 @@ No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-19 15:55 UTC, covering the previous 36 hours.
+Fetched 2026-11-19 19:11 UTC, covering the previous 36 hours.
 
-- [Saudis prepare for Houthi war to last well into 2027](https://www.thehindu.com/news/international/saudis-prepare-for-houthi-war-to-last-well-into-2027/article71717227.ece) (thehindu.com)
-- [Iran protests erupt over bus crash killing 13 oil workers in Abdanan](https://www.foxnews.com/world/protesters-call-regime-change-iran-following-deadly-crash-killed-13-oil-gas-workers) (foxnews.com)
-- [Diesel : The fuel that affects everything](https://hpr1.com/diesel-the-fuel-that-affects-everything/) (hpr1.com)
-- [Is another US - Iran war looming ?](http://www.middleeaststar.com/news/279440849/is-another-us-iran-war-looming) (middleeaststar.com)
+- [Riyadh tallest skyscraper hit in Houthi strike on Saudi wealth fund HQ](https://bdnews24.com/world/middle-east/fivt512358) (bdnews24.com)
 
 Headlines from the same day are context. They do not prove why a price moved.

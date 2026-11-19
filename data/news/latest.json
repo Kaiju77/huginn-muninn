@@ -1,41 +1,55 @@
 {
- "fetched_at": "2026-11-19T15:55:54+00:00",
+ "fetched_at": "2026-11-19T19:11:54+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
   {
-   "title": "Petrol Price in Pakistan to Drop to Rs322 Per Litre as another relief likely tonight",
-   "url": "https://pakobserver.net/petrol-price-in-pakistan-to-drop-to-rs322-per-litre-as-another-relief-likely-tonight/",
-   "domain": "pakobserver.net",
-   "seendate": "20261118T173000Z",
-   "sourcecountry": "Pakistan"
-  },
-  {
-   "title": "Saudis prepare for Houthi war to last well into 2027",
-   "url": "https://www.thehindu.com/news/international/saudis-prepare-for-houthi-war-to-last-well-into-2027/article71717227.ece",
-   "domain": "thehindu.com",
-   "seendate": "20261118T173000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Iran protests erupt over bus crash killing 13 oil workers in Abdanan",
-   "url": "https://www.foxnews.com/world/protesters-call-regime-change-iran-following-deadly-crash-killed-13-oil-gas-workers",
-   "domain": "foxnews.com",
-   "seendate": "20261118T173000Z",
+   "title": "Takeaways from the historic summit between Trump , Xi and Putin",
+   "url": "http://www.rockymounttelegram.com/news/world/takeaways-from-the-historic-summit-between-trump-xi-and-putin/article_9ad39578-18af-5ea9-a631-d1ef2149fee6.html",
+   "domain": "rockymounttelegram.com",
+   "seendate": "20261119T171500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Diesel : The fuel that affects everything",
-   "url": "https://hpr1.com/diesel-the-fuel-that-affects-everything/",
-   "domain": "hpr1.com",
-   "seendate": "20261118T173000Z",
+   "title": "Riyadh tallest skyscraper hit in Houthi strike on Saudi wealth fund HQ",
+   "url": "https://bdnews24.com/world/middle-east/fivt512358",
+   "domain": "bdnews24.com",
+   "seendate": "20261119T171500Z",
+   "sourcecountry": "Bangladesh"
+  },
+  {
+   "title": "Trump , Xi and Putin hold historic trilateral meeting",
+   "url": "https://www.wdbj7.com/2026/11/19/nuclear-arms-ending-wars-iran-ukraine-top-agenda-trump-xi-putin-meeting/",
+   "domain": "wdbj7.com",
+   "seendate": "20261119T171500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Is another US - Iran war looming ? ",
-   "url": "http://www.middleeaststar.com/news/279440849/is-another-us-iran-war-looming",
-   "domain": "middleeaststar.com",
-   "seendate": "20261118T173000Z",
-   "sourcecountry": "Syria"
+   "title": "Poland Tusk : It doesnt look probable that Russia will be ready to negotiate peace before spring",
+   "url": "https://investinglive.com/news/poland-s-tusk-it-doesn-t-look-probable-that-russia-will-be-ready-to-negotiate-peace-before-spring/",
+   "domain": "investinglive.com",
+   "seendate": "20261119T171500Z",
+   "sourcecountry": ""
+  },
+  {
+   "title": "Trump , Xi and Putin hold historic trilateral meeting",
+   "url": "https://www.knoe.com/2026/11/19/nuclear-arms-ending-wars-iran-ukraine-top-agenda-trump-xi-putin-meeting/",
+   "domain": "knoe.com",
+   "seendate": "20261119T171500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "No major breakthroughs as Trump , Xi and Putin sit down for historic meeting",
+   "url": "https://www.elystandard.co.uk/news/national/26745380.no-major-breakthroughs-trump-xi-putin-sit-historic-meeting/",
+   "domain": "elystandard.co.uk",
+   "seendate": "20261119T171500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "At historic summit , Xi and Putin share global stage with weakened Trump",
+   "url": "https://www.adn.com/nation-world/2026/11/19/at-historic-summit-xi-and-putin-share-global-stage-with-weakened-trump/",
+   "domain": "adn.com",
+   "seendate": "20261119T171500Z",
+   "sourcecountry": "United States"
   }
  ]
 }
