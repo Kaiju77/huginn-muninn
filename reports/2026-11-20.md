@@ -29,7 +29,7 @@ To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-20 15:43 UTC, covering the previous 36 hours.
+Fetched 2026-11-20 18:56 UTC, covering the previous 36 hours.
 
 - [Iran rejects Trump bioweapons claims , warns against repeat of disproved allegations that Iraq had WMD](https://tribune.com.pk/story/2641331/iran-rejects-trumps-bioweapons-claims-warns-against-repeat-of-disproved-allegations) (tribune.com.pk)
 - [IEA warns of lasting Hormuz shock , hails India clean push in 2026 outlook](https://www.hindustantimes.com/india-news/iea-warns-of-lasting-hormuz-shock-hails-india-s-clean-push-in-2026-outlook-101795152562692.html) (hindustantimes.com)
