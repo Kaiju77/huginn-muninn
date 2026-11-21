@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-20
+# Daily market brief, 2026-11-21
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -24,20 +24,21 @@ AI screen unavailable today; the keyword screen was used (an escalation word plu
 **Possible new events (need your approval):**
 
 - `c-20261120-yemen-red-sea`: [KSA : Riyadh tower hit in Houthi strike](https://www.gdnonline.com:443/Details/1413395) (7 sites)
+- `c-20261121-iran`: [IRGC claims downing of US MQ - 9 drone over Strait of Hormuz](https://news.webindia123.com/news/Articles/World/20261121/4522619.html) (4 sites)
 
 To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-20 18:56 UTC, covering the previous 36 hours.
+Fetched 2026-11-21 14:50 UTC, covering the previous 36 hours.
 
-- [Iran rejects Trump bioweapons claims , warns against repeat of disproved allegations that Iraq had WMD](https://tribune.com.pk/story/2641331/iran-rejects-trumps-bioweapons-claims-warns-against-repeat-of-disproved-allegations) (tribune.com.pk)
-- [IEA warns of lasting Hormuz shock , hails India clean push in 2026 outlook](https://www.hindustantimes.com/india-news/iea-warns-of-lasting-hormuz-shock-hails-india-s-clean-push-in-2026-outlook-101795152562692.html) (hindustantimes.com)
-- [Oil Prices Rebound as Houthi Attacks Reignite Middle East Supply Fears](https://oilprice.com/Latest-Energy-News/World-News/Oil-Prices-Rebound-as-Houthi-Attacks-Reignite-Middle-East-Supply-Fears.html) (oilprice.com)
-- [VLCC Freight Rates Plunge 64 &#37; from October Peak as Geopolitical Risk Premium Unwinds &#124; Peak Oil News and Message Boards](https://peakoil.com/production/vlcc-freight-rates-plunge-64-from-october-peak-as-geopolitical-risk-premium-unwinds) (peakoil.com)
-- [Singapore energy security : Diversification and natural gas](https://www.straitstimes.com/singapore/environment/diversifying-energy-sources-and-fuel-suppliers-key-to-self-sufficiency-in-spore-tan-see-leng) (straitstimes.com)
-- [Oil prices gain as Houthi attacks on Riyadh raise supply concerns](https://tribune.com.pk/story/2641333/oil-prices-gain-as-houthi-attacks-on-riyadh-raise-supply-concerns) (tribune.com.pk)
-- [Europe Arctic Pivot : Norway Hammerfest Becomes the Bottleneck for Supply Diversification](https://english.pravda.ru/news/business/173630-norway-arctic-lng-hammerfest-constraint/) (english.pravda.ru)
-- [Iraq Risky Standoff : Government vs . Iran - Allied Militias](https://www.oneindia.com/international/iraqs-risky-standoff-government-vs-iran-allied-militias-8264753.html) (oneindia.com)
+- [Briton swims in Strait of Hormuz to highlight environmental cost of war](https://www.penarthtimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/) (penarthtimes.co.uk)
+- [Global Oil Market Heads Towards Surplus , Crude Prices May Fall To $70 By 2027](https://www.businessworld.in/article/global-oil-market-heads-towards-surplus-crude-prices-may-fall-to-70-by-2027-634643) (businessworld.in)
+- [Man swims in Strait of Hormuz to highlight Iran war impact](https://www.wdsu.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133) (wdsu.com)
+- [Iranian Regime Says It Has No Choice but to Break US Blockade as 14 Oil Tankers Prepare to Challenge Restrictions](https://www.arabtimesonline.com/news/iranian-regime-says-it-has-no-choice-but-to-break-us-blockade-as-14-oil-tankers-prepare-to-challenge-restrictions/) (arabtimesonline.com)
+- [Norway pours €2bn into air defence](https://www.thebarentsobserver.com/security/norway-pours-2bn-into-air-defence/462411) (thebarentsobserver.com)
+- [Ominous reversal ! Iran issues nuclear ultimatum against US after downing 58 MQ drones as F - 16 sends SOS](https://www.bankingnews.gr/diethni/articles/912456/ominous-reversal-iran-issues-nuclear-ultimatum-against-us-after-downing-58-mq-drones-as-f-16-sends-sos) (bankingnews.gr)
+- [Strait of Hormuz attacks have increased to highest level since Iran war began](https://www.kake.com/news/national/strait-of-hormuz-attacks-have-increased-to-highest-level-since-iran-war-began/article_a4749f3d-3247-4907-a39d-6795d12d82f0.html) (kake.com)
+- [Uganda has waited 20 years for oil , but can it make the wait worthwhile ?](https://www.independent.co.ug/uganda-has-waited-20-years-for-oil-but-can-it-make-the-wait-worthwhile/) (independent.co.ug)
 
 Headlines from the same day are context. They do not prove why a price moved.
