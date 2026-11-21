@@ -30,15 +30,15 @@ To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-21 14:50 UTC, covering the previous 36 hours.
+Fetched 2026-11-21 17:47 UTC, covering the previous 36 hours.
 
-- [Briton swims in Strait of Hormuz to highlight environmental cost of war](https://www.penarthtimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/) (penarthtimes.co.uk)
+- [Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news](http://www.idahopress.com/ap_news/us/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_d69706d0-0aa1-5a72-85d7-55f28dbbb892.html) (idahopress.com)
+- [Briton swims in Strait of Hormuz to highlight environmental cost of war](https://www.basingstokegazette.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/) (basingstokegazette.co.uk)
+- [Reported Hormuz attacks hit wartime highs . Oil prices fall anyway . · Digg](https://digg.com/world-business/hk32yb03) (digg.com)
+- [Gas prices plummet , offering relief - WestCentralOnline : West Central Saskatchewan latest news , sports , weather , community events .](https://westcentralonline.com/articles/gas-prices-plummet-offering-relief) (westcentralonline.com)
+- [Rickards : Hard Truths On Iran And Ukraine](http://www.zerohedge.com/geopolitical/rickards-hard-truths-iran-and-ukraine) (zerohedge.com)
+- [Iran says oil tanker catches fire after hitting mine in Strait of Hormuz](https://aa.com.tr/en/middle-east/iran-says-oil-tanker-catches-fire-after-hitting-mine-in-strait-of-hormuz/4133044) (aa.com.tr)
 - [Global Oil Market Heads Towards Surplus , Crude Prices May Fall To $70 By 2027](https://www.businessworld.in/article/global-oil-market-heads-towards-surplus-crude-prices-may-fall-to-70-by-2027-634643) (businessworld.in)
 - [Man swims in Strait of Hormuz to highlight Iran war impact](https://www.wdsu.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133) (wdsu.com)
-- [Iranian Regime Says It Has No Choice but to Break US Blockade as 14 Oil Tankers Prepare to Challenge Restrictions](https://www.arabtimesonline.com/news/iranian-regime-says-it-has-no-choice-but-to-break-us-blockade-as-14-oil-tankers-prepare-to-challenge-restrictions/) (arabtimesonline.com)
-- [Norway pours €2bn into air defence](https://www.thebarentsobserver.com/security/norway-pours-2bn-into-air-defence/462411) (thebarentsobserver.com)
-- [Ominous reversal ! Iran issues nuclear ultimatum against US after downing 58 MQ drones as F - 16 sends SOS](https://www.bankingnews.gr/diethni/articles/912456/ominous-reversal-iran-issues-nuclear-ultimatum-against-us-after-downing-58-mq-drones-as-f-16-sends-sos) (bankingnews.gr)
-- [Strait of Hormuz attacks have increased to highest level since Iran war began](https://www.kake.com/news/national/strait-of-hormuz-attacks-have-increased-to-highest-level-since-iran-war-began/article_a4749f3d-3247-4907-a39d-6795d12d82f0.html) (kake.com)
-- [Uganda has waited 20 years for oil , but can it make the wait worthwhile ?](https://www.independent.co.ug/uganda-has-waited-20-years-for-oil-but-can-it-make-the-wait-worthwhile/) (independent.co.ug)
 
 Headlines from the same day are context. They do not prove why a price moved.
