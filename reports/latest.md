@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-21
+# Daily market brief, 2026-11-22
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -23,22 +23,22 @@ AI screen unavailable today; the keyword screen was used (an escalation word plu
 
 **Possible new events (need your approval):**
 
-- `c-20261120-yemen-red-sea`: [KSA : Riyadh tower hit in Houthi strike](https://www.gdnonline.com:443/Details/1413395) (7 sites)
 - `c-20261121-iran`: [IRGC claims downing of US MQ - 9 drone over Strait of Hormuz](https://news.webindia123.com/news/Articles/World/20261121/4522619.html) (4 sites)
+- `c-20261122-israel`: [Israeli opposition leader condemns suspected settler attacks as terrorism , and other Mideast news](https://www.clickorlando.com/news/world/2026/11/22/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/) (3 sites)
 
 To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-21 17:47 UTC, covering the previous 36 hours.
+Fetched 2026-11-22 14:46 UTC, covering the previous 36 hours.
 
-- [Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news](http://www.idahopress.com/ap_news/us/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_d69706d0-0aa1-5a72-85d7-55f28dbbb892.html) (idahopress.com)
-- [Briton swims in Strait of Hormuz to highlight environmental cost of war](https://www.basingstokegazette.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/) (basingstokegazette.co.uk)
-- [Reported Hormuz attacks hit wartime highs . Oil prices fall anyway . · Digg](https://digg.com/world-business/hk32yb03) (digg.com)
-- [Gas prices plummet , offering relief - WestCentralOnline : West Central Saskatchewan latest news , sports , weather , community events .](https://westcentralonline.com/articles/gas-prices-plummet-offering-relief) (westcentralonline.com)
-- [Rickards : Hard Truths On Iran And Ukraine](http://www.zerohedge.com/geopolitical/rickards-hard-truths-iran-and-ukraine) (zerohedge.com)
-- [Iran says oil tanker catches fire after hitting mine in Strait of Hormuz](https://aa.com.tr/en/middle-east/iran-says-oil-tanker-catches-fire-after-hitting-mine-in-strait-of-hormuz/4133044) (aa.com.tr)
-- [Global Oil Market Heads Towards Surplus , Crude Prices May Fall To $70 By 2027](https://www.businessworld.in/article/global-oil-market-heads-towards-surplus-crude-prices-may-fall-to-70-by-2027-634643) (businessworld.in)
-- [Man swims in Strait of Hormuz to highlight Iran war impact](https://www.wdsu.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133) (wdsu.com)
+- [UAE Chambers discusses strengthening trade , investment partnerships with South Africa](http://www.kenyastar.com/news/279448783/uae-chambers-discusses-strengthening-trade-investment-partnerships-with-south-africa) (kenyastar.com)
+- [Israeli opposition leader condemns suspected settler attacks as terrorism , and other Mideast news](https://www.wellandtribune.ca/news/world/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/article_d30f6b91-c3a7-515d-aa17-45a903a953bf.html) (wellandtribune.ca)
+- [Iraq oil smuggling issues : Where do they come from ?](http://www.jpost.com/middle-east/iran-news/article-915675) (jpost.com)
+- [Houthi attacks complicate Trump push for Saudi nuclear deal](https://www.middle-east-online.com/en/houthi-attacks-complicate-trump%E2%80%99s-push-saudi-nuclear-deal) (middle-east-online.com)
+- [Iraq moves to replace combat patrols with regular police](https://www.middle-east-online.com/en/iraq-moves-replace-combat-patrols-regular-police) (middle-east-online.com)
+- [Bahrain says Iran struck industrial site as tankers hit in Hormuz](https://www.enca.com/business/bahrain-says-iran-struck-industrial-site-tankers-hit-hormuz) (enca.com)
+- [Doug Casey On The Coming Collapse Of Saudi Arabia , And What It Means For The Petrodollar](http://www.zerohedge.com/energy/doug-casey-coming-collapse-saudi-arabia-and-what-it-means-petrodollar) (zerohedge.com)
+- [As war engulfs the Strait of Hormuz , one swimmer is fighting to protect its wildlife](https://www.sbs.com.au/news/article/man-swims-across-the-strait-of-hormuz-to-protect-wildlife/sucyype2c) (sbs.com.au)
 
 Headlines from the same day are context. They do not prove why a price moved.

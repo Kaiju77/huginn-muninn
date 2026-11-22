@@ -1,7 +1,217 @@
 {
- "fetched_at": "2026-11-21T17:47:54+00:00",
+ "fetched_at": "2026-11-22T14:46:22+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
+  {
+   "title": "COP31 UN climate talks edge closer to final deal",
+   "url": "https://www.canberratimes.com.au/story/9395866/cop31-un-climate-talks-edge-closer-to-final-deal/",
+   "domain": "canberratimes.com.au",
+   "seendate": "20261122T123000Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "COP31 climate talks close to final deal , says summit president",
+   "url": "https://bworldonline.com/world/2026/11/22/795713/cop31-climate-talks-close-to-final-deal-says-summit-president/",
+   "domain": "bworldonline.com",
+   "seendate": "20261122T123000Z",
+   "sourcecountry": "Philippines"
+  },
+  {
+   "title": "UAE Chambers discusses strengthening trade , investment partnerships with South Africa",
+   "url": "http://www.kenyastar.com/news/279448783/uae-chambers-discusses-strengthening-trade-investment-partnerships-with-south-africa",
+   "domain": "kenyastar.com",
+   "seendate": "20261122T123000Z",
+   "sourcecountry": "Kenya"
+  },
+  {
+   "title": "Israeli opposition leader condemns suspected settler attacks as  terrorism , and other Mideast news",
+   "url": "https://www.wellandtribune.ca/news/world/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/article_d30f6b91-c3a7-515d-aa17-45a903a953bf.html",
+   "domain": "wellandtribune.ca",
+   "seendate": "20261122T123000Z",
+   "sourcecountry": "Canada"
+  },
+  {
+   "title": "Turkey aids Somalia in breaking ground on new naval facilities",
+   "url": "http://www.jpost.com/international/article-915680",
+   "domain": "jpost.com",
+   "seendate": "20261122T123000Z",
+   "sourcecountry": "Israel"
+  },
+  {
+   "title": "Iraq oil smuggling issues : Where do they come from ? ",
+   "url": "http://www.jpost.com/middle-east/iran-news/article-915675",
+   "domain": "jpost.com",
+   "seendate": "20261122T123000Z",
+   "sourcecountry": "Israel"
+  },
+  {
+   "title": "UN climate talks close in on deal that accepts 1 . 5C overshoot",
+   "url": "https://www.middle-east-online.com/en/un-climate-talks-close-deal-accepts-15c-overshoot",
+   "domain": "middle-east-online.com",
+   "seendate": "20261122T103000Z",
+   "sourcecountry": "Iraq"
+  },
+  {
+   "title": "Israeli opposition leader condemns suspected settler attacks as  terrorism , and other Mideast news",
+   "url": "https://www.clickorlando.com/news/world/2026/11/22/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/",
+   "domain": "clickorlando.com",
+   "seendate": "20261122T103000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "COP31 climate deal hangs in the balance as time runs out",
+   "url": "https://wiky.com/2026/11/21/cop31-climate-talks-close-to-final-deal-says-summit-president/",
+   "domain": "wiky.com",
+   "seendate": "20261122T103000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Houthi attacks complicate Trump push for Saudi nuclear deal",
+   "url": "https://www.middle-east-online.com/en/houthi-attacks-complicate-trump%E2%80%99s-push-saudi-nuclear-deal",
+   "domain": "middle-east-online.com",
+   "seendate": "20261122T103000Z",
+   "sourcecountry": "Iraq"
+  },
+  {
+   "title": "Israeli opposition leader condemns suspected settler attacks as  terrorism , and other Mideast news",
+   "url": "https://www.yakimaherald.com/news/nation_and_world/nation/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/article_0530041d-b7be-5cd3-afaf-ac81ef03bc68.html",
+   "domain": "yakimaherald.com",
+   "seendate": "20261122T103000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Iraq moves to replace combat patrols with regular police",
+   "url": "https://www.middle-east-online.com/en/iraq-moves-replace-combat-patrols-regular-police",
+   "domain": "middle-east-online.com",
+   "seendate": "20261122T103000Z",
+   "sourcecountry": "Iraq"
+  },
+  {
+   "title": "What drove the US midterm elections outcome ? - Jamaica Observer",
+   "url": "https://www.jamaicaobserver.com/2026/11/22/drove-us-midterm-elections-outcome/",
+   "domain": "jamaicaobserver.com",
+   "seendate": "20261122T073000Z",
+   "sourcecountry": "Jamaica"
+  },
+  {
+   "title": "News",
+   "url": "https://www.pakistanlink.org/Headlines/Nov26/20/11.htm",
+   "domain": "pakistanlink.org",
+   "seendate": "20261122T073000Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "Cop31 live : A new draft deal on the table as talks go into final hours",
+   "url": "https://www.theguardian.com/environment/live/2026/nov/22/cop31-climate-crisis-talks-turkey-latest-news-updates",
+   "domain": "theguardian.com",
+   "seendate": "20261122T073000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
+   "url": "https://isp.netscape.com:443/news/world/story/0001/20261122/f6e36c4caf13ec6fed57c9f077cbd067",
+   "domain": "isp.netscape.com",
+   "seendate": "20261122T073000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Bahrain says Iran struck industrial site as tankers hit in Hormuz",
+   "url": "https://www.enca.com/business/bahrain-says-iran-struck-industrial-site-tankers-hit-hormuz",
+   "domain": "enca.com",
+   "seendate": "20261122T073000Z",
+   "sourcecountry": "South Africa"
+  },
+  {
+   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
+   "url": "http://www.sitkasentinel.com/stories/turkeys-final-draft-at-un-climate-talks-doesnt-mention-the-fossil-fuels-that-cause-global-warming,188094",
+   "domain": "sitkasentinel.com",
+   "seendate": "20261122T073000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Doug Casey On The Coming Collapse Of Saudi Arabia , And What It Means For The Petrodollar",
+   "url": "http://www.zerohedge.com/energy/doug-casey-coming-collapse-saudi-arabia-and-what-it-means-petrodollar",
+   "domain": "zerohedge.com",
+   "seendate": "20261122T053000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
+   "url": "https://www.wsls.com/news/world/2026/11/22/turkeys-final-draft-at-un-climate-talks-doesnt-mention-the-fossil-fuels-that-cause-global-warming/",
+   "domain": "wsls.com",
+   "seendate": "20261122T053000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
+   "url": "https://www.yakimaherald.com/news/nation_and_world/world/turkeys-final-draft-at-un-climate-talks-doesnt-mention-the-fossil-fuels-that-cause-global/article_98f9e8c1-ea58-5d82-b177-8b69270feb00.html",
+   "domain": "yakimaherald.com",
+   "seendate": "20261122T053000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "As war engulfs the Strait of Hormuz , one swimmer is fighting to protect its wildlife",
+   "url": "https://www.sbs.com.au/news/article/man-swims-across-the-strait-of-hormuz-to-protect-wildlife/sucyype2c",
+   "domain": "sbs.com.au",
+   "seendate": "20261122T003000Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Iran attacks US bases in Bahrain as its tankers get ready to break the US blockade",
+   "url": "https://www.euronews.com/2026/11/21/iran-attacks-us-bases-in-bahrain-as-its-tankers-get-ready-to-break-the-us-blockade",
+   "domain": "euronews.com",
+   "seendate": "20261122T003000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "COP31 climate summit risks failure as talks go deep into overtime",
+   "url": "https://www.cnbc.com/2026/11/21/cop31-climate-summit-risks-failure-as-talks-go-deep-into-overtime.html",
+   "domain": "cnbc.com",
+   "seendate": "20261122T003000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Dangote Group unveils multi ‑ billion ‑ dollar projects across East Africa",
+   "url": "https://kenya-today.com/report-dangote-group-unveils-multibilliondollar-projects-across-east-africa-30996/",
+   "domain": "kenya-today.com",
+   "seendate": "20261121T203000Z",
+   "sourcecountry": "Kenya"
+  },
+  {
+   "title": "Rosebank oil field will not bring down bills , claims Energy Secretary",
+   "url": "https://www.telegraph.co.uk/news/2026/11/21/rosebank-oil-field-will-not-bring-down-bills-claims-energy/",
+   "domain": "telegraph.co.uk",
+   "seendate": "20261121T203000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Thanksgiving Gas Prices Could Break a Record Despite Recent Plunge",
+   "url": "https://oilprice.com/Latest-Energy-News/World-News/Thanksgiving-Gas-Prices-Could-Break-a-Record-Despite-Recent-Plunge.html",
+   "domain": "oilprice.com",
+   "seendate": "20261121T203000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Iran strikes tankers and Israeli hit on food truck in Gaza kills 3",
+   "url": "https://www.wdbo.com/news/world/iran-strikes-3/5DOQKPG6KUZP3LICC6KBHJWPF4/",
+   "domain": "wdbo.com",
+   "seendate": "20261121T203000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Energy firm profits hit £143 billion ahead of January 1 price cap rise",
+   "url": "https://www.birminghammail.co.uk/news/cost-of-living/energy-firm-profits-hit-143-34921742",
+   "domain": "birminghammail.co.uk",
+   "seendate": "20261121T203000Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Russian cargo ship bound for Kaliningrad hit by drones near Finland",
+   "url": "https://www.telegraph.co.uk/world-news/2026/11/21/russian-cargo-ship-bound-for-kaliningrad-hit-by-drones-near/",
+   "domain": "telegraph.co.uk",
+   "seendate": "20261121T203000Z",
+   "sourcecountry": "United Kingdom"
+  },
   {
    "title": "Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news",
    "url": "http://www.idahopress.com/ap_news/us/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_d69706d0-0aa1-5a72-85d7-55f28dbbb892.html",
@@ -176,356 +386,6 @@
    "domain": "goskagit.com",
    "seendate": "20261121T163000Z",
    "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.penarthtimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "penarthtimes.co.uk",
-   "seendate": "20261121T143000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.eppingforestguardian.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "eppingforestguardian.co.uk",
-   "seendate": "20261121T143000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Global Oil Market Heads Towards Surplus , Crude Prices May Fall To $70 By 2027",
-   "url": "https://www.businessworld.in/article/global-oil-market-heads-towards-surplus-crude-prices-may-fall-to-70-by-2027-634643",
-   "domain": "businessworld.in",
-   "seendate": "20261121T143000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Man swims in Strait of Hormuz to highlight Iran war impact",
-   "url": "https://www.wdsu.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133",
-   "domain": "wdsu.com",
-   "seendate": "20261121T143000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.wharfedaleobserver.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "wharfedaleobserver.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.thetottenhamindependent.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "thetottenhamindependent.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.surreycomet.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "surreycomet.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Man swims in Strait of Hormuz to highlight Iran war impact",
-   "url": "https://www.wtae.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133",
-   "domain": "wtae.com",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.ealingtimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "ealingtimes.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Iranian Regime Says It Has No Choice but to Break US Blockade as 14 Oil Tankers Prepare to Challenge Restrictions",
-   "url": "https://www.arabtimesonline.com/news/iranian-regime-says-it-has-no-choice-but-to-break-us-blockade-as-14-oil-tankers-prepare-to-challenge-restrictions/",
-   "domain": "arabtimesonline.com",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "Kuwait"
-  },
-  {
-   "title": "Africa : 13 july 2010 [ Little challenge as Tanzania leader seeks new term ] ",
-   "url": "https://burundi-agnews.org/africa-13-july-2010-little-challenge-as-tanzania-leader-seeks-new-term/",
-   "domain": "burundi-agnews.org",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "Burundi"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.cravenherald.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "cravenherald.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.irvinetimes.com/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "irvinetimes.com",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.leighjournal.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "leighjournal.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.eadt.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "eadt.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.halesowennews.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "halesowennews.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.southwalesargus.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "southwalesargus.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Man swims in Strait of Hormuz to highlight Iran war impact",
-   "url": "https://www.wvtm13.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133",
-   "domain": "wvtm13.com",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Man swims in Strait of Hormuz to highlight Iran war impact",
-   "url": "https://www.koco.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133",
-   "domain": "koco.com",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.enfieldindependent.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "enfieldindependent.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Cop31 climate talks overrun in dispute over final deal",
-   "url": "https://www.thenationalnews.com/news/mena/2026/11/21/cop31-climate-talks-overrun-in-dispute-over-final-deal/",
-   "domain": "thenationalnews.com",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": ""
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.burytimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "burytimes.co.uk",
-   "seendate": "20261121T133000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.newburytoday.co.uk/national/briton-swims-in-strait-of-hormuz-to-highlight-environmental-cost-of-war-174588/",
-   "domain": "newburytoday.co.uk",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Norway pours €2bn into air defence",
-   "url": "https://www.thebarentsobserver.com/security/norway-pours-2bn-into-air-defence/462411",
-   "domain": "thebarentsobserver.com",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "Russia"
-  },
-  {
-   "title": "As Trump basks in summit pomp , China Xi strengthens his hand",
-   "url": "https://tribune.com.pk/story/2641527/as-trump-basks-in-summit-pomp-chinas-xi-strengthens-his-hand",
-   "domain": "tribune.com.pk",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "Pakistan"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.newarkadvertiser.co.uk/national/briton-swims-in-strait-of-hormuz-to-highlight-environmental-cost-of-war-174588/",
-   "domain": "newarkadvertiser.co.uk",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Ominous reversal ! Iran issues nuclear ultimatum against US after downing 58 MQ drones as F - 16 sends SOS",
-   "url": "https://www.bankingnews.gr/diethni/articles/912456/ominous-reversal-iran-issues-nuclear-ultimatum-against-us-after-downing-58-mq-drones-as-f-16-sends-sos",
-   "domain": "bankingnews.gr",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "Greece"
-  },
-  {
-   "title": "Strait of Hormuz attacks have increased to highest level since Iran war began",
-   "url": "https://www.kake.com/news/national/strait-of-hormuz-attacks-have-increased-to-highest-level-since-iran-war-began/article_a4749f3d-3247-4907-a39d-6795d12d82f0.html",
-   "domain": "kake.com",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Uganda has waited 20 years for oil , but can it make the wait worthwhile ? ",
-   "url": "https://www.independent.co.ug/uganda-has-waited-20-years-for-oil-but-can-it-make-the-wait-worthwhile/",
-   "domain": "independent.co.ug",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "Uganda"
-  },
-  {
-   "title": "Man swims in Strait of Hormuz to highlight Iran war impact",
-   "url": "https://www.ksbw.com/article/lewis-pugh-strait-of-hormuz-swim-iran-war/74497133",
-   "domain": "ksbw.com",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "How They Voted : Colorado congressional votes for Nov . 13 - 19 , 2026",
-   "url": "https://www.reporterherald.com/2026/11/21/how-they-voted-colorado-congressional-votes-for-nov-13-19-2026/",
-   "domain": "reporterherald.com",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "US , Qatar intensify mediation efforts to end Iran conflict",
-   "url": "https://www.samaa.tv/2087360717-us-qatar-intensify-mediation-efforts-to-end-iran-conflict",
-   "domain": "samaa.tv",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "Pakistan"
-  },
-  {
-   "title": "How They Voted : Colorado congressional votes for Nov . 13 - 19 , 2026",
-   "url": "https://www.timescall.com/2026/11/21/how-they-voted-colorado-congressional-votes-for-nov-13-19-2026/",
-   "domain": "timescall.com",
-   "seendate": "20261121T123000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Arab News | The logic behind Saudi Arabia strategy",
-   "url": "https://www.arabnews.com/opinion/the-logic-behind-saudi-arabias-strategy-3013332",
-   "domain": "arabnews.com",
-   "seendate": "20261121T113000Z",
-   "sourcecountry": "Saudi Arabia"
-  },
-  {
-   "title": "Two Tankers Attacked in Strait of Hormuz",
-   "url": "https://english.aawsat.com/world/5343927-two-tankers-attacked-strait-hormuz",
-   "domain": "english.aawsat.com",
-   "seendate": "20261121T113000Z",
-   "sourcecountry": "Syria"
-  },
-  {
-   "title": "IRGC claims downing of US MQ - 9 drone over Strait of Hormuz",
-   "url": "https://news.webindia123.com/news/Articles/World/20261121/4522619.html",
-   "domain": "news.webindia123.com",
-   "seendate": "20261121T113000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Two Tanker Attack Incidents Reported Near Oman Khasab",
-   "url": "https://arynews.tv/two-tanker-attack-incidents-reported-near-omans-khasab-on-saturday-ukmto-says",
-   "domain": "arynews.tv",
-   "seendate": "20261121T103000Z",
-   "sourcecountry": "Pakistan"
-  },
-  {
-   "title": "  Operation Economic Outcast  Is Still in Full Force With This Latest Move",
-   "url": "https://townhall.com/news/cameron-arcand/2026/11/20/operation-economic-outcast-is-still-in-full-force-with-this-latest-move-n2686846",
-   "domain": "townhall.com",
-   "seendate": "20261121T064500Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Trump insists Iran wont make an  acceptable  deal as concerns grow about next steps",
-   "url": "https://www.wsls.com/news/politics/2026/11/20/trump-insists-iran-wont-make-an-acceptable-deal-as-concerns-grow-about-next-steps/",
-   "domain": "wsls.com",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "AI sell - off batters Wall Street ; S & P 500 enters correction , Nasdaq turns negative for year",
-   "url": "https://timesofindia.indiatimes.com/business/international-business/ai-sell-off-batters-wall-street-sp-500-enters-correction-nasdaq-turns-negative-for-year/articleshow/136041935.cms",
-   "domain": "timesofindia.indiatimes.com",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Ottawa , N . L . approve $14 - billion Bay du Nord offshore oil project",
-   "url": "https://edmontonjournal.com/energy/oil-and-gas/ottawa-newfoundland-and-labrador-approve-14-billion-bay-du-nord-offshore-oil-project",
-   "domain": "edmontonjournal.com",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "Canada"
-  },
-  {
-   "title": "S & P 500 sinks 3 . 7 % and the Nasdaq composite goes negative for the year",
-   "url": "https://www.wuwf.org/2026-11-20/s-p-500-sinks-3-7-and-the-nasdaq-composite-goes-negative-for-the-year",
-   "domain": "wuwf.org",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "  Iran tyrannical regime puts its own interests first : US Treasury chief slams Tehran over oil revenue crisis",
-   "url": "http://www.iraqsun.com/news/279446379/iran-tyrannical-regime-puts-its-own-interests-first-us-treasury-chief-slams-tehran-over-oil-revenue-crisis",
-   "domain": "iraqsun.com",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "Iraq"
-  },
-  {
-   "title": "S & P 500 sinks 3 . 7 % and the Nasdaq composite goes negative for the year",
-   "url": "https://www.wgcu.org/2026-11-20/s-p-500-sinks-3-7-and-the-nasdaq-composite-goes-negative-for-the-year",
-   "domain": "wgcu.org",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Trump , Xi , Putin Declaration Omits Ukraine ; Moscow Rejects NATO - Style Guarantee",
-   "url": "https://www.hngn.com/articles/273878/20261120/trump-xi-putin-issue-peace-declaration-that-omits-ukraine.htm",
-   "domain": "hngn.com",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "S & P 500 sinks 3 . 7 % and the Nasdaq composite goes negative for the year",
-   "url": "https://www.aspenpublicradio.org/2026-11-20/s-p-500-sinks-3-7-and-the-nasdaq-composite-goes-negative-for-the-year",
-   "domain": "aspenpublicradio.org",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "S & P 500 sinks 3 . 7 % and the Nasdaq composite goes negative for the year",
-   "url": "https://www.iowapublicradio.org/news-from-npr/2026-11-20/s-p-500-sinks-3-7-and-the-nasdaq-composite-goes-negative-for-the-year",
-   "domain": "iowapublicradio.org",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Fears growing of return to all - out war between US , Iran",
-   "url": "https://www.dailyadvertiser.com.au/story/9395697/fears-growing-of-return-to-all-out-war-between-us-iran/",
-   "domain": "dailyadvertiser.com.au",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "S & P 500 sinks 3 . 7 % and the Nasdaq composite goes negative for the year",
-   "url": "https://www.wkyufm.org/news/2026-11-20/s-p-500-sinks-3-7-and-the-nasdaq-composite-goes-negative-for-the-year",
-   "domain": "wkyufm.org",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "N . W . T . govt hints at relief measures aimed at countering high fuel prices",
-   "url": "https://www.cbc.ca/news/canada/north/nwt-heating-subsidies-2026-9.7430220",
-   "domain": "cbc.ca",
-   "seendate": "20261121T003000Z",
-   "sourcecountry": "Canada"
   }
  ]
 }
