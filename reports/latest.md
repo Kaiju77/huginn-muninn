@@ -30,8 +30,9 @@ To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-22 14:46 UTC, covering the previous 36 hours.
+Fetched 2026-11-22 18:04 UTC, covering the previous 36 hours.
 
+- [Libya eastern government suspects drone attack caused explosion on Russian ship](https://www.internazionale.it/ultime-notizie-reuters/2026/11/22/libya-s-eastern-government-suspects-drone-attack-caused-explosion-on-russian-ship-at-benghazi-port) (internazionale.it)
 - [UAE Chambers discusses strengthening trade , investment partnerships with South Africa](http://www.kenyastar.com/news/279448783/uae-chambers-discusses-strengthening-trade-investment-partnerships-with-south-africa) (kenyastar.com)
 - [Israeli opposition leader condemns suspected settler attacks as terrorism , and other Mideast news](https://www.wellandtribune.ca/news/world/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/article_d30f6b91-c3a7-515d-aa17-45a903a953bf.html) (wellandtribune.ca)
 - [Iraq oil smuggling issues : Where do they come from ?](http://www.jpost.com/middle-east/iran-news/article-915675) (jpost.com)
@@ -39,6 +40,5 @@ Fetched 2026-11-22 14:46 UTC, covering the previous 36 hours.
 - [Iraq moves to replace combat patrols with regular police](https://www.middle-east-online.com/en/iraq-moves-replace-combat-patrols-regular-police) (middle-east-online.com)
 - [Bahrain says Iran struck industrial site as tankers hit in Hormuz](https://www.enca.com/business/bahrain-says-iran-struck-industrial-site-tankers-hit-hormuz) (enca.com)
 - [Doug Casey On The Coming Collapse Of Saudi Arabia , And What It Means For The Petrodollar](http://www.zerohedge.com/energy/doug-casey-coming-collapse-saudi-arabia-and-what-it-means-petrodollar) (zerohedge.com)
-- [As war engulfs the Strait of Hormuz , one swimmer is fighting to protect its wildlife](https://www.sbs.com.au/news/article/man-swims-across-the-strait-of-hormuz-to-protect-wildlife/sucyype2c) (sbs.com.au)
 
 Headlines from the same day are context. They do not prove why a price moved.

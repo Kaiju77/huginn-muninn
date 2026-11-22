@@ -1,7 +1,14 @@
 {
- "fetched_at": "2026-11-22T14:46:22+00:00",
+ "fetched_at": "2026-11-22T18:04:41+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
+  {
+   "title": "Libya eastern government suspects drone attack caused explosion on Russian ship",
+   "url": "https://www.internazionale.it/ultime-notizie-reuters/2026/11/22/libya-s-eastern-government-suspects-drone-attack-caused-explosion-on-russian-ship-at-benghazi-port",
+   "domain": "internazionale.it",
+   "seendate": "20261122T163000Z",
+   "sourcecountry": "Italy"
+  },
   {
    "title": "COP31 UN climate talks edge closer to final deal",
    "url": "https://www.canberratimes.com.au/story/9395866/cop31-un-climate-talks-edge-closer-to-final-deal/",
@@ -211,181 +218,6 @@
    "domain": "telegraph.co.uk",
    "seendate": "20261121T203000Z",
    "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news",
-   "url": "http://www.idahopress.com/ap_news/us/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_d69706d0-0aa1-5a72-85d7-55f28dbbb892.html",
-   "domain": "idahopress.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.basingstokegazette.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "basingstokegazette.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.midweekherald.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "midweekherald.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.london-now.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "london-now.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": ""
-  },
-  {
-   "title": "Inflation , economic growth and the mood of US consumers in focus this week",
-   "url": "http://www.rockymounttelegram.com/news/national/inflation-economic-growth-and-the-mood-of-us-consumers-in-focus-this-week/article_3bcbe7a7-4499-5f7b-9cca-fe36c6708ee1.html",
-   "domain": "rockymounttelegram.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.braintreeandwithamtimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "braintreeandwithamtimes.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Reported Hormuz attacks hit wartime highs . Oil prices fall anyway . · Digg",
-   "url": "https://digg.com/world-business/hk32yb03",
-   "domain": "digg.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "COP31 climate summit risks failure as talks go deep into overtime",
-   "url": "https://kelo.com/2026/11/21/cop31-climate-summit-risks-failure-as-talks-go-deep-into-overtime/",
-   "domain": "kelo.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Inflation , economic growth and the mood of US consumers in focus this week",
-   "url": "http://www.cecildaily.com/ap/nation/inflation-economic-growth-and-the-mood-of-us-consumers-in-focus-this-week/article_eecddea8-8262-5331-98e9-3e6b2de185d6.html",
-   "domain": "cecildaily.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Gas prices plummet , offering relief - WestCentralOnline : West Central Saskatchewan latest news , sports , weather , community events . ",
-   "url": "https://westcentralonline.com/articles/gas-prices-plummet-offering-relief",
-   "domain": "westcentralonline.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "Canada"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.countytimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "countytimes.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.northsomersettimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "northsomersettimes.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news",
-   "url": "https://www.wboc.com/news/international/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_01da6b4b-0bb9-5d63-96fd-a41f63b4e2d6.html",
-   "domain": "wboc.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Rickards : Hard Truths On Iran And Ukraine",
-   "url": "http://www.zerohedge.com/geopolitical/rickards-hard-truths-iran-and-ukraine",
-   "domain": "zerohedge.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Iran says oil tanker catches fire after hitting mine in Strait of Hormuz",
-   "url": "https://aa.com.tr/en/middle-east/iran-says-oil-tanker-catches-fire-after-hitting-mine-in-strait-of-hormuz/4133044",
-   "domain": "aa.com.tr",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "Turkey"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.bridgwatermercury.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "bridgwatermercury.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.cambstimes.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "cambstimes.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Inflation , economic growth and the mood of US consumers in focus this week",
-   "url": "http://www.idahopress.com/ap_news/us/inflation-economic-growth-and-the-mood-of-us-consumers-in-focus-this-week/article_3d93bb0f-90c1-5cf1-85cc-e186d1d6df58.html",
-   "domain": "idahopress.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Inflation , economic growth and the mood of US consumers in focus this week",
-   "url": "http://www.bozemandailychronicle.com/wire/business/inflation-economic-growth-and-the-mood-of-us-consumers-in-focus-this-week/article_03e18def-5aad-5ddb-bd47-40c10816e2ae.html",
-   "domain": "bozemandailychronicle.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Three things that will flip the switch on our economic recovery",
-   "url": "https://www.nzherald.co.nz/business/three-things-that-will-flip-the-switch-on-our-economic-recovery-liam-dann/premium/ASWXILW7P5HMFO53JXAZCAPSW4/",
-   "domain": "nzherald.co.nz",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "New Zealand"
-  },
-  {
-   "title": "Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news",
-   "url": "http://www.rockymounttelegram.com/news/national/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_cf8214ba-1461-56d3-9213-344895893f91.html",
-   "domain": "rockymounttelegram.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news",
-   "url": "http://www.bozemandailychronicle.com/wire/news/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_ccf9db54-917b-5716-ac6a-ccc60f72baa9.html",
-   "domain": "bozemandailychronicle.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Iran strikes 3 tankers as it shows off missile launchers , and other Mideast news",
-   "url": "http://www.cecildaily.com/ap/nation/iran-strikes-3-tankers-as-it-shows-off-missile-launchers-and-other-mideast-news/article_f349f73f-8b70-55f7-be84-d7ac14708fc6.html",
-   "domain": "cecildaily.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Briton swims in Strait of Hormuz to highlight  environmental cost of war  ",
-   "url": "https://www.nwemail.co.uk/news/national/26750618.briton-swims-strait-hormuz-highlight-environmental-cost-war/",
-   "domain": "nwemail.co.uk",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Inflation , economic growth and the mood of US consumers in focus this week",
-   "url": "http://www.goskagit.com/news/ap_business/inflation-economic-growth-and-the-mood-of-us-consumers-in-focus-this-week/article_d6af9b01-7459-57ab-8c69-26e46cb2c7bf.html",
-   "domain": "goskagit.com",
-   "seendate": "20261121T163000Z",
-   "sourcecountry": "United States"
   }
  ]
 }
