@@ -1,7 +1,133 @@
 {
- "fetched_at": "2026-11-24T18:02:36+00:00",
+ "fetched_at": "2026-11-24T20:54:29+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
+  {
+   "title": "Nearly A Dozen Injured After Houthi Missile Strikes Tallest Tower In Saudi Capital",
+   "url": "https://www.zerohedge.com/geopolitical/nearly-dozen-injured-after-houthi-missile-strikes-tallest-tower-saudi-capital",
+   "domain": "zerohedge.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "The U . N . Climate Talks Broke Down . Now What ? - Governor Wind Energy Coalition",
+   "url": "https://governorswindenergycoalition.org/the-u-n-climate-talks-broke-down-now-what/",
+   "domain": "governorswindenergycoalition.org",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Houthis wont seize Aden , Yemeni government forces say",
+   "url": "https://www.al-monitor.com/originals/2026/11/houthis-wont-seize-aden-yemeni-government-forces-say",
+   "domain": "al-monitor.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Israel"
+  },
+  {
+   "title": "Iraq Al - Zaidi Emerges as Risk - Taker in Showdowns Against Factions and Kurds",
+   "url": "https://english.aawsat.com/features/5345209-iraq%E2%80%99s-al-zaidi-emerges-risk-taker-showdowns-against-factions-and-kurds",
+   "domain": "english.aawsat.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Syria"
+  },
+  {
+   "title": "Eleven hurt in second Houthi strike within days on Riyadh tallest tower",
+   "url": "https://www.jpost.com/middle-east/article-916001",
+   "domain": "jpost.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Israel"
+  },
+  {
+   "title": "Houthi rebels close in on Aden as Yemeni forces dig in behind a fortified line",
+   "url": "https://www.nvdaily.com/associated_press_national/houthi-rebels-close-in-on-aden-as-yemeni-forces-dig-in-behind-a-fortified-line/article_5e6f5698-c229-5879-9bd9-b90d47fdd448.html",
+   "domain": "nvdaily.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Nvidia , Anthropic and other AI stocks get back to tumbling and drag the US market lower",
+   "url": "https://www.nvdaily.com/associated_press_national/nvidia-anthropic-and-other-ai-stocks-get-back-to-tumbling-and-drag-the-us-market/article_6d3d6ec1-8df1-5e7f-b2f8-e337756ca1ca.html",
+   "domain": "nvdaily.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Unprecedented global disruption is here",
+   "url": "http://www.timberjay.com/stories/unprecedented-global-disruption-is-here,51020",
+   "domain": "timberjay.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "3 Non - AI Stocks to Buy for Long - Term Dividends and Stability",
+   "url": "https://www.fool.com/investing/2026/11/24/3-non-ai-stocks-to-buy-for-long-term-dividends-and-stability/",
+   "domain": "fool.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Nvidiaaargh ! > Nvidiaaah ? ",
+   "url": "https://www.zerohedge.com/markets/nvidiaaargh-nvidiaaah",
+   "domain": "zerohedge.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "At least 11 injured in Houthi attack on Riyadh tallest skyscraper",
+   "url": "https://www.dailysabah.com/world/mid-east/at-least-11-injured-in-houthi-attack-on-riyadhs-tallest-skyscraper",
+   "domain": "dailysabah.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Turkey"
+  },
+  {
+   "title": "Finding leftover candle boxes from Chanukahs past a  real little miracle  - Israel & Jewish News",
+   "url": "https://www.jns.org/news/u-s-news/finding-leftover-candle-boxes-from-chanukahs-past-a-real-little-miracle",
+   "domain": "jns.org",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Israel"
+  },
+  {
+   "title": "PODCAST : Pentagon takes aim at Canadian defence as trade tensions mount",
+   "url": "https://www.620ckrm.com/2026/11/24/podcast-pentagon-takes-aim-at-canadian-defence-as-trade-tensions-mount/",
+   "domain": "620ckrm.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Canada"
+  },
+  {
+   "title": "Iraqi MP Suspected of Smuggling Accuses al - Nujaba Faction of Seizing Oil Pipeline",
+   "url": "https://english.aawsat.com/arab-world/5345205-iraqi-mp-suspected-smuggling-accuses-al-nujaba-faction-seizing-oil-pipeline",
+   "domain": "english.aawsat.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Syria"
+  },
+  {
+   "title": "Iraqi Kurds close ranks as Baghdad moves to seize oil , border control",
+   "url": "https://www.al-monitor.com/originals/2026/11/iraqi-kurds-close-ranks-baghdad-moves-seize-oil-border-control",
+   "domain": "al-monitor.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Israel"
+  },
+  {
+   "title": "President Trump Is Considering Assassinating Senior Iranian Officials to Bring an End to the War",
+   "url": "https://wcbm.com/national-headline/president-trump-is-considering-assassinating-senior-iranian-officials-to-bring-an-end-to-the-war/",
+   "domain": "wcbm.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Russia to respond to Ukraine refinery attacks : Putin",
+   "url": "https://www.perthnow.com.au/news/conflict/russia-to-respond-to-ukraines-refinery-attacks-putin-c-23208500",
+   "domain": "perthnow.com.au",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Arab News | Iraqi PM orders ministry to manage oilfields in areas under Kurdish control , Kurds reject move",
+   "url": "https://www.arabnews.com/middle-east/iraqi-pm-cracks-down-on-kurds-control-of-oil-fields-kurds-reject-risky-move-3013810",
+   "domain": "arabnews.com",
+   "seendate": "20261124T201500Z",
+   "sourcecountry": "Saudi Arabia"
+  },
   {
    "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO",
    "url": "https://mymotherlode.com/news/national/11335708/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidias-ceo.html",
@@ -400,132 +526,6 @@
    "domain": "inverelltimes.com.au",
    "seendate": "20261124T044500Z",
    "sourcecountry": "Australia"
-  },
-  {
-   "title": "SBS News in Easy English 24 November 2026",
-   "url": "https://www.sbs.com.au/news/podcast-episode/sbs-news-in-easy-english-24-november-2026/s33yrgq2h",
-   "domain": "sbs.com.au",
-   "seendate": "20261124T044500Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "U . S . and Qatar Agree to Strengthen Cooperation in Defense , Trade , and Technology – Chennaionline",
-   "url": "https://www.chennaionline.com/news/us-and-qatar-agree-to-strengthen-cooperation-in-defense-trade-and-technology/",
-   "domain": "chennaionline.com",
-   "seendate": "20261124T044500Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Shipping Corporation of India Opens Tenders for $3B Fleet Expansion",
-   "url": "https://maritime-executive.com/article/shipping-corporation-of-india-opens-tenders-for-3b-fleet-expansion",
-   "domain": "maritime-executive.com",
-   "seendate": "20261124T044500Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Iraq Completes Kirkuk Oil Smuggling Probe Amid Widening Crackdown",
-   "url": "https://www.eurasiareview.com/24112026-iraq-completes-kirkuk-oil-smuggling-probe-amid-widening-crackdown/",
-   "domain": "eurasiareview.com",
-   "seendate": "20261124T044500Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "US Oil Fund Falls 4 . 49 % as Supply Returns",
-   "url": "https://www.riotimesonline.com/oil-markets-latam-monday-november-23-2026/",
-   "domain": "riotimesonline.com",
-   "seendate": "20261124T044500Z",
-   "sourcecountry": "Brazil"
-  },
-  {
-   "title": "Tunisia looks to expand olive oil presence in Korea",
-   "url": "https://www.koreaherald.com/article/10947452",
-   "domain": "koreaherald.com",
-   "seendate": "20261124T044500Z",
-   "sourcecountry": "South Korea"
-  },
-  {
-   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
-   "url": "https://www.ulladullatimes.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
-   "domain": "ulladullatimes.com.au",
-   "seendate": "20261124T043000Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "Ukrainian drones hit a Russian warship at a naval base in Libya",
-   "url": "https://macaudailytimes.com.mo/ukrainian-drones-hit-a-russian-warship-at-a-naval-base-in-libya.html",
-   "domain": "macaudailytimes.com.mo",
-   "seendate": "20261124T033000Z",
-   "sourcecountry": "Macau"
-  },
-  {
-   "title": "US eyes Iran as possible culprit in dozens of new cyberattacks against ships , WSJ reports",
-   "url": "https://lufkindailynews.com/news_reuters/top_news/us-eyes-iran-as-possible-culprit-in-dozens-of-new-cyberattacks-against-ships-wsj-reports/article_10f5a4f4-a77a-54f1-80ac-006170416bf9.html",
-   "domain": "lufkindailynews.com",
-   "seendate": "20261124T033000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Iran Suspected in Wave of Cyberattacks on Oil Tankers , U . S . Officials Tell WSJ",
-   "url": "https://www.haaretz.com/middle-east-news/iran/2026-11-24/ty-article/iran-suspected-in-wave-of-cyberattacks-on-oil-tankers-u-s-officials-tell-wsj/000001a2-0afd-d0d9-a9f6-beffacc60000",
-   "domain": "haaretz.com",
-   "seendate": "20261124T033000Z",
-   "sourcecountry": "Israel"
-  },
-  {
-   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
-   "url": "https://www.bluemountainsgazette.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
-   "domain": "bluemountainsgazette.com.au",
-   "seendate": "20261124T033000Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "US probes Iran , Russia link after 50 vessels face cyberattack : Report",
-   "url": "https://timesofindia.indiatimes.com/world/middle-east/us-probes-iran-russia-link-after-50-vessels-face-cyberattack-report/articleshow/136117793.cms",
-   "domain": "timesofindia.indiatimes.com",
-   "seendate": "20261124T033000Z",
-   "sourcecountry": "India"
-  },
-  {
-   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
-   "url": "https://www.southcoastregister.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
-   "domain": "southcoastregister.com.au",
-   "seendate": "20261124T031500Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
-   "url": "https://www.examiner.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
-   "domain": "examiner.com.au",
-   "seendate": "20261124T031500Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "Oil transit through Strait of Hormuz hits new weekly record",
-   "url": "https://www.trend.az/world/4249914.html",
-   "domain": "trend.az",
-   "seendate": "20261124T031500Z",
-   "sourcecountry": "Azerbaijan"
-  },
-  {
-   "title": "Col . Jacques Baud – The Greanville Post",
-   "url": "https://www.greanvillepost.com/author/jacques-baud/",
-   "domain": "greanvillepost.com",
-   "seendate": "20261124T031500Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
-   "url": "https://www.katherinetimes.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
-   "domain": "katherinetimes.com.au",
-   "seendate": "20261124T031500Z",
-   "sourcecountry": "Australia"
-  },
-  {
-   "title": "Ontario gas prices expected to fall Wednesday : GTA forecast",
-   "url": "https://www.guelphmercury.com/news/ontario-gas-price-prediction-for-nov-25/article_f4738a84-b87e-5531-b44f-f4a0bd1d440c.html",
-   "domain": "guelphmercury.com",
-   "seendate": "20261124T031500Z",
-   "sourcecountry": "Canada"
   }
  ]
 }

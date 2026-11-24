@@ -25,15 +25,15 @@ No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-24 18:02 UTC, covering the previous 36 hours.
+Fetched 2026-11-24 20:54 UTC, covering the previous 36 hours.
 
-- [Qatar and US push diplomatic coordination to de - escalate tensions amid regional crises during eighth Strategic Dialogue](https://news.webindia123.com/news/Articles/World/20261124/4523810.html) (news.webindia123.com)
-- [UN Climate Summit Ends Without Agreement Over Fossil Fuel Language – NaturalNews . com](https://www.naturalnews.com/2026-11-23-un-climate-summit-no-agreement-fossil-fuel-language.html) (naturalnews.com)
-- [US probes suspected Iranian role in cyberattacks on oil tankers](https://tradearabia.com:443/News/490100/US-probes-suspected-Iranian-role-in-cyberattacks-on-oil-tankers) (tradearabia.com)
-- [Vitol Engen to lead R40bn South African gas - to - power project](https://www.bizcommunity.com/article/vitols-engen-to-lead-r40bn-south-african-gas-power-project-295667a) (bizcommunity.com)
-- [Arab News &#124; Oil prices near three - month lows as rising supply offsets Hormuz threat](https://www.arabnews.com/energy/oil-prices-near-three-month-lows-as-rising-supply-offsets-hormuz-threat-3013802) (arabnews.com)
-- [U . S . Probes Suspected Iranian Cyberattacks on Up to 50 Ships , WSJ Reports](https://gcaptain.com/u-s-probes-suspected-iranian-cyberattacks-on-up-to-50-ships-wsj-reports/) (gcaptain.com)
-- [Oil prices near three - month lows as rising supply offsets Hormuz threat](https://tribune.com.pk/story/2642028/oil-prices-near-three-month-lows-as-rising-supply-offsets-hormuz-threat) (tribune.com.pk)
-- [Iranian parliament speaker says US seeks no war , no peace stalemate with Iran , calls for deterrence](https://tribune.com.pk/story/2642021/iranian-parliament-speaker-says-us-seeks-no-war-no-peace-stalemate-with-iran-calls-for-deterrence) (tribune.com.pk)
+- [Nearly A Dozen Injured After Houthi Missile Strikes Tallest Tower In Saudi Capital](https://www.zerohedge.com/geopolitical/nearly-dozen-injured-after-houthi-missile-strikes-tallest-tower-saudi-capital) (zerohedge.com)
+- [The U . N . Climate Talks Broke Down . Now What ? - Governor Wind Energy Coalition](https://governorswindenergycoalition.org/the-u-n-climate-talks-broke-down-now-what/) (governorswindenergycoalition.org)
+- [Houthis wont seize Aden , Yemeni government forces say](https://www.al-monitor.com/originals/2026/11/houthis-wont-seize-aden-yemeni-government-forces-say) (al-monitor.com)
+- [Iraq Al - Zaidi Emerges as Risk - Taker in Showdowns Against Factions and Kurds](https://english.aawsat.com/features/5345209-iraq%E2%80%99s-al-zaidi-emerges-risk-taker-showdowns-against-factions-and-kurds) (english.aawsat.com)
+- [Eleven hurt in second Houthi strike within days on Riyadh tallest tower](https://www.jpost.com/middle-east/article-916001) (jpost.com)
+- [Houthi rebels close in on Aden as Yemeni forces dig in behind a fortified line](https://www.nvdaily.com/associated_press_national/houthi-rebels-close-in-on-aden-as-yemeni-forces-dig-in-behind-a-fortified-line/article_5e6f5698-c229-5879-9bd9-b90d47fdd448.html) (nvdaily.com)
+- [At least 11 injured in Houthi attack on Riyadh tallest skyscraper](https://www.dailysabah.com/world/mid-east/at-least-11-injured-in-houthi-attack-on-riyadhs-tallest-skyscraper) (dailysabah.com)
+- [Finding leftover candle boxes from Chanukahs past a real little miracle - Israel &amp; Jewish News](https://www.jns.org/news/u-s-news/finding-leftover-candle-boxes-from-chanukahs-past-a-real-little-miracle) (jns.org)
 
 Headlines from the same day are context. They do not prove why a price moved.
