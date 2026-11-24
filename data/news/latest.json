@@ -1,223 +1,531 @@
 {
- "fetched_at": "2026-11-22T18:04:41+00:00",
+ "fetched_at": "2026-11-24T18:02:36+00:00",
  "query": "(oil OR crude OR brent OR opec OR \"natural gas\" OR lng) (iran OR israel OR saudi OR iraq OR yemen OR houthi OR gaza OR lebanon OR syria OR hormuz OR \"red sea\" OR qatar OR uae OR libya OR norway OR equinor OR \"north sea\") sourcelang:english",
  "articles": [
   {
-   "title": "Libya eastern government suspects drone attack caused explosion on Russian ship",
-   "url": "https://www.internazionale.it/ultime-notizie-reuters/2026/11/22/libya-s-eastern-government-suspects-drone-attack-caused-explosion-on-russian-ship-at-benghazi-port",
-   "domain": "internazionale.it",
-   "seendate": "20261122T163000Z",
-   "sourcecountry": "Italy"
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO",
+   "url": "https://mymotherlode.com/news/national/11335708/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidias-ceo.html",
+   "domain": "mymotherlode.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "United States"
   },
   {
-   "title": "COP31 UN climate talks edge closer to final deal",
-   "url": "https://www.canberratimes.com.au/story/9395866/cop31-un-climate-talks-edge-closer-to-final-deal/",
-   "domain": "canberratimes.com.au",
-   "seendate": "20261122T123000Z",
+   "title": "How to make holiday travel less of an expensive hassle and get home safely",
+   "url": "https://mymotherlode.com/news/national/11335729/how-to-make-holiday-travel-less-of-an-expensive-hassle-and-get-home-safely.html",
+   "domain": "mymotherlode.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Small US trucking firms scramble to survive mounting diesel costs",
+   "url": "http://www.thedailytimes.com/news/small-us-trucking-firms-scramble-to-survive-mounting-diesel-costs/article_1ac49d6e-571a-59fc-a0b7-caa4ef630a84.html",
+   "domain": "thedailytimes.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "How to make holiday travel less of an expensive hassle and get home safely",
+   "url": "https://www.union-bulletin.com/news/national/how-to-make-holiday-travel-less-of-an-expensive-hassle-and-get-home-safely/article_bb4cf19f-47b3-5cf1-8175-a427f87960c0.html",
+   "domain": "union-bulletin.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Qatar and US push diplomatic coordination to  de - escalate tensions  amid regional crises during eighth Strategic Dialogue",
+   "url": "https://news.webindia123.com/news/Articles/World/20261124/4523810.html",
+   "domain": "news.webindia123.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Opinion : Geopolitics – Escalation Is the Base Case Now",
+   "url": "https://www.kyivpost.com/opinion/90996",
+   "domain": "kyivpost.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "Ukraine"
+  },
+  {
+   "title": "Qatar and US push diplomatic coordination to  de - escalate tensions  amid regional crises during eighth Strategic Dialogue",
+   "url": "https://aninews.in/news/world/us/qatar-and-us-push-diplomatic-coordination-to-de-escalate-tensions-amid-regional-crises-during-eighth-strategic-dialogue20261124122118/",
+   "domain": "aninews.in",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "The Planet strikes back",
+   "url": "https://eturbonews.com/planet-strikes-back/",
+   "domain": "eturbonews.com",
+   "seendate": "20261124T074500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Flicker of hope even as COP31 flames out",
+   "url": "https://www.smh.com.au/national/nsw/flicker-of-hope-even-as-cop31-flames-out-20261124-p61gpx.html",
+   "domain": "smh.com.au",
+   "seendate": "20261124T074500Z",
    "sourcecountry": "Australia"
   },
   {
-   "title": "COP31 climate talks close to final deal , says summit president",
-   "url": "https://bworldonline.com/world/2026/11/22/795713/cop31-climate-talks-close-to-final-deal-says-summit-president/",
-   "domain": "bworldonline.com",
-   "seendate": "20261122T123000Z",
-   "sourcecountry": "Philippines"
-  },
-  {
-   "title": "UAE Chambers discusses strengthening trade , investment partnerships with South Africa",
-   "url": "http://www.kenyastar.com/news/279448783/uae-chambers-discusses-strengthening-trade-investment-partnerships-with-south-africa",
-   "domain": "kenyastar.com",
-   "seendate": "20261122T123000Z",
-   "sourcecountry": "Kenya"
-  },
-  {
-   "title": "Israeli opposition leader condemns suspected settler attacks as  terrorism , and other Mideast news",
-   "url": "https://www.wellandtribune.ca/news/world/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/article_d30f6b91-c3a7-515d-aa17-45a903a953bf.html",
-   "domain": "wellandtribune.ca",
-   "seendate": "20261122T123000Z",
-   "sourcecountry": "Canada"
-  },
-  {
-   "title": "Turkey aids Somalia in breaking ground on new naval facilities",
-   "url": "http://www.jpost.com/international/article-915680",
-   "domain": "jpost.com",
-   "seendate": "20261122T123000Z",
-   "sourcecountry": "Israel"
-  },
-  {
-   "title": "Iraq oil smuggling issues : Where do they come from ? ",
-   "url": "http://www.jpost.com/middle-east/iran-news/article-915675",
-   "domain": "jpost.com",
-   "seendate": "20261122T123000Z",
-   "sourcecountry": "Israel"
-  },
-  {
-   "title": "UN climate talks close in on deal that accepts 1 . 5C overshoot",
-   "url": "https://www.middle-east-online.com/en/un-climate-talks-close-deal-accepts-15c-overshoot",
-   "domain": "middle-east-online.com",
-   "seendate": "20261122T103000Z",
-   "sourcecountry": "Iraq"
-  },
-  {
-   "title": "Israeli opposition leader condemns suspected settler attacks as  terrorism , and other Mideast news",
-   "url": "https://www.clickorlando.com/news/world/2026/11/22/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/",
-   "domain": "clickorlando.com",
-   "seendate": "20261122T103000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "COP31 climate deal hangs in the balance as time runs out",
-   "url": "https://wiky.com/2026/11/21/cop31-climate-talks-close-to-final-deal-says-summit-president/",
-   "domain": "wiky.com",
-   "seendate": "20261122T103000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Houthi attacks complicate Trump push for Saudi nuclear deal",
-   "url": "https://www.middle-east-online.com/en/houthi-attacks-complicate-trump%E2%80%99s-push-saudi-nuclear-deal",
-   "domain": "middle-east-online.com",
-   "seendate": "20261122T103000Z",
-   "sourcecountry": "Iraq"
-  },
-  {
-   "title": "Israeli opposition leader condemns suspected settler attacks as  terrorism , and other Mideast news",
-   "url": "https://www.yakimaherald.com/news/nation_and_world/nation/israeli-opposition-leader-condemns-suspected-settler-attacks-as-terrorism-and-other-mideast-news/article_0530041d-b7be-5cd3-afaf-ac81ef03bc68.html",
-   "domain": "yakimaherald.com",
-   "seendate": "20261122T103000Z",
-   "sourcecountry": "United States"
-  },
-  {
-   "title": "Iraq moves to replace combat patrols with regular police",
-   "url": "https://www.middle-east-online.com/en/iraq-moves-replace-combat-patrols-regular-police",
-   "domain": "middle-east-online.com",
-   "seendate": "20261122T103000Z",
-   "sourcecountry": "Iraq"
-  },
-  {
-   "title": "What drove the US midterm elections outcome ? - Jamaica Observer",
-   "url": "https://www.jamaicaobserver.com/2026/11/22/drove-us-midterm-elections-outcome/",
-   "domain": "jamaicaobserver.com",
-   "seendate": "20261122T073000Z",
-   "sourcecountry": "Jamaica"
-  },
-  {
-   "title": "News",
-   "url": "https://www.pakistanlink.org/Headlines/Nov26/20/11.htm",
-   "domain": "pakistanlink.org",
-   "seendate": "20261122T073000Z",
+   "title": "Climate failure",
+   "url": "https://tribune.com.pk/story/2641922/climate-failure",
+   "domain": "tribune.com.pk",
+   "seendate": "20261124T071500Z",
    "sourcecountry": "Pakistan"
   },
   {
-   "title": "Cop31 live : A new draft deal on the table as talks go into final hours",
-   "url": "https://www.theguardian.com/environment/live/2026/nov/22/cop31-climate-crisis-talks-turkey-latest-news-updates",
-   "domain": "theguardian.com",
-   "seendate": "20261122T073000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
-   "url": "https://isp.netscape.com:443/news/world/story/0001/20261122/f6e36c4caf13ec6fed57c9f077cbd067",
-   "domain": "isp.netscape.com",
-   "seendate": "20261122T073000Z",
+   "title": "UN Climate Summit Ends Without Agreement Over Fossil Fuel Language – NaturalNews . com",
+   "url": "https://www.naturalnews.com/2026-11-23-un-climate-summit-no-agreement-fossil-fuel-language.html",
+   "domain": "naturalnews.com",
+   "seendate": "20261124T071500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Bahrain says Iran struck industrial site as tankers hit in Hormuz",
-   "url": "https://www.enca.com/business/bahrain-says-iran-struck-industrial-site-tankers-hit-hormuz",
-   "domain": "enca.com",
-   "seendate": "20261122T073000Z",
+   "title": "Collapse of UN climate talks , over fossil fuels , was years in making",
+   "url": "https://www.timesherald.com/2026/11/23/un-climate-talks-collapse-cop31/",
+   "domain": "timesherald.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "US probes suspected Iranian role in cyberattacks on oil tankers",
+   "url": "https://tradearabia.com:443/News/490100/US-probes-suspected-Iranian-role-in-cyberattacks-on-oil-tankers",
+   "domain": "tradearabia.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United Arab Emirates"
+  },
+  {
+   "title": "US probes suspected Iranian role in cyberattacks on oil tankers",
+   "url": "https://tradearabia.com:443/News/490100/US-probes-suspected-Iranian-role-in-cyberattacks-on-oil-tankers/IT",
+   "domain": "tradearabia.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United Arab Emirates"
+  },
+  {
+   "title": "How to make holiday travel less of an expensive hassle and get home safely",
+   "url": "http://www.stardem.com/ap/nation/how-to-make-holiday-travel-less-of-an-expensive-hassle-and-get-home-safely/article_3b533e1b-f008-5bc1-9b96-59c488ac4d99.html",
+   "domain": "stardem.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Vitol Engen to lead R40bn South African gas - to - power project",
+   "url": "https://www.bizcommunity.com/article/vitols-engen-to-lead-r40bn-south-african-gas-power-project-295667a",
+   "domain": "bizcommunity.com",
+   "seendate": "20261124T071500Z",
    "sourcecountry": "South Africa"
   },
   {
-   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
-   "url": "http://www.sitkasentinel.com/stories/turkeys-final-draft-at-un-climate-talks-doesnt-mention-the-fossil-fuels-that-cause-global-warming,188094",
-   "domain": "sitkasentinel.com",
-   "seendate": "20261122T073000Z",
+   "title": "Arab News | Oil prices near three - month lows as rising supply offsets Hormuz threat",
+   "url": "https://www.arabnews.com/energy/oil-prices-near-three-month-lows-as-rising-supply-offsets-hormuz-threat-3013802",
+   "domain": "arabnews.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "Saudi Arabia"
+  },
+  {
+   "title": "Australia , Singapore Deepen AI Ties Amid Nvidia Scrutiny",
+   "url": "https://www.theepochtimes.com/world/australia-singapore-deepen-ai-ties-amid-nvidia-scrutiny-6128643",
+   "domain": "theepochtimes.com",
+   "seendate": "20261124T071500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Doug Casey On The Coming Collapse Of Saudi Arabia , And What It Means For The Petrodollar",
-   "url": "http://www.zerohedge.com/energy/doug-casey-coming-collapse-saudi-arabia-and-what-it-means-petrodollar",
+   "title": "US probes suspected Iranian role in cyberattacks on oil tankers",
+   "url": "https://tradearabia.com:443/News/490100/US-probes-suspected-Iranian-role-in-cyberattacks-on-oil-tankers/OGN",
+   "domain": "tradearabia.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United Arab Emirates"
+  },
+  {
+   "title": "U . S . Probes Suspected Iranian Cyberattacks on Up to 50 Ships , WSJ Reports",
+   "url": "https://gcaptain.com/u-s-probes-suspected-iranian-cyberattacks-on-up-to-50-ships-wsj-reports/",
+   "domain": "gcaptain.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Oil prices near three - month lows as rising supply offsets Hormuz threat",
+   "url": "https://tribune.com.pk/story/2642028/oil-prices-near-three-month-lows-as-rising-supply-offsets-hormuz-threat",
+   "domain": "tribune.com.pk",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "A year of deadly floods and fires – and yet Cop31 still collapsed . When will our leaders grasp the scale of this crisis ? | Bill McGuire",
+   "url": "https://www.theguardian.com/commentisfree/2026/nov/24/deadly-floods-fires-cop31-collapsed-climate-crisis",
+   "domain": "theguardian.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "United Kingdom"
+  },
+  {
+   "title": "Oil Prices Near Three - Month Lows as Rising Supply Offsets Hormuz Threat",
+   "url": "https://english.aawsat.com/business/5344924-oil-prices-near-three-month-lows-rising-supply-offsets-hormuz-threat",
+   "domain": "english.aawsat.com",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "Syria"
+  },
+  {
+   "title": "Iranian parliament speaker says US seeks  no war , no peace  stalemate with Iran , calls for deterrence",
+   "url": "https://tribune.com.pk/story/2642021/iranian-parliament-speaker-says-us-seeks-no-war-no-peace-stalemate-with-iran-calls-for-deterrence",
+   "domain": "tribune.com.pk",
+   "seendate": "20261124T071500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "Dow Jones Top Energy Headlines at 12 AM ET : Oil Prices Fall as Traders Weigh Supply Surplus , Gulf Attacks | Texas ... ",
+   "url": "https://www.morningstar.com/news/dow-jones/2026112438/dow-jones-top-energy-headlines-at-12-am-et-oil-prices-fall-as-traders-weigh-supply-surplus-gulf-attacks-texas",
+   "domain": "morningstar.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "China"
+  },
+  {
+   "title": "Trump tough - on - China talk always just an act",
+   "url": "https://www.ironmountaindailynews.com/opinion/2026/11/trumps-tough-on-china-talk-always-just-an-act/",
+   "domain": "ironmountaindailynews.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Brent slips under $89 - Shafaqna English | International Shia News & Fatwas",
+   "url": "https://en.shafaqna.com/494494/brent-slips-under-89/",
+   "domain": "en.shafaqna.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "Saudi Arabia"
+  },
+  {
+   "title": "How to make holiday travel less of an expensive hassle and get home safely",
+   "url": "http://www.rockymounttelegram.com/news/national/how-to-make-holiday-travel-less-of-an-expensive-hassle-and-get-home-safely/article_25601571-ab9d-5f46-9dcb-fd312a96a2e7.html",
+   "domain": "rockymounttelegram.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Dow Jones Top Financial Services Headlines at 12 AM ET : Strategy and Crypto Stocks Rally as Bitcoin Rebounds Past $63 , 000 . Is the Jump Temporary ? | Julius ... ",
+   "url": "https://www.morningstar.com/news/dow-jones/2026112439/dow-jones-top-financial-services-headlines-at-12-am-et-strategy-and-crypto-stocks-rally-as-bitcoin-rebounds-past-63000-is-the-jump-temporary-julius",
+   "domain": "morningstar.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "China"
+  },
+  {
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO :: WRAL . com",
+   "url": "https://www.wral.com/news/ap/feec0-asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidia-s-ceo/",
+   "domain": "wral.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "EMEA Morning Briefing : Jensen Huang Return to Nvidia Sparks AI Rally",
+   "url": "https://www.morningstar.com/news/dow-jones/2026112445/emea-morning-briefing-jensen-huangs-return-to-nvidia-sparks-ai-rally",
+   "domain": "morningstar.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "China"
+  },
+  {
+   "title": "Iran says three tankers hit mines in Hormuz despite U . S . escort",
+   "url": "https://www.cnbc.com/2026/11/24/iran-trump-hormuz-crude-.html",
+   "domain": "cnbc.com",
+   "seendate": "20261124T063000Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Crude Oil Slips Below $89 To Three - Month Low As Supply Surplus Concerns Mount",
+   "url": "https://www.freepressjournal.in/business/crude-oil-slips-below-89-to-three-month-low-as-supply-surplus-concerns-mount",
+   "domain": "freepressjournal.in",
+   "seendate": "20261124T061500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO",
+   "url": "https://www.ksat.com/business/2026/11/24/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidias-ceo/",
+   "domain": "ksat.com",
+   "seendate": "20261124T061500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Iran says three tankers hit mines , yet oil sits near a three - month low as supply wins",
+   "url": "https://investinglive.com/commodities/iran-says-three-tankers-hit-mines-yet-oil-sits-near-a-three-month-low-as-supply-wins/",
+   "domain": "investinglive.com",
+   "seendate": "20261124T061500Z",
+   "sourcecountry": ""
+  },
+  {
+   "title": "US eyes Iran as possible culprit in dozens of new cyberattacks against ships , WSJ reports",
+   "url": "https://arynews.tv/news/liveblog/iran-war-2026-live-updates-trump-us-israel?update=24-Nov-2026-08-25-00",
+   "domain": "arynews.tv",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO | World News",
+   "url": "http://www.thegazette.com/news/world/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidia-s-ceo/article_94740cc8-d0c4-5e46-b00f-cb99732875a6.html",
+   "domain": "thegazette.com",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO | News",
+   "url": "http://www.wdtimes.com/news/world/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidia-s-ceo/article_f60054c1-1fe0-5ae9-b220-8d4f328a1e42.html",
+   "domain": "wdtimes.com",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "US eyes Iran as possible culprit in dozens of new cyberattacks against ships , WSJ reports",
+   "url": "https://arynews.tv/news/liveblog/iran-war-2026-live-updates-trump-us-israel?update=24-Nov-2026-08-15-00",
+   "domain": "arynews.tv",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO",
+   "url": "https://www.aol.com/articles/asian-stocks-rally-wall-street-033125000.html",
+   "domain": "aol.com",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Saudi Arabia Turns To South Korea , Ukraine To Bolster Air Defenses",
+   "url": "https://www.zerohedge.com/geopolitical/saudi-arabia-turns-south-korea-ukraine-bolster-air-defenses",
    "domain": "zerohedge.com",
-   "seendate": "20261122T053000Z",
+   "seendate": "20261124T051500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
-   "url": "https://www.wsls.com/news/world/2026/11/22/turkeys-final-draft-at-un-climate-talks-doesnt-mention-the-fossil-fuels-that-cause-global-warming/",
-   "domain": "wsls.com",
-   "seendate": "20261122T053000Z",
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO | News",
+   "url": "http://www.dailyadvance.com/news/world/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidia-s-ceo/article_764fb088-0ee0-52c9-9978-9e87e9b990c4.html",
+   "domain": "dailyadvance.com",
+   "seendate": "20261124T051500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Turkey final draft at UN climate talks doesnt mention the fossil fuels that cause global warming",
-   "url": "https://www.yakimaherald.com/news/nation_and_world/world/turkeys-final-draft-at-un-climate-talks-doesnt-mention-the-fossil-fuels-that-cause-global/article_98f9e8c1-ea58-5d82-b177-8b69270feb00.html",
-   "domain": "yakimaherald.com",
-   "seendate": "20261122T053000Z",
+   "title": "Trump suggests Iran strikes will resume next year if talks fail",
+   "url": "https://www.spokesman.com/stories/2026/nov/23/trump-suggests-iran-strikes-will-resume-next-year-/",
+   "domain": "spokesman.com",
+   "seendate": "20261124T051500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "As war engulfs the Strait of Hormuz , one swimmer is fighting to protect its wildlife",
-   "url": "https://www.sbs.com.au/news/article/man-swims-across-the-strait-of-hormuz-to-protect-wildlife/sucyype2c",
-   "domain": "sbs.com.au",
-   "seendate": "20261122T003000Z",
+   "title": "US markets rebound sharply as Nvidia soars on Huang return ; Nasdaq rallies 6 . 5 pc",
+   "url": "https://ianslive.in/us-markets-rebound-sharply-as-nvidia-soars-on-huangs-return--20261124094716",
+   "domain": "ianslive.in",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Cards on the table : The good and bad of Anwar 4 years in power",
+   "url": "https://www.malaysiakini.com/news/889672-cards-on-the-table-the-good-and-bad-of-anwars-4-years-in-power",
+   "domain": "malaysiakini.com",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "Malaysia"
+  },
+  {
+   "title": "US eyes Iran as possible culprit in dozens of new cyberattacks against ships , WSJ reports",
+   "url": "https://arynews.tv/news/liveblog/iran-war-2026-live-updates-trump-us-israel?update=24-Nov-2026-08-40-00",
+   "domain": "arynews.tv",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "Thanksgiving gas prices are up , but Americans keep buying trucks , SUVs",
+   "url": "https://www.grandhaventribune.com/news/automotive/thanksgiving-gas-prices-are-up-but-americans-keep-buying-trucks-suvs/article_d9f23217-e8ba-56e2-8ca9-247e08568f87.html",
+   "domain": "grandhaventribune.com",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "US eyes Iran as possible culprit in dozens of new cyberattacks against ships , WSJ reports",
+   "url": "https://arynews.tv/news/liveblog/iran-war-2026-live-updates-trump-us-israel?update=24-Nov-2026-08-10-00",
+   "domain": "arynews.tv",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "Stocks climb as Huang stunning return to Nvidia lifts optimism",
+   "url": "https://arynews.tv/stocks-climb-as-huangs-stunning-return-to-nvidia-lifts-optimism",
+   "domain": "arynews.tv",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "Pakistan"
+  },
+  {
+   "title": "With eyes forward to U . S . Senate , Peltola says she not looking in the rearview",
+   "url": "https://www.kmxt.org/alaska-statewide-news/2026-11-23/with-eyes-forward-to-u-s-senate-peltola-says-shes-not-looking-in-the-rearview",
+   "domain": "kmxt.org",
+   "seendate": "20261124T051500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.merimbulanewsweekly.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "merimbulanewsweekly.com.au",
+   "seendate": "20261124T044500Z",
    "sourcecountry": "Australia"
   },
   {
-   "title": "Iran attacks US bases in Bahrain as its tankers get ready to break the US blockade",
-   "url": "https://www.euronews.com/2026/11/21/iran-attacks-us-bases-in-bahrain-as-its-tankers-get-ready-to-break-the-us-blockade",
-   "domain": "euronews.com",
-   "seendate": "20261122T003000Z",
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO | News",
+   "url": "http://www.goskagit.com/news/world/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidia-s-ceo/article_fa0f4980-a300-535b-9c45-c4f16a0ba108.html",
+   "domain": "goskagit.com",
+   "seendate": "20261124T044500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "COP31 climate summit risks failure as talks go deep into overtime",
-   "url": "https://www.cnbc.com/2026/11/21/cop31-climate-summit-risks-failure-as-talks-go-deep-into-overtime.html",
-   "domain": "cnbc.com",
-   "seendate": "20261122T003000Z",
+   "title": "US markets rebound sharply as Nvidia soars on Huang return ; Nasdaq rallies 6 . 5 pc",
+   "url": "https://www.prokerala.com/news/articles/a1840372.html",
+   "domain": "prokerala.com",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.redlandcitybulletin.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "redlandcitybulletin.com.au",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Durban Port Clears 18 of 41 Medicine Loads",
+   "url": "https://www.riotimesonline.com/durban-port-clears-18-of-41-medicine-loads/",
+   "domain": "riotimesonline.com",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "Brazil"
+  },
+  {
+   "title": "Asian stocks rally after Wall Street rebound as Jensen Huang returns as Nvidia CEO",
+   "url": "https://www.stcatharinesstandard.ca/business/asian-stocks-rally-after-wall-street-rebound-as-jensen-huang-returns-as-nvidia-s-ceo/article_e8a0ea9a-2e00-50d3-b773-4fe5c07ffa8b.html",
+   "domain": "stcatharinesstandard.ca",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "Canada"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.inverelltimes.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "inverelltimes.com.au",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "SBS News in Easy English 24 November 2026",
+   "url": "https://www.sbs.com.au/news/podcast-episode/sbs-news-in-easy-english-24-november-2026/s33yrgq2h",
+   "domain": "sbs.com.au",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "U . S . and Qatar Agree to Strengthen Cooperation in Defense , Trade , and Technology – Chennaionline",
+   "url": "https://www.chennaionline.com/news/us-and-qatar-agree-to-strengthen-cooperation-in-defense-trade-and-technology/",
+   "domain": "chennaionline.com",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Shipping Corporation of India Opens Tenders for $3B Fleet Expansion",
+   "url": "https://maritime-executive.com/article/shipping-corporation-of-india-opens-tenders-for-3b-fleet-expansion",
+   "domain": "maritime-executive.com",
+   "seendate": "20261124T044500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Dangote Group unveils multi ‑ billion ‑ dollar projects across East Africa",
-   "url": "https://kenya-today.com/report-dangote-group-unveils-multibilliondollar-projects-across-east-africa-30996/",
-   "domain": "kenya-today.com",
-   "seendate": "20261121T203000Z",
-   "sourcecountry": "Kenya"
-  },
-  {
-   "title": "Rosebank oil field will not bring down bills , claims Energy Secretary",
-   "url": "https://www.telegraph.co.uk/news/2026/11/21/rosebank-oil-field-will-not-bring-down-bills-claims-energy/",
-   "domain": "telegraph.co.uk",
-   "seendate": "20261121T203000Z",
-   "sourcecountry": "United Kingdom"
-  },
-  {
-   "title": "Thanksgiving Gas Prices Could Break a Record Despite Recent Plunge",
-   "url": "https://oilprice.com/Latest-Energy-News/World-News/Thanksgiving-Gas-Prices-Could-Break-a-Record-Despite-Recent-Plunge.html",
-   "domain": "oilprice.com",
-   "seendate": "20261121T203000Z",
+   "title": "Iraq Completes Kirkuk Oil Smuggling Probe Amid Widening Crackdown",
+   "url": "https://www.eurasiareview.com/24112026-iraq-completes-kirkuk-oil-smuggling-probe-amid-widening-crackdown/",
+   "domain": "eurasiareview.com",
+   "seendate": "20261124T044500Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Iran strikes tankers and Israeli hit on food truck in Gaza kills 3",
-   "url": "https://www.wdbo.com/news/world/iran-strikes-3/5DOQKPG6KUZP3LICC6KBHJWPF4/",
-   "domain": "wdbo.com",
-   "seendate": "20261121T203000Z",
+   "title": "US Oil Fund Falls 4 . 49 % as Supply Returns",
+   "url": "https://www.riotimesonline.com/oil-markets-latam-monday-november-23-2026/",
+   "domain": "riotimesonline.com",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "Brazil"
+  },
+  {
+   "title": "Tunisia looks to expand olive oil presence in Korea",
+   "url": "https://www.koreaherald.com/article/10947452",
+   "domain": "koreaherald.com",
+   "seendate": "20261124T044500Z",
+   "sourcecountry": "South Korea"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.ulladullatimes.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "ulladullatimes.com.au",
+   "seendate": "20261124T043000Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Ukrainian drones hit a Russian warship at a naval base in Libya",
+   "url": "https://macaudailytimes.com.mo/ukrainian-drones-hit-a-russian-warship-at-a-naval-base-in-libya.html",
+   "domain": "macaudailytimes.com.mo",
+   "seendate": "20261124T033000Z",
+   "sourcecountry": "Macau"
+  },
+  {
+   "title": "US eyes Iran as possible culprit in dozens of new cyberattacks against ships , WSJ reports",
+   "url": "https://lufkindailynews.com/news_reuters/top_news/us-eyes-iran-as-possible-culprit-in-dozens-of-new-cyberattacks-against-ships-wsj-reports/article_10f5a4f4-a77a-54f1-80ac-006170416bf9.html",
+   "domain": "lufkindailynews.com",
+   "seendate": "20261124T033000Z",
    "sourcecountry": "United States"
   },
   {
-   "title": "Energy firm profits hit £143 billion ahead of January 1 price cap rise",
-   "url": "https://www.birminghammail.co.uk/news/cost-of-living/energy-firm-profits-hit-143-34921742",
-   "domain": "birminghammail.co.uk",
-   "seendate": "20261121T203000Z",
-   "sourcecountry": "United Kingdom"
+   "title": "Iran Suspected in Wave of Cyberattacks on Oil Tankers , U . S . Officials Tell WSJ",
+   "url": "https://www.haaretz.com/middle-east-news/iran/2026-11-24/ty-article/iran-suspected-in-wave-of-cyberattacks-on-oil-tankers-u-s-officials-tell-wsj/000001a2-0afd-d0d9-a9f6-beffacc60000",
+   "domain": "haaretz.com",
+   "seendate": "20261124T033000Z",
+   "sourcecountry": "Israel"
   },
   {
-   "title": "Russian cargo ship bound for Kaliningrad hit by drones near Finland",
-   "url": "https://www.telegraph.co.uk/world-news/2026/11/21/russian-cargo-ship-bound-for-kaliningrad-hit-by-drones-near/",
-   "domain": "telegraph.co.uk",
-   "seendate": "20261121T203000Z",
-   "sourcecountry": "United Kingdom"
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.bluemountainsgazette.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "bluemountainsgazette.com.au",
+   "seendate": "20261124T033000Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "US probes Iran , Russia link after 50 vessels face cyberattack : Report",
+   "url": "https://timesofindia.indiatimes.com/world/middle-east/us-probes-iran-russia-link-after-50-vessels-face-cyberattack-report/articleshow/136117793.cms",
+   "domain": "timesofindia.indiatimes.com",
+   "seendate": "20261124T033000Z",
+   "sourcecountry": "India"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.southcoastregister.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "southcoastregister.com.au",
+   "seendate": "20261124T031500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.examiner.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "examiner.com.au",
+   "seendate": "20261124T031500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Oil transit through Strait of Hormuz hits new weekly record",
+   "url": "https://www.trend.az/world/4249914.html",
+   "domain": "trend.az",
+   "seendate": "20261124T031500Z",
+   "sourcecountry": "Azerbaijan"
+  },
+  {
+   "title": "Col . Jacques Baud – The Greanville Post",
+   "url": "https://www.greanvillepost.com/author/jacques-baud/",
+   "domain": "greanvillepost.com",
+   "seendate": "20261124T031500Z",
+   "sourcecountry": "United States"
+  },
+  {
+   "title": "Closer AI ties with Singapore despite Nvidia spy probe",
+   "url": "https://www.katherinetimes.com.au/story/9396882/closer-ai-ties-with-singapore-despite-nvidia-spy-probe/",
+   "domain": "katherinetimes.com.au",
+   "seendate": "20261124T031500Z",
+   "sourcecountry": "Australia"
+  },
+  {
+   "title": "Ontario gas prices expected to fall Wednesday : GTA forecast",
+   "url": "https://www.guelphmercury.com/news/ontario-gas-price-prediction-for-nov-25/article_f4738a84-b87e-5531-b44f-f4a0bd1d440c.html",
+   "domain": "guelphmercury.com",
+   "seendate": "20261124T031500Z",
+   "sourcecountry": "Canada"
   }
  ]
 }
