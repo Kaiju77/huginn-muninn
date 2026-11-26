@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-25
+# Daily market brief, 2026-11-26
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -9,7 +9,7 @@ _Historical base rates and headlines. Not a forecast or advice. You make the dec
 | Brent | 2026-11-11 | 92.14 USD/barrel | +2.2% | +0.3% | normal |
 | WTI | 2026-11-11 | 89.62 USD/barrel | +0.0% | -2.3% | normal |
 | Henry Hub gas | 2026-11-11 | 3 USD/MMBtu | +0.0% | +14.1% | normal |
-| USD/NOK | 2026-11-25 | 9.8562 NOK per USD | +0.7% | +1.9% | normal |
+| USD/NOK | 2026-11-26 | 9.7658 NOK per USD | -0.9% | +0.8% | larger than 84% of days |
 
 EIA publishes a few days late, so the latest close can be several days old.
 
@@ -25,20 +25,22 @@ AI screen unavailable today; the keyword screen was used (an escalation word plu
 
 - `c-20261125-yemen-red-sea`: [Nearly A Dozen Injured After Houthi Missile Strikes Tallest Tower In Saudi Capital](https://www.zerohedge.com/geopolitical/nearly-dozen-injured-after-houthi-missile-strikes-tallest-tower-saudi-capital) (4 sites)
 - `c-20261125-iran`: [Israel Defence Minister claims Iran developing Chemical Weapons , Tehran warns US bases within strike range](http://www.bignewsnetwork.com/news/279452993/israel-defence-minister-claims-iran-developing-chemical-weapons-tehran-warns-us-bases-within-strike-range) (4 sites)
+- `c-20261126-iran`: [Oil prices rise on supply concerns as Iran claims mine strikes on ships](https://www.business-standard.com/markets/commodities/oil-prices-rise-on-supply-concerns-as-iran-claims-mine-strikes-on-ships-126112600085_1.html) (3 sites)
+- `c-20261126-saudi`: [Yemen Ansar Allah Strikes Saudi Arabia Largest Oil Refinery](https://news.antiwar.com/2026/11/25/yemens-ansar-allah-strikes-saudi-arabias-largest-oil-refinery/) (5 sites)
 
 To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-25 20:16 UTC, covering the previous 36 hours.
+Fetched 2026-11-26 17:14 UTC, covering the previous 36 hours.
 
-- [Libya vows retaliation for deaths in Ukrainian attack](https://www.bordermail.com.au/story/9398434/libya-vows-retaliation-for-deaths-in-ukrainian-attack/) (bordermail.com.au)
-- [Yemen Houthis say they attacked Saudi oil refinery and Riyadh financial district](https://cyprus-mail.com/2026/11/25/yemens-houthis-say-they-attacked-saudi-oil-refinery-and-riyadh-financial-district) (cyprus-mail.com)
-- [Eurobank pledges support for Cypru energy transition](https://cyprus-mail.com/2026/11/25/eurobank-pledges-support-for-cyprus-energy-transition) (cyprus-mail.com)
-- [Libya moves to scrap oil deal at centre of $3 billion controversy](https://www.middle-east-online.com/en/libya-moves-scrap-oil-deal-centre-3-billion-controversy) (middle-east-online.com)
-- [Iran War Updates : Iran developing chemical weapons , Israeli defense minister claims – Ya Libnan](https://yalibnan.com/2026/11/25/iran-war-updates-iran-developing-chemical-weapons-israeli-defense-minister-claims/) (yalibnan.com)
-- [Donald Trump says Iran war funding lasts through January as Democratic Congress nears](http://www.jpost.com/middle-east/iran-news/article-916036) (jpost.com)
-- [Arab News &#124; IRGC Navy says two oil tankers hit mines , caught fire in Strait of Hormuz , state media](https://www.arabnews.com/middle-east/irgc-navy-says-two-oil-tankers-hit-mines-caught-fire-in-strait-of-hormuz-state-media-3013942) (arabnews.com)
-- [Iran claims downing of US MQ - 9 , Lucas drones over Strait of Hormuz](https://aninews.in/news/world/middle-east/iran-claims-downing-of-us-mq-9-lucas-drones-over-strait-of-hormuz20261125101519/) (aninews.in)
+- [Israeli strikes kill 8 in Gaza , and other Mideast news](https://www.wsbradio.com/news/world/israeli-strikes-kill/2KI2NGIMFY4S5DIRMKR2T6IAPQ/) (wsbradio.com)
+- [High energy prices have New Englanders turning to firewood banks](https://www.bostonglobe.com/2026/11/26/metro/high-energy-prices-wood-banks/) (bostonglobe.com)
+- [Iran claims US will be forced to abandon blockade , threatens oil exports](https://www.israelnationalnews.com/news/437166) (israelnationalnews.com)
+- [Azerbaijan Azeri Light oil price exceeds $100 per barrel](https://www.trend.az/azerbaijan/4250796.html) (trend.az)
+- [Saudi Arabia Downs Houthi Missiles and Drones Targeting Riyadh](https://www.asianage.com/west-asia/saudi-arabia-downs-houthi-missiles-and-drones-targeting-riyadh-2008070) (asianage.com)
+- [Oil rises on supply concerns as Iran claims mine strikes on ships](https://ksevradio.com/oil-rises-on-supply-concerns-as-iran-claims-mine-strikes-on-ships/) (ksevradio.com)
+- [Houthis launch retaliatory attacks on two Saudi ports on Red Sea](https://www.businesstimes.com.sg/international/houthis-launch-retaliatory-attacks-two-saudi-ports-red-sea) (businesstimes.com.sg)
+- [Saudi Arabia downs missiles targeting capital](https://arynews.tv/saudi-arabia-downs-missiles-targeting-capital) (arynews.tv)
 
 Headlines from the same day are context. They do not prove why a price moved.
