@@ -32,7 +32,7 @@ To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and
 
 ## Headlines (GDELT)
 
-Fetched 2026-11-26 17:14 UTC, covering the previous 36 hours.
+Fetched 2026-11-26 19:53 UTC, covering the previous 36 hours.
 
 - [Israeli strikes kill 8 in Gaza , and other Mideast news](https://www.wsbradio.com/news/world/israeli-strikes-kill/2KI2NGIMFY4S5DIRMKR2T6IAPQ/) (wsbradio.com)
 - [High energy prices have New Englanders turning to firewood banks](https://www.bostonglobe.com/2026/11/26/metro/high-energy-prices-wood-banks/) (bostonglobe.com)
