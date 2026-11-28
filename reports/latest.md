@@ -1,4 +1,4 @@
-# Daily market brief, 2026-11-27
+# Daily market brief, 2026-11-28
 
 _Historical base rates and headlines. Not a forecast or advice. You make the decisions._
 
@@ -21,15 +21,10 @@ No catalog events in the last 90 days. Latest: US and Israel strike Iran; 2026 I
 
 AI screen unavailable today; the keyword screen was used (an escalation word plus a region, 3+ sites).
 
-**Possible new events (need your approval):**
-
-- `c-20261126-iran`: [Oil prices rise on supply concerns as Iran claims mine strikes on ships](https://www.business-standard.com/markets/commodities/oil-prices-rise-on-supply-concerns-as-iran-claims-mine-strikes-on-ships-126112600085_1.html) (3 sites)
-- `c-20261126-saudi`: [Yemen Ansar Allah Strikes Saudi Arabia Largest Oil Refinery](https://news.antiwar.com/2026/11/25/yemens-ansar-allah-strikes-saudi-arabias-largest-oil-refinery/) (5 sites)
-
-To add one: GitHub, then Actions, then **approve-event**, then Run workflow, and paste the id.
+No new conflict escalation found today.
 
 ## Headlines (GDELT)
 
-No headlines fetched on 2026-11-27 (the latest fetch is from 2026-11-26; today's fetch failed or has not run).
+No headlines fetched on 2026-11-28 (the latest fetch is from 2026-11-26; today's fetch failed or has not run).
 
 Headlines from the same day are context. They do not prove why a price moved.
